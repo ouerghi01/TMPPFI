@@ -47,7 +47,7 @@ export function Dashboard() {
   const navigate = useNavigate();
 
   // Fetch data using React Query hooks
-  const { data: stats, isLoading: isLoadingStats } = useDashboardStats();
+  const { data: statsx, isLoading: isLoadingStats } = useDashboardStats();
   const { data: themes } = useThemes();
   const { data: consultations } = useConsultations();
   const { data: petitions } = usePetitions();
@@ -57,7 +57,6 @@ export function Dashboard() {
   const { data: conferences } = useConferences();
   const { data: signalementStats } = useSignalementStats();
   const { data: youthPolls } = useYouthPolls({ status: 'OPEN', featured: true });
-  const { data: youthStats } = useYouthSpaceStats();
 
   const getDaysLeft = (dateStr: string) => {
     const end = new Date(dateStr);
@@ -77,25 +76,34 @@ export function Dashboard() {
   const kpiStats = [
     {
       label: language === 'fr' ? 'Processus actifs' : language === 'de' ? 'Aktive Prozesse' : 'Active processes',
-      value: stats?.overview?.activeConsultations?.toString() || "0",
+      value: (
+        (consultations?.length ?? 0) +
+        (petitions?.length ?? 0) +
+        (votes?.length ?? 0) +
+        (assemblies?.length ?? 0) +
+        (legislativeConsultations?.length ?? 0) +
+        (conferences?.length ?? 0)
+
+      ).toString(),
+
       icon: MessageSquare,
       variant: 'blue' as const,
     },
     {
       label: language === 'fr' ? 'Pétitions ouvertes' : language === 'de' ? 'Offene Petitionen' : 'Open petitions',
-      value: stats?.overview?.openPetitions?.toString() || "0",
+      value: petitions?.length?.toString() || "0",
       icon: FileText,
       variant: 'green' as const,
     },
     {
       label: language === 'fr' ? 'Votes en cours' : language === 'de' ? 'Laufende Abstimmungen' : 'Ongoing votes',
-      value: stats?.overview?.ongoingVotes?.toString() || "0",
+      value: votes?.length?.toString() || "0",
       icon: CheckSquare,
       variant: 'purple' as const,
     },
     {
       label: language === 'fr' ? 'Participants totaux' : language === 'de' ? 'Teilnehmer insgesamt' : 'Total participants',
-      value: stats?.overview?.totalParticipants?.toLocaleString() || "0",
+      value: consultations?.reduce((acc, consultation) => acc + consultation.stats.totalParticipants, 0)?.toLocaleString() || "0",
       icon: Users,
       variant: 'orange' as const,
     },
@@ -200,11 +208,28 @@ export function Dashboard() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {themes?.slice(0, 8).map((theme) => {
               // Calculate real process count
-              const processCount =
-                (theme.stats?.consultations || 0) +
-                (theme.stats?.petitions || 0) +
-                (theme.stats?.votes || 0) +
-                (theme.stats?.assemblies || 0);
+              let consultationBytheme = consultations?.filter((consultation) => parseInt(consultation.themeId) === parseInt(theme.id)).length;
+              let petitionBytheme = petitions?.filter((petition) => parseInt(petition.themeId) === parseInt(theme.id)).length;
+              let voteBytheme = votes?.filter((vote) => parseInt(vote.themeId) === parseInt(theme.id)).length;
+              let assembliesByTheme = assemblies?.filter((assembly) => parseInt(assembly.themeId) === parseInt(theme.id)).length;
+              let youthParticipationByTheme = youthPolls?.filter((youthPoll) => parseInt(youthPoll.themeId) === parseInt(theme.id)).length;
+              if (youthParticipationByTheme == undefined) {
+                youthParticipationByTheme = 0;
+              }
+              if (consultationBytheme === undefined) {
+                consultationBytheme = 0;
+              }
+              if (petitionBytheme === undefined) {
+                petitionBytheme = 0;
+              }
+              if (voteBytheme === undefined) {
+                voteBytheme = 0;
+              }
+              if (assembliesByTheme === undefined) {
+                assembliesByTheme = 0;
+              }
+              const processCount = consultationBytheme + petitionBytheme + voteBytheme + assembliesByTheme + youthParticipationByTheme;
+
 
               // Map icon string to component if needed, or use a default if it's a string
               // For now assuming theme.icon is a string/emoji or we need a proper icon mapper.
@@ -267,7 +292,7 @@ export function Dashboard() {
                       <MessageSquare className="w-6 h-6 text-blue-600" />
                     </div>
                     <Badge className="bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-100 transition-colors">
-                      {stats?.overview?.activeConsultations || 0} {language === "fr" && "actives"}
+                      {consultations?.length || 0} {language === "fr" && "actives"}
                       {language === "de" && "aktiv"}
                       {language === "en" && "active"}
                     </Badge>
@@ -300,7 +325,7 @@ export function Dashboard() {
                       <FileText className="w-6 h-6 text-green-600" />
                     </div>
                     <Badge className="bg-emerald-50 text-emerald-600 border border-emerald-200 hover:bg-emerald-100 transition-colors">
-                      {stats?.overview?.openPetitions || 0} {language === "fr" && "ouvertes"}
+                      {petitions?.length || 0} {language === "fr" && "ouvertes"}
                       {language === "de" && "offen"}
                       {language === "en" && "open"}
                     </Badge>
@@ -333,7 +358,7 @@ export function Dashboard() {
                       <Vote className="w-6 h-6 text-purple-600" />
                     </div>
                     <Badge className="bg-indigo-50 text-indigo-600 border border-indigo-200 hover:bg-indigo-100 transition-colors">
-                      {stats?.overview?.ongoingVotes || 0} {language === "fr" && "en cours"}
+                      {votes?.length || 0} {language === "fr" && "en cours"}
                       {language === "de" && "laufend"}
                       {language === "en" && "ongoing"}
                     </Badge>
@@ -369,7 +394,7 @@ export function Dashboard() {
                     </div>
                     <Badge className="bg-orange-50 text-orange-600 border border-orange-200 hover:bg-orange-100 transition-colors">
                       {/* Calculate active signalements (submitted + in_progress + under_review) */}
-                      {(signalementStats?.byStatus?.submitted || 0) + (signalementStats?.byStatus?.in_progress || 0) + (signalementStats?.byStatus?.under_review || 0)} {language === "fr" && "actifs"}
+                      {(signalementStats?.byStatus?.SUBMITTED || 0) + (signalementStats?.byStatus?.IN_PROGRESS || 0) + (signalementStats?.byStatus?.UNDER_REVIEW || 0)} {language === "fr" && "actifs"}
                       {language === "de" && "aktiv"}
                       {language === "en" && "active"}
                     </Badge>
@@ -868,9 +893,9 @@ export function Dashboard() {
                     {language === "en" && "🎯 Make your voice heard!"}
                   </h3>
                   <p className="text-sm text-gray-600">
-                    {language === "fr" && `${youthStats?.activePolls || 0} sondages actifs • ${youthStats?.userPoints || 0} points gagnés`}
-                    {language === "de" && `${youthStats?.activePolls || 0} aktive Umfragen • ${youthStats?.userPoints || 0} Punkte gesammelt`}
-                    {language === "en" && `${youthStats?.activePolls || 0} active polls • ${youthStats?.userPoints || 0} points earned`}
+                    {language === "fr" && `${youthPolls?.length || 0} sondages actifs • ${youthPolls?.reduce((acc, poll) => acc + poll.totalResponses, 0) || 0} réponses`}
+                    {language === "de" && `${youthPolls?.length || 0} aktive Umfragen • ${youthPolls?.reduce((acc, poll) => acc + poll.totalResponses, 0) || 0} Antworten`}
+                    {language === "en" && `${youthPolls?.length || 0} active polls • ${youthPolls?.reduce((acc, poll) => acc + poll.totalResponses, 0) || 0} responses`}
                   </p>
                 </div>
                 <Link to="/youth-space">

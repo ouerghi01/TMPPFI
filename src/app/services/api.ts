@@ -93,8 +93,9 @@ import { getThemesApi } from '../../api/themes';
 import { getPetitions } from '../../api/petetion';
 import { getAssembly } from '../../api/assembly';
 import { getConferencesApi } from '../../api/conferences';
-import { getConsultations } from '../../api/consultations';
+import { getConsultations, getLegislativeConsultationsApi } from '../../api/consultations';
 import { getPollsApi } from '../../api/votes';
+import { getSignalementsApi } from '../../api/signalements';
 
 // Simulated API delay (remove in production)
 const simulateDelay = (ms: number = 500) => new Promise(resolve => setTimeout(resolve, ms));
@@ -605,7 +606,7 @@ export const legislativeConsultationApi = {
   }): Promise<ApiResponse<LegislativeConsultationDTO[]>> {
     await simulateDelay();
 
-    let consultations = [...mockLegislativeConsultations];
+    let consultations = await getLegislativeConsultationsApi();
 
     if (params?.status) {
       consultations = consultations.filter(c => c.status === params.status);
@@ -1238,7 +1239,7 @@ export const signalementApi = {
     await simulateDelay();
 
     return {
-      data: mockSignalementStats,
+      data: await getSignalementsApi(),
       timestamp: new Date().toISOString(),
       success: true,
     };

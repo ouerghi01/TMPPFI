@@ -19,3 +19,12 @@ export const getConsultationById = async (id: string) => {
     throw error;
   }
 }
+export const getLegislativeConsultationsApi = async () => {
+  try {
+    const response = await apiClient.get<any[]>(`/public/consultations/type/Legislative`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching legislative consultations:', error);
+    throw error;
+  }
+} 

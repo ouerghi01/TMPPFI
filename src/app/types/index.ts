@@ -937,9 +937,30 @@ export interface SearchResponseDTO {
 
 // ==================== Signalement DTOs ====================
 
-export type SignalementStatus = 'submitted' | 'under_review' | 'in_progress' | 'resolved' | 'rejected' | 'archived';
-export type SignalementCategory = 'infrastructure' | 'cleanliness' | 'safety' | 'environment' | 'public_space' | 'transport' | 'noise' | 'other';
-export type SignalementPriority = 'low' | 'medium' | 'high' | 'urgent';
+export type SignalementStatus =
+  | 'SUBMITTED'
+  | 'UNDER_REVIEW'
+  | 'IN_PROGRESS'
+  | 'RESOLVED'
+  | 'REJECTED'
+  | 'ARCHIVED';
+
+export type SignalementCategory =
+  | 'INFRASTRUCTURE'
+  | 'CLEANLINESS'
+  | 'SAFETY'
+  | 'ENVIRONMENT'
+  | 'PUBLIC_SPACE'
+  | 'TRANSPORT'
+  | 'NOISE'
+  | 'OTHER';
+
+export type SignalementPriority =
+  | 'LOW'
+  | 'MEDIUM'
+  | 'HIGH'
+  | 'URGENT';
+
 
 export interface SignalementDTO {
   id: string;
