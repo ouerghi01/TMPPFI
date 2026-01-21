@@ -2152,7 +2152,7 @@ export const mockLegislativeSummaries: LegislativeSummaryDTO[] = [
   },
 ];
 
-export const mockLegislativeConsultationSummaries: LegislativeConsultationSummaryDTO[] = 
+export const mockLegislativeConsultationSummaries: LegislativeConsultationSummaryDTO[] =
   mockLegislativeConsultations.map(lc => ({
     id: lc.id,
     slug: lc.slug,
@@ -2439,6 +2439,7 @@ export const mockAssemblies: AssemblyDTO[] = [
     },
     createdAt: '2024-03-01T00:00:00Z',
     updatedAt: '2026-01-09T00:00:00Z',
+    title: undefined
   },
   {
     id: 'asm_002',

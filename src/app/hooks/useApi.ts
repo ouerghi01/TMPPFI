@@ -181,7 +181,7 @@ export function useLogin() {
       // Store tokens in localStorage
       localStorage.setItem('accessToken', data.tokens.accessToken);
       localStorage.setItem('refreshToken', data.tokens.refreshToken);
-      
+
       // Update current user cache
       queryClient.setQueryData(queryKeys.currentUser, data.user);
     },
@@ -320,12 +320,12 @@ export function useSignPetition() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ 
-      petitionId, 
-      data 
-    }: { 
-      petitionId: string; 
-      data: { anonymous?: boolean; comment?: string } 
+    mutationFn: async ({
+      petitionId,
+      data
+    }: {
+      petitionId: string;
+      data: { anonymous?: boolean; comment?: string }
     }) => {
       const response = await apiService.petition.signPetition(petitionId, data);
       return response.data;
@@ -366,12 +366,12 @@ export function useCastVote() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ 
-      voteId, 
-      optionIds 
-    }: { 
-      voteId: string; 
-      optionIds: string[] 
+    mutationFn: async ({
+      voteId,
+      optionIds
+    }: {
+      voteId: string;
+      optionIds: string[]
     }) => {
       const response = await apiService.vote.castVote(voteId, optionIds);
       return response.data;

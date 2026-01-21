@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useConsultation, useTheme } from '../hooks/useApi';
@@ -8,12 +8,12 @@ import { Badge } from '../components/ui/badge';
 import { Textarea } from '../components/ui/textarea';
 import { ThemeTag } from '../components/ThemeTag';
 import { StatusBadge } from '../components/StatusBadge';
-import { 
-  Calendar, 
-  MapPin, 
-  Users, 
-  ArrowLeft, 
-  MessageSquare, 
+import {
+  Calendar,
+  MapPin,
+  Users,
+  ArrowLeft,
+  MessageSquare,
   Heart,
   Send,
   ThumbsUp,
@@ -24,6 +24,7 @@ import {
   X
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { getCommentsByConsultation } from '../../api/comments';
 
 interface Comment {
   id: string;
@@ -62,17 +63,26 @@ export function ConsultationDetailPage() {
   const { language, t, tLocal } = useLanguage();
   const navigate = useNavigate();
   const [newComment, setNewComment] = useState('');
-  const [comments, setComments] = useState<Comment[]>(mockComments);
+  const [comments, setComments] = useState<Comment[]>([]);
+
+
   const [hasSupported, setHasSupported] = useState(false);
   const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
   const [editingContent, setEditingContent] = useState('');
 
   // Fetch consultation using React Query
   const { data: consultation, isLoading, error } = useConsultation(id || '');
-  
+
   // Fetch theme data
   const { data: theme } = useTheme(consultation?.themeId || '');
+  useEffect(() => {
+    const fetchComments = async () => {
+      const data = await getCommentsByConsultation(id || '');
+      setComments(data);
+    };
 
+    fetchComments();
+  }, [id]);
   // Check if debate is active
   const isDebateActive = consultation?.status === 'open' || consultation?.status === 'upcoming';
 
@@ -134,9 +144,9 @@ export function ConsultationDetailPage() {
     setComments([comment, ...comments]);
     setNewComment('');
     toast.success(
-      language === 'fr' ? 'Commentaire publié !' : 
-      language === 'de' ? 'Kommentar veröffentlicht!' : 
-      'Comment posted!'
+      language === 'fr' ? 'Commentaire publié !' :
+        language === 'de' ? 'Kommentar veröffentlicht!' :
+          'Comment posted!'
     );
   };
 
@@ -151,7 +161,7 @@ export function ConsultationDetailPage() {
   const handleSaveEdit = () => {
     if (!editingContent.trim()) return;
 
-    const updatedComments = comments.map(comment => 
+    const updatedComments = comments.map(comment =>
       comment.id === editingCommentId ? { ...comment, content: editingContent } : comment
     );
 
@@ -159,9 +169,9 @@ export function ConsultationDetailPage() {
     setEditingCommentId(null);
     setEditingContent('');
     toast.success(
-      language === 'fr' ? 'Commentaire mis à jour !' : 
-      language === 'de' ? 'Kommentar aktualisiert!' : 
-      'Comment updated!'
+      language === 'fr' ? 'Commentaire mis à jour !' :
+        language === 'de' ? 'Kommentar aktualisiert!' :
+          'Comment updated!'
     );
   };
 
@@ -174,9 +184,9 @@ export function ConsultationDetailPage() {
     const updatedComments = comments.filter(comment => comment.id !== commentId);
     setComments(updatedComments);
     toast.success(
-      language === 'fr' ? 'Commentaire supprimé !' : 
-      language === 'de' ? 'Kommentar gelöscht!' : 
-      'Comment deleted!'
+      language === 'fr' ? 'Commentaire supprimé !' :
+        language === 'de' ? 'Kommentar gelöscht!' :
+          'Comment deleted!'
     );
   };
 
@@ -245,7 +255,7 @@ export function ConsultationDetailPage() {
                       {language === 'de' && 'Teilnehmer'}
                       {language === 'en' && 'Participants'}
                     </p>
-                    <p className="font-medium">{consultation.registeredParticipants}</p>
+                    <p className="font-medium">{consultation.totalParticipants}</p>
                   </div>
                 </div>
                 {consultation.location && (
@@ -261,7 +271,7 @@ export function ConsultationDetailPage() {
                     </div>
                   </div>
                 )}
-                {consultation.stats?.totalComments !== undefined && (
+                {consultation?.totalComments !== undefined && (
                   <div className="flex items-center gap-2 text-gray-600">
                     <Heart className="w-5 h-5" />
                     <div>
@@ -270,7 +280,7 @@ export function ConsultationDetailPage() {
                         {language === 'de' && 'Beiträge'}
                         {language === 'en' && 'Contributions'}
                       </p>
-                      <p className="font-medium">{consultation.stats.totalComments + (hasSupported ? 1 : 0)}</p>
+                      <p className="font-medium">{consultation.totalComments + (hasSupported ? 1 : 0)}</p>
                     </div>
                   </div>
                 )}
@@ -297,8 +307,8 @@ export function ConsultationDetailPage() {
                   onChange={(e) => setNewComment(e.target.value)}
                   placeholder={
                     language === 'fr' ? 'Partagez votre avis...' :
-                    language === 'de' ? 'Teilen Sie Ihre Meinung...' :
-                    'Share your thoughts...'
+                      language === 'de' ? 'Teilen Sie Ihre Meinung...' :
+                        'Share your thoughts...'
                   }
                   rows={3}
                 />
@@ -372,7 +382,7 @@ export function ConsultationDetailPage() {
                           </Button>
                         </div>
                         <p className="text-gray-700 mb-2">{comment.content}</p>
-                        
+
                         {/* Edit and Delete buttons - only for own comments and active debates */}
                         {comment.author === 'Vous' && isDebateActive && (
                           <div className="flex items-center gap-2">
@@ -400,7 +410,7 @@ export function ConsultationDetailPage() {
                             </Button>
                           </div>
                         )}
-                        
+
                         {/* Info message if debate is closed */}
                         {comment.author === 'Vous' && !isDebateActive && (
                           <p className="text-xs text-gray-500 italic mt-2">
@@ -431,13 +441,13 @@ export function ConsultationDetailPage() {
             </CardHeader>
             <CardContent className="space-y-3">
               {consultation.type === 'citizen_proposal' && (
-                <Button 
-                  onClick={handleSupport} 
+                <Button
+                  onClick={handleSupport}
                   variant={hasSupported ? 'secondary' : 'default'}
                   className="w-full gap-2"
                 >
                   <Heart className={`w-4 h-4 ${hasSupported ? 'fill-current' : ''}`} />
-                  {hasSupported 
+                  {hasSupported
                     ? (language === 'fr' ? 'Soutien retiré' : language === 'de' ? 'Unterstützt' : 'Supported')
                     : (language === 'fr' ? 'Soutenir' : language === 'de' ? 'Unterstützen' : 'Support')
                   }
@@ -470,7 +480,7 @@ export function ConsultationDetailPage() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div 
+              <div
                 className="p-4 rounded-lg flex items-center gap-3"
                 style={{ backgroundColor: `${theme.color}20` }}
               >

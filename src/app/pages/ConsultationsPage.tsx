@@ -33,13 +33,13 @@ export function ConsultationsPage() {
         <PageBanner
           title={
             language === 'fr' ? 'Consultations publiques' :
-            language === 'de' ? 'Öffentliche Konsultationen' :
-            'Public Consultations'
+              language === 'de' ? 'Öffentliche Konsultationen' :
+                'Public Consultations'
           }
           description={
             language === 'fr' ? 'Donnez votre avis sur les projets et politiques de votre commune' :
-            language === 'de' ? 'Geben Sie Ihre Meinung zu Projekten und Richtlinien Ihrer Gemeinde ab' :
-            'Give your opinion on your community\'s projects and policies'
+              language === 'de' ? 'Geben Sie Ihre Meinung zu Projekten und Richtlinien Ihrer Gemeinde ab' :
+                'Give your opinion on your community\'s projects and policies'
           }
           gradient="from-cyan-600 to-blue-600"
           icon={<MessageSquare className="w-12 h-12 text-white" />}
@@ -60,13 +60,13 @@ export function ConsultationsPage() {
         <PageBanner
           title={
             language === 'fr' ? 'Consultations publiques' :
-            language === 'de' ? 'Öffentliche Konsultationen' :
-            'Public Consultations'
+              language === 'de' ? 'Öffentliche Konsultationen' :
+                'Public Consultations'
           }
           description={
             language === 'fr' ? 'Donnez votre avis sur les projets et politiques de votre commune' :
-            language === 'de' ? 'Geben Sie Ihre Meinung zu Projekten und Richtlinien Ihrer Gemeinde ab' :
-            'Give your opinion on your community\'s projects and policies'
+              language === 'de' ? 'Geben Sie Ihre Meinung zu Projekten und Richtlinien Ihrer Gemeinde ab' :
+                'Give your opinion on your community\'s projects and policies'
           }
           gradient="from-cyan-600 to-blue-600"
           icon={<MessageSquare className="w-12 h-12 text-white" />}
@@ -89,9 +89,9 @@ export function ConsultationsPage() {
   // Calculate statistics
   const totalConsultations = consultations?.length || 0;
   const openConsultations = consultations?.filter(c => c.status === 'open').length || 0;
-  const totalParticipants = consultations?.reduce((sum, c) => sum + (c.registeredParticipants || 0), 0) || 0;
-  const totalComments = consultations?.reduce((sum, c) => sum + (c.stats?.totalComments || 0), 0) || 0;
-  const engagementRate = totalConsultations > 0 
+  const totalParticipants = consultations?.reduce((sum, c) => sum + (c.totalParticipants || 0), 0) || 0;
+  const totalComments = consultations?.reduce((sum, c) => sum + (c.totalComments || 0), 0) || 0;
+  const engagementRate = totalConsultations > 0
     ? Math.round((totalParticipants / totalConsultations) * 100) / 100
     : 0;
 
@@ -100,26 +100,26 @@ export function ConsultationsPage() {
       <PageBanner
         title={
           language === 'fr' ? 'Consultations publiques' :
-          language === 'de' ? 'Öffentliche Konsultationen' :
-          'Public Consultations'
+            language === 'de' ? 'Öffentliche Konsultationen' :
+              'Public Consultations'
         }
         description={
           language === 'fr' ? 'Donnez votre avis sur les projets et politiques de votre commune' :
-          language === 'de' ? 'Geben Sie Ihre Meinung zu Projekten und Richtlinien Ihrer Gemeinde ab' :
-          'Give your opinion on your community\'s projects and policies'
+            language === 'de' ? 'Geben Sie Ihre Meinung zu Projekten und Richtlinien Ihrer Gemeinde ab' :
+              'Give your opinion on your community\'s projects and policies'
         }
         gradient="from-cyan-600 to-blue-600"
         icon={<MessageSquare className="w-12 h-12 text-white" />}
       />
-      
+
       <PageLayout className="py-8">
         {/* Statistics Dashboard */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
           <KPICard
             label={
               language === 'fr' ? 'Total' :
-              language === 'de' ? 'Gesamt' :
-              'Total'
+                language === 'de' ? 'Gesamt' :
+                  'Total'
             }
             value={totalConsultations}
             icon={FileText}
@@ -129,8 +129,8 @@ export function ConsultationsPage() {
           <KPICard
             label={
               language === 'fr' ? 'Ouvertes' :
-              language === 'de' ? 'Offen' :
-              'Open'
+                language === 'de' ? 'Offen' :
+                  'Open'
             }
             value={openConsultations}
             icon={TrendingUp}
@@ -140,8 +140,8 @@ export function ConsultationsPage() {
           <KPICard
             label={
               language === 'fr' ? 'Participants' :
-              language === 'de' ? 'Teilnehmer' :
-              'Participants'
+                language === 'de' ? 'Teilnehmer' :
+                  'Participants'
             }
             value={totalParticipants.toLocaleString()}
             icon={Users}
@@ -151,8 +151,8 @@ export function ConsultationsPage() {
           <KPICard
             label={
               language === 'fr' ? 'Contributions' :
-              language === 'de' ? 'Beiträge' :
-              'Contributions'
+                language === 'de' ? 'Beiträge' :
+                  'Contributions'
             }
             value={totalComments.toLocaleString()}
             icon={Heart}
@@ -165,8 +165,8 @@ export function ConsultationsPage() {
           <FilterBar>
             <FilterField label={
               language === 'fr' ? `${t('common.filter')} par thème` :
-              language === 'de' ? `${t('common.filter')} nach Thema` :
-              `${t('common.filter')} by theme`
+                language === 'de' ? `${t('common.filter')} nach Thema` :
+                  `${t('common.filter')} by theme`
             }>
               <Select value={selectedTheme || 'all'} onValueChange={setSelectedTheme}>
                 <SelectTrigger>
@@ -185,8 +185,8 @@ export function ConsultationsPage() {
 
             <FilterField label={
               language === 'fr' ? `${t('common.filter')} par statut` :
-              language === 'de' ? `${t('common.filter')} nach Status` :
-              `${t('common.filter')} by status`
+                language === 'de' ? `${t('common.filter')} nach Status` :
+                  `${t('common.filter')} by status`
             }>
               <Select value={selectedStatus || 'all'} onValueChange={setSelectedStatus}>
                 <SelectTrigger>
@@ -209,6 +209,8 @@ export function ConsultationsPage() {
             <TabsTrigger value="debate">Débats ({filteredConsultations.filter(c => c.type === 'online_debate').length})</TabsTrigger>
             <TabsTrigger value="proposal">Propositions ({filteredConsultations.filter(c => c.type === 'citizen_proposal').length})</TabsTrigger>
             <TabsTrigger value="meeting">Rencontres ({filteredConsultations.filter(c => c.type === 'public_meeting').length})</TabsTrigger>
+            <TabsTrigger value="legislative">Legislatives ({filteredConsultations.filter(c => c.type === 'legislative').length})</TabsTrigger>
+
           </TabsList>
 
           <TabsContent value="all">
@@ -225,6 +227,9 @@ export function ConsultationsPage() {
 
           <TabsContent value="meeting">
             <ConsultationsList consultations={filteredConsultations.filter(c => c.type === 'public_meeting')} />
+          </TabsContent>
+          <TabsContent value="legislative">
+            <ConsultationsList consultations={filteredConsultations.filter(c => c.type === 'legislative')} />
           </TabsContent>
         </Tabs>
 
@@ -270,7 +275,7 @@ export function ConsultationsPage() {
 // Component to display consultations list
 function ConsultationsList({ consultations }: { consultations: ConsultationDTO[] }) {
   const { t, language, tLocal } = useLanguage();
-  
+
   const getTypeIcon = (type: string) => {
     switch (type) {
       case 'online_debate':
@@ -333,16 +338,16 @@ function ConsultationsList({ consultations }: { consultations: ConsultationDTO[]
                 )}
                 <div className="flex items-center gap-2 text-gray-600 text-sm">
                   <Users className="w-4 h-4" />
-                  <span>{consultation.registeredParticipants} participants</span>
+                  <span>{consultation.totalParticipants} participants</span>
                 </div>
               </div>
 
               {/* Comments for proposals */}
-              {consultation.type === 'citizen_proposal' && consultation.stats?.totalComments !== undefined && (
+              {consultation.totalComments !== undefined && (
                 <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
                   <div className="flex items-center gap-2 text-green-800">
                     <Heart className="w-4 h-4" />
-                    <span className="font-medium">{consultation.stats.totalComments} contributions</span>
+                    <span className="font-medium">{consultation.totalComments} contributions</span>
                   </div>
                 </div>
               )}
@@ -351,7 +356,7 @@ function ConsultationsList({ consultations }: { consultations: ConsultationDTO[]
             {/* Button aligned at bottom */}
             {consultation.status === 'open' && (
               <div className="mt-4 pt-4 border-t border-gray-100">
-                <Link to={`/consultations/${consultation.slug}`}>
+                <Link to={`/consultations/${consultation.id}`}>
                   <Button className="w-full gap-2">
                     {t('common.participate')}
                     <ArrowRight className="w-4 h-4" />

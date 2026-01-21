@@ -220,14 +220,14 @@ export function ConferencesPage() {
 
   const handleRegistration = (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!registrationData.firstName || !registrationData.lastName || 
-        !registrationData.email || !registrationData.phone || 
-        !registrationData.motivation || !registrationData.acceptTerms) {
+
+    if (!registrationData.firstName || !registrationData.lastName ||
+      !registrationData.email || !registrationData.phone ||
+      !registrationData.motivation || !registrationData.acceptTerms) {
       toast.error(
         language === 'fr' ? 'Veuillez remplir tous les champs obligatoires et accepter les conditions' :
-        language === 'de' ? 'Bitte füllen Sie alle Pflichtfelder aus und akzeptieren Sie die Bedingungen' :
-        'Please fill in all required fields and accept the terms'
+          language === 'de' ? 'Bitte füllen Sie alle Pflichtfelder aus und akzeptieren Sie die Bedingungen' :
+            'Please fill in all required fields and accept the terms'
       );
       return;
     }
@@ -237,16 +237,16 @@ export function ConferencesPage() {
     if (!emailRegex.test(registrationData.email)) {
       toast.error(
         language === 'fr' ? 'Veuillez entrer une adresse email valide' :
-        language === 'de' ? 'Bitte geben Sie eine gültige E-Mail-Adresse ein' :
-        'Please enter a valid email address'
+          language === 'de' ? 'Bitte geben Sie eine gültige E-Mail-Adresse ein' :
+            'Please enter a valid email address'
       );
       return;
     }
 
     toast.success(
       language === 'fr' ? `Votre inscription à \"${selectedConference ? tLocal(selectedConference.title) : ''}\" est confirmée ! Vous recevrez un email de confirmation.` :
-      language === 'de' ? `Ihre Anmeldung zu \"${selectedConference ? tLocal(selectedConference.title) : ''}\" ist bestätigt! Sie erhalten eine Bestätigungs-E-Mail.` :
-      `Your registration for \"${selectedConference ? tLocal(selectedConference.title) : ''}\" is confirmed! You will receive a confirmation email.`
+        language === 'de' ? `Ihre Anmeldung zu \"${selectedConference ? tLocal(selectedConference.title) : ''}\" ist bestätigt! Sie erhalten eine Bestätigungs-E-Mail.` :
+          `Your registration for \"${selectedConference ? tLocal(selectedConference.title) : ''}\" is confirmed! You will receive a confirmation email.`
     );
 
     // Add conference ID to registeredConferences
@@ -272,11 +272,11 @@ export function ConferencesPage() {
   const handleCancelRegistration = (conferenceId: string, conferenceTitle: string) => {
     // Remove conference from registered list
     setRegisteredConferences(prev => prev.filter(id => id !== conferenceId));
-    
+
     toast.success(
       language === 'fr' ? `Inscription annulée pour "${conferenceTitle}"` :
-      language === 'de' ? `Anmeldung für "${conferenceTitle}" storniert` :
-      `Registration cancelled for "${conferenceTitle}"`
+        language === 'de' ? `Anmeldung für "${conferenceTitle}" storniert` :
+          `Registration cancelled for "${conferenceTitle}"`
     );
   };
 
@@ -285,7 +285,7 @@ export function ConferencesPage() {
   const uniqueSpeakers = conferences ? new Set(conferences.flatMap(c => c.speakers?.filter(s => s).map(s => s.id) || [])).size : 0;
   const totalSeatsReserved = conferences ? conferences.reduce((sum, c) => sum + c.registeredCount, 0) : 0;
   const totalCapacity = conferences ? conferences.reduce((sum, c) => sum + c.capacity, 0) : 0;
-  const seatsReservedPercent = totalCapacity > 0 
+  const seatsReservedPercent = totalCapacity > 0
     ? Math.round((totalSeatsReserved / totalCapacity) * 100)
     : 0;
   const upcomingSessions = conferences ? conferences.reduce((sum, c) => sum + c.sessions.length, 0) : 0;
@@ -295,26 +295,26 @@ export function ConferencesPage() {
       <PageBanner
         title={
           language === 'fr' ? 'Conférences & Forums' :
-          language === 'de' ? 'Konferenzen & Foren' :
-          'Conferences & Forums'
+            language === 'de' ? 'Konferenzen & Foren' :
+              'Conferences & Forums'
         }
         description={
           language === 'fr' ? 'Participez aux événements et rencontrez les experts de votre commune' :
-          language === 'de' ? 'Nehmen Sie an Veranstaltungen teil und treffen Sie die Experten Ihrer Gemeinde' :
-          'Participate in events and meet experts from your community'
+            language === 'de' ? 'Nehmen Sie an Veranstaltungen teil und treffen Sie die Experten Ihrer Gemeinde' :
+              'Participate in events and meet experts from your community'
         }
         gradient="from-indigo-600 to-purple-600"
         icon={<Mic className="w-12 h-12 text-white" />}
       />
-      
+
       <PageLayout className="py-8">
         {/* KPI Cards - Standard 4-column grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
           <KPICard
             label={
               language === 'fr' ? 'Total Événements' :
-              language === 'de' ? 'Gesamt Veranstaltungen' :
-              'Total Events Hosted'
+                language === 'de' ? 'Gesamt Veranstaltungen' :
+                  'Total Events Hosted'
             }
             value={totalEvents}
             icon={FileText}
@@ -325,8 +325,8 @@ export function ConferencesPage() {
           <KPICard
             label={
               language === 'fr' ? 'Experts invités' :
-              language === 'de' ? 'Experten-Referenten' :
-              'Expert Speakers'
+                language === 'de' ? 'Experten-Referenten' :
+                  'Expert Speakers'
             }
             value={uniqueSpeakers}
             icon={Users}
@@ -337,8 +337,8 @@ export function ConferencesPage() {
           <KPICard
             label={
               language === 'fr' ? 'Places réservées' :
-              language === 'de' ? 'Reservierte Plätze' :
-              'Seats Reserved'
+                language === 'de' ? 'Reservierte Plätze' :
+                  'Seats Reserved'
             }
             value={`${seatsReservedPercent}%`}
             icon={TrendingUp}
@@ -349,8 +349,8 @@ export function ConferencesPage() {
           <KPICard
             label={
               language === 'fr' ? 'Sessions à venir' :
-              language === 'de' ? 'Kommende Sitzungen' :
-              'Upcoming Sessions'
+                language === 'de' ? 'Kommende Sitzungen' :
+                  'Upcoming Sessions'
             }
             value={upcomingSessions}
             icon={Mic}
@@ -420,7 +420,7 @@ export function ConferencesPage() {
                       <div className="flex items-center gap-2 text-gray-600">
                         <Mic className="w-5 h-5" />
                         <span>
-                          {conference.sessions.length} 
+                          {conference.sessions.length}
                           {language === 'fr' && ' sessions au programme'}
                           {language === 'de' && ' Sitzungen im Programm'}
                           {language === 'en' && ' sessions scheduled'}
@@ -439,10 +439,10 @@ export function ConferencesPage() {
                         <div className="flex flex-wrap gap-2">
                           {conference.speakers.filter(s => s).slice(0, 3).map((speaker, idx) => {
                             // Speaker is a SpeakerDTO object with firstName, lastName, and id
-                            const speakerName = `${speaker.firstName} ${speaker.lastName}`;
+                            const speakerName = `${speaker.name}`;
                             // Use the actual speaker ID from the DTO
                             const speakerId = speaker.id;
-                            
+
                             return (
                               <button
                                 key={idx}
@@ -461,7 +461,7 @@ export function ConferencesPage() {
                     <div>
                       <div className="flex justify-between text-sm mb-2">
                         <span className="text-gray-600">
-                          {conference.registeredCount} / {conference.capacity} 
+                          {conference.registeredCount} / {conference.capacity}
                           {language === 'fr' && ' places réservées'}
                           {language === 'de' && ' Plätze reserviert'}
                           {language === 'en' && ' seats reserved'}
@@ -470,14 +470,13 @@ export function ConferencesPage() {
                       </div>
                       <div className="w-full bg-gray-200 rounded-full h-2">
                         <div
-                          className={`h-2 rounded-full transition-all ${
-                            fillRate >= 90 ? 'bg-red-600' : fillRate >= 70 ? 'bg-orange-600' : 'bg-green-600'
-                          }`}
+                          className={`h-2 rounded-full transition-all ${fillRate >= 90 ? 'bg-red-600' : fillRate >= 70 ? 'bg-orange-600' : 'bg-green-600'
+                            }`}
                           style={{ width: `${fillRate}%` }}
                         />
                       </div>
                       <div className="text-xs text-gray-600 mt-1">
-                        {availableSpots} 
+                        {availableSpots}
                         {language === 'fr' && ' places restantes'}
                         {language === 'de' && ' Plätze verfügbar'}
                         {language === 'en' && ' seats available'}
@@ -489,7 +488,7 @@ export function ConferencesPage() {
                   <div className="mt-4 pt-4 border-t border-gray-100 space-y-2">
                     {!isRegistered ? (
                       availableSpots > 0 ? (
-                        <Button 
+                        <Button
                           onClick={() => setSelectedConference(conference)}
                           className="w-full gap-2"
                         >
@@ -507,7 +506,7 @@ export function ConferencesPage() {
                       )
                     ) : canCancel ? (
                       <>
-                        <Button 
+                        <Button
                           onClick={() => handleCancelRegistration(conference.id, tLocal(conference.title))}
                           variant="destructive"
                           className="w-full gap-2"
@@ -525,7 +524,7 @@ export function ConferencesPage() {
                       </>
                     ) : (
                       <>
-                        <Button 
+                        <Button
                           variant="secondary"
                           className="w-full gap-2"
                           disabled
@@ -707,7 +706,7 @@ export function ConferencesPage() {
                     {language === 'de' && 'Persönliche Informationen'}
                     {language === 'en' && 'Personal information'}
                   </h3>
-                  
+
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="reg-firstName">
@@ -750,8 +749,8 @@ export function ConferencesPage() {
                       onChange={(e) => handleInputChange('email', e.target.value)}
                       placeholder={
                         language === 'fr' ? 'votre.email@exemple.com' :
-                        language === 'de' ? 'ihre.email@beispiel.com' :
-                        'your.email@example.com'
+                          language === 'de' ? 'ihre.email@beispiel.com' :
+                            'your.email@example.com'
                       }
                       required
                     />
@@ -800,8 +799,8 @@ export function ConferencesPage() {
                     onChange={(e) => handleInputChange('motivation', e.target.value)}
                     placeholder={
                       language === 'fr' ? 'Expliquez brièvement votre intérêt pour cette conférence...' :
-                      language === 'de' ? 'Erklären Sie kurz Ihr Interesse an dieser Konferenz...' :
-                      'Briefly explain your interest in this conference...'
+                        language === 'de' ? 'Erklären Sie kurz Ihr Interesse an dieser Konferenz...' :
+                          'Briefly explain your interest in this conference...'
                     }
                     rows={4}
                     required
@@ -821,8 +820,8 @@ export function ConferencesPage() {
                     onChange={(e) => handleInputChange('specialNeeds', e.target.value)}
                     placeholder={
                       language === 'fr' ? 'Régime alimentaire, accessibilité PMR, interprétation...' :
-                      language === 'de' ? 'Diät, Barrierefreiheit, Dolmetschen...' :
-                      'Dietary requirements, wheelchair access, interpretation...'
+                        language === 'de' ? 'Diät, Barrierefreiheit, Dolmetschen...' :
+                          'Dietary requirements, wheelchair access, interpretation...'
                     }
                     rows={2}
                   />

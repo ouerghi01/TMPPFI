@@ -7,11 +7,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import { Button } from '../components/ui/button';
 import { Progress } from '../components/ui/progress';
 import { Separator } from '../components/ui/separator';
-import { 
-  ArrowLeft, 
-  Calendar, 
-  Users, 
-  CheckCircle2, 
+import {
+  ArrowLeft,
+  Calendar,
+  Users,
+  CheckCircle2,
   AlertCircle,
   TrendingUp,
   BarChart3,
@@ -30,13 +30,13 @@ export function VoteDetailPage() {
   const { voteId } = useParams<{ voteId: string }>();
   const navigate = useNavigate();
   const { language, tLocal } = useLanguage();
-  
+
   // Fetch vote using React Query
   const { data: vote, isLoading, error } = useVote(voteId || '');
-  
+
   // Fetch theme data
   const { data: theme } = useTheme(vote?.themeId || '');
-  
+
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [hasVoted, setHasVoted] = useState(false);
   const [previousVote, setPreviousVote] = useState<string | null>(null);
@@ -63,8 +63,8 @@ export function VoteDetailPage() {
   if (error || !vote) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <Button 
-          variant="ghost" 
+        <Button
+          variant="ghost"
           onClick={() => navigate('/votes')}
           className="mb-6 gap-2"
         >
@@ -82,17 +82,17 @@ export function VoteDetailPage() {
     );
   }
 
-  const totalVotes = vote.options.reduce((sum, option) => sum + (option.votes || 0), 0);
-  const isOpen = vote.status === 'open';
-  const isUpcoming = vote.status === 'upcoming';
-  const isClosed = vote.status === 'closed';
+  const totalVotes = vote.options.reduce((sum, option) => sum + (option.votesCount || 0), 0);
+  const isOpen = vote.status === 'OPEN';
+  const isUpcoming = vote.status === 'UPCOMING';
+  const isClosed = vote.status === 'CLOSED';
 
   const handleVote = () => {
     if (!selectedOption) {
       toast.error(
         language === 'fr' ? 'Veuillez sélectionner une option' :
-        language === 'de' ? 'Bitte wählen Sie eine Option' :
-        'Please select an option'
+          language === 'de' ? 'Bitte wählen Sie eine Option' :
+            'Please select an option'
       );
       return;
     }
@@ -102,15 +102,15 @@ export function VoteDetailPage() {
     setHasVoted(true);
     setIsModifying(false);
     setVoteDate(now);
-    
+
     const successMessage = isModifying
       ? (language === 'fr' ? `Votre vote a été mis à jour avec succès le ${now.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })} à ${now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}` :
-         language === 'de' ? `Ihre Stimme wurde erfolgreich aktualisiert am ${now.toLocaleDateString('de-DE', { day: 'numeric', month: 'long', year: 'numeric' })} um ${now.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}` :
-         `Your vote was successfully updated on ${now.toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })} at ${now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}`)
+        language === 'de' ? `Ihre Stimme wurde erfolgreich aktualisiert am ${now.toLocaleDateString('de-DE', { day: 'numeric', month: 'long', year: 'numeric' })} um ${now.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}` :
+          `Your vote was successfully updated on ${now.toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })} at ${now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}`)
       : (language === 'fr' ? 'Votre vote a été enregistré avec succès !' :
-         language === 'de' ? 'Ihre Stimme wurde erfolgreich registriert!' :
-         'Your vote has been successfully recorded!');
-    
+        language === 'de' ? 'Ihre Stimme wurde erfolgreich registriert!' :
+          'Your vote has been successfully recorded!');
+
     toast.success(successMessage);
   };
 
@@ -145,8 +145,8 @@ export function VoteDetailPage() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* Back Button */}
-      <Button 
-        variant="ghost" 
+      <Button
+        variant="ghost"
         onClick={() => navigate('/votes')}
         className="mb-6 gap-2"
       >
@@ -224,7 +224,7 @@ export function VoteDetailPage() {
                     {language === 'en' && 'Participants'}
                   </p>
                   <p className="font-semibold text-gray-900">
-                    {vote.stats?.totalVoters || totalVotes || 0}
+                    {vote.stats?.totalVotes || totalVotes || 0}
                   </p>
                 </div>
               </div>
@@ -244,7 +244,7 @@ export function VoteDetailPage() {
                     {language === 'en' && 'Vote type'}
                   </p>
                   <p className="font-semibold text-gray-900">
-                    {vote.type === 'referendum' ? 
+                    {vote.type === 'referendum' ?
                       (language === 'fr' ? 'Référendum' : language === 'de' ? 'Referendum' : 'Referendum') :
                       (language === 'fr' ? 'Consultation' : language === 'de' ? 'Konsultation' : 'Consultation')
                     }
@@ -280,14 +280,14 @@ export function VoteDetailPage() {
                     {visualMode ? (
                       <>
                         {language === 'fr' ? '📝 Mode standard' :
-                        language === 'de' ? '📝 Standardmodus' :
-                        '📝 Standard mode'}
+                          language === 'de' ? '📝 Standardmodus' :
+                            '📝 Standard mode'}
                       </>
                     ) : (
                       <>
                         {language === 'fr' ? '🎨 Mode simplifié (Analphabètes)' :
-                        language === 'de' ? '🎨 Vereinfachter Modus (Analphabeten)' :
-                        '🎨 Simplified mode (Illiterate)'}
+                          language === 'de' ? '🎨 Vereinfachter Modus (Analphabeten)' :
+                            '🎨 Simplified mode (Illiterate)'}
                       </>
                     )}
                   </Button>
@@ -313,84 +313,78 @@ export function VoteDetailPage() {
                 )}
               </CardHeader>
               <CardContent className="pt-6">{!visualMode ? (
-                  // Standard Mode
-                  <div className="space-y-3">
-                    {vote.options.map((option) => (
+                // Standard Mode
+                <div className="space-y-3">
+                  {vote.options.map((option) => (
+                    <button
+                      key={option.id}
+                      onClick={() => setSelectedOption(option.id)}
+                      className={`w-full p-4 rounded-lg border-2 text-left transition-all ${selectedOption === option.id
+                        ? 'border-blue-600 bg-blue-50'
+                        : 'border-gray-200 hover:border-gray-300 bg-white'
+                        }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${selectedOption === option.id
+                          ? 'border-blue-600 bg-blue-600'
+                          : 'border-gray-300'
+                          }`}>
+                          {selectedOption === option.id && (
+                            <div className="w-2 h-2 bg-white rounded-full"></div>
+                          )}
+                        </div>
+                        <span className="font-medium text-gray-900">{tLocal(option.label)}</span>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                // Visual Mode - Simplified with Pictograms
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {vote.options.map((option, index) => {
+                    const visual = getVisualForOption(index);
+                    const VisualIcon = visual.icon;
+                    return (
                       <button
                         key={option.id}
                         onClick={() => setSelectedOption(option.id)}
-                        className={`w-full p-4 rounded-lg border-2 text-left transition-all ${
-                          selectedOption === option.id
-                            ? 'border-blue-600 bg-blue-50'
-                            : 'border-gray-200 hover:border-gray-300 bg-white'
-                        }`}
+                        className={`p-8 rounded-2xl border-4 transition-all transform hover:scale-105 ${selectedOption === option.id
+                          ? `${visual.borderColor} ${visual.color} bg-opacity-10 shadow-xl`
+                          : 'border-gray-300 bg-white hover:border-gray-400'
+                          }`}
                       >
-                        <div className="flex items-center gap-3">
-                          <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                            selectedOption === option.id
-                              ? 'border-blue-600 bg-blue-600'
-                              : 'border-gray-300'
-                          }`}>
-                            {selectedOption === option.id && (
-                              <div className="w-2 h-2 bg-white rounded-full"></div>
-                            )}
+                        <div className="flex flex-col items-center gap-4">
+                          <div className={`w-24 h-24 rounded-full flex items-center justify-center ${selectedOption === option.id
+                            ? `${visual.color} text-white`
+                            : `bg-gray-100 ${visual.textColor}`
+                            }`}>
+                            <VisualIcon className="w-12 h-12 stroke-[3]" />
                           </div>
-                          <span className="font-medium text-gray-900">{tLocal(option.label)}</span>
+                          <div className="text-center">
+                            <div className={`text-5xl mb-3 ${selectedOption === option.id ? visual.textColor : 'text-gray-400'
+                              }`}>
+                              {visual.emoji}
+                            </div>
+                            <span className={`text-xl font-bold block ${selectedOption === option.id ? 'text-gray-900' : 'text-gray-700'
+                              }`}>
+                              {tLocal(option.label)}
+                            </span>
+                          </div>
+                          {selectedOption === option.id && (
+                            <div className={`mt-2 px-4 py-2 rounded-full ${visual.color} text-white font-semibold text-sm`}>
+                              {language === 'fr' && '✓ Sélectionné'}
+                              {language === 'de' && '✓ Ausgewählt'}
+                              {language === 'en' && '✓ Selected'}
+                            </div>
+                          )}
                         </div>
                       </button>
-                    ))}
-                  </div>
-                ) : (
-                  // Visual Mode - Simplified with Pictograms
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {vote.options.map((option, index) => {
-                      const visual = getVisualForOption(index);
-                      const VisualIcon = visual.icon;
-                      return (
-                        <button
-                          key={option.id}
-                          onClick={() => setSelectedOption(option.id)}
-                          className={`p-8 rounded-2xl border-4 transition-all transform hover:scale-105 ${
-                            selectedOption === option.id
-                              ? `${visual.borderColor} ${visual.color} bg-opacity-10 shadow-xl`
-                              : 'border-gray-300 bg-white hover:border-gray-400'
-                          }`}
-                        >
-                          <div className="flex flex-col items-center gap-4">
-                            <div className={`w-24 h-24 rounded-full flex items-center justify-center ${
-                              selectedOption === option.id
-                                ? `${visual.color} text-white`
-                                : `bg-gray-100 ${visual.textColor}`
-                            }`}>
-                              <VisualIcon className="w-12 h-12 stroke-[3]" />
-                            </div>
-                            <div className="text-center">
-                              <div className={`text-5xl mb-3 ${
-                                selectedOption === option.id ? visual.textColor : 'text-gray-400'
-                              }`}>
-                                {visual.emoji}
-                              </div>
-                              <span className={`text-xl font-bold block ${
-                                selectedOption === option.id ? 'text-gray-900' : 'text-gray-700'
-                              }`}>
-                                {tLocal(option.label)}
-                              </span>
-                            </div>
-                            {selectedOption === option.id && (
-                              <div className={`mt-2 px-4 py-2 rounded-full ${visual.color} text-white font-semibold text-sm`}>
-                                {language === 'fr' && '✓ Sélectionné'}
-                                {language === 'de' && '✓ Ausgewählt'}
-                                {language === 'en' && '✓ Selected'}
-                              </div>
-                            )}
-                          </div>
-                        </button>
-                      );
-                    })}
-                  </div>
-                )}
+                    );
+                  })}
+                </div>
+              )}
 
-                <Button 
+                <Button
                   onClick={handleVote}
                   className="w-full mt-6 gap-2 text-lg py-6"
                   disabled={!selectedOption}
@@ -421,7 +415,7 @@ export function VoteDetailPage() {
                       {language === 'de' && 'Vielen Dank für Ihre Teilnahme.'}
                       {language === 'en' && 'Thank you for your participation.'}
                     </p>
-                    
+
                     {/* Vote Details */}
                     {voteDate && (
                       <div className="bg-white rounded-lg p-4 mb-3">
@@ -457,7 +451,7 @@ export function VoteDetailPage() {
 
                     {/* Modify Vote Button */}
                     {isOpen && (
-                      <Button 
+                      <Button
                         onClick={handleModifyVote}
                         variant="outline"
                         className="w-full gap-2 border-blue-600 text-blue-600 hover:bg-blue-50"
@@ -516,7 +510,7 @@ export function VoteDetailPage() {
               <CardContent>
                 <div className="space-y-4">
                   {vote.options.map((option, index) => {
-                    const percentage = getOptionPercentage(option.votes || 0);
+                    const percentage = getOptionPercentage(option.votesCount || 0);
                     const visual = getVisualForOption(index);
                     return (
                       <div key={option.id}>
@@ -568,12 +562,12 @@ export function VoteDetailPage() {
                   <p>
                     {vote.type === 'referendum' ? (
                       language === 'fr' ? 'Ce référendum permet aux citoyens de se prononcer directement sur une question importante pour la collectivité.' :
-                      language === 'de' ? 'Dieses Referendum ermöglicht es den Bürgern, sich direkt zu einer wichtigen Frage für die Gemeinschaft zu äußern.' :
-                      'This referendum allows citizens to vote directly on an important question for the community.'
+                        language === 'de' ? 'Dieses Referendum ermöglicht es den Bürgern, sich direkt zu einer wichtigen Frage für die Gemeinschaft zu äußern.' :
+                          'This referendum allows citizens to vote directly on an important question for the community.'
                     ) : (
                       language === 'fr' ? 'Cette consultation permet de recueillir l\'avis des citoyens sur plusieurs options proposées.' :
-                      language === 'de' ? 'Diese Konsultation ermöglicht es, die Meinung der Bürger zu mehreren vorgeschlagenen Optionen einzuholen.' :
-                      'This consultation allows gathering citizens\' opinions on several proposed options.'
+                        language === 'de' ? 'Diese Konsultation ermöglicht es, die Meinung der Bürger zu mehreren vorgeschlagenen Optionen einzuholen.' :
+                          'This consultation allows gathering citizens\' opinions on several proposed options.'
                     )}
                   </p>
                 </div>
@@ -682,7 +676,7 @@ export function VoteDetailPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                <Link 
+                <Link
                   to="/votes"
                   className="block text-sm text-blue-600 hover:text-blue-700"
                 >
@@ -690,7 +684,7 @@ export function VoteDetailPage() {
                   {language === 'de' && '→ Alle Abstimmungen'}
                   {language === 'en' && '→ All votes'}
                 </Link>
-                <Link 
+                <Link
                   to="/consultations"
                   className="block text-sm text-blue-600 hover:text-blue-700"
                 >
@@ -698,7 +692,7 @@ export function VoteDetailPage() {
                   {language === 'de' && '→ Öffentliche Konsultationen'}
                   {language === 'en' && '→ Public consultations'}
                 </Link>
-                <Link 
+                <Link
                   to={`/themes/${vote.themeId}`}
                   className="block text-sm text-blue-600 hover:text-blue-700"
                 >

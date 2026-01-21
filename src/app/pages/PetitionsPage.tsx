@@ -31,26 +31,26 @@ export function PetitionsPage() {
   const handleSignPetition = (e: React.MouseEvent, petitionId: string, petitionTitle: LocalizedString) => {
     e.preventDefault(); // Prevent Link navigation
     e.stopPropagation();
-    
+
     setSignedPetitions(prev => [...prev, petitionId]);
-    
+
     toast.success(
       language === 'fr' ? `Signature ajoutée à "${tLocal(petitionTitle)}"` :
-      language === 'de' ? `Unterschrift zu "${tLocal(petitionTitle)}" hinzugefügt` :
-      `Signature added to "${tLocal(petitionTitle)}"`
+        language === 'de' ? `Unterschrift zu "${tLocal(petitionTitle)}" hinzugefügt` :
+          `Signature added to "${tLocal(petitionTitle)}"`
     );
   };
 
   const handleUnsignPetition = (e: React.MouseEvent, petitionId: string, petitionTitle: LocalizedString) => {
     e.preventDefault(); // Prevent Link navigation
     e.stopPropagation();
-    
+
     setSignedPetitions(prev => prev.filter(id => id !== petitionId));
-    
+
     toast.success(
       language === 'fr' ? `Signature retirée de "${tLocal(petitionTitle)}"` :
-      language === 'de' ? `Unterschrift von "${tLocal(petitionTitle)}" entfernt` :
-      `Signature removed from "${tLocal(petitionTitle)}"`
+        language === 'de' ? `Unterschrift von "${tLocal(petitionTitle)}" entfernt` :
+          `Signature removed from "${tLocal(petitionTitle)}"`
     );
   };
 
@@ -61,13 +61,13 @@ export function PetitionsPage() {
         <PageBanner
           title={
             language === 'fr' ? 'Pétitions citoyennes' :
-            language === 'de' ? 'Bürgerpetitionen' :
-            'Citizen Petitions'
+              language === 'de' ? 'Bürgerpetitionen' :
+                'Citizen Petitions'
           }
           description={
             language === 'fr' ? 'Signez ou lancez une pétition pour faire entendre votre voix' :
-            language === 'de' ? 'Unterschreiben oder starten Sie eine Petition, um Ihre Stimme zu erheben' :
-            'Sign or start a petition to make your voice heard'
+              language === 'de' ? 'Unterschreiben oder starten Sie eine Petition, um Ihre Stimme zu erheben' :
+                'Sign or start a petition to make your voice heard'
           }
           gradient="from-green-600 to-emerald-600"
           icon={<FileText className="w-12 h-12 text-white" />}
@@ -88,13 +88,13 @@ export function PetitionsPage() {
         <PageBanner
           title={
             language === 'fr' ? 'Pétitions citoyennes' :
-            language === 'de' ? 'Bürgerpetitionen' :
-            'Citizen Petitions'
+              language === 'de' ? 'Bürgerpetitionen' :
+                'Citizen Petitions'
           }
           description={
             language === 'fr' ? 'Signez ou lancez une pétition pour faire entendre votre voix' :
-            language === 'de' ? 'Unterschreiben oder starten Sie eine Petition, um Ihre Stimme zu erheben' :
-            'Sign or start a petition to make your voice heard'
+              language === 'de' ? 'Unterschreiben oder starten Sie eine Petition, um Ihre Stimme zu erheben' :
+                'Sign or start a petition to make your voice heard'
           }
           gradient="from-green-600 to-emerald-600"
           icon={<FileText className="w-12 h-12 text-white" />}
@@ -144,7 +144,7 @@ export function PetitionsPage() {
   };
 
   // Calculate statistics
-  const activePetitions = petitions?.filter((p) => p.status === 'open').length || 0;
+  const activePetitions = petitions?.filter((p) => p.status === 'OPEN').length || 0;
   const thresholdReached = petitions?.filter((p) => p.status === 'under_review').length || 0;
   const totalPetitions = petitions?.length || 0;
   const totalSignatures = petitions?.reduce((sum, p) => sum + (p.currentSignatures || 0), 0) || 0;
@@ -154,13 +154,13 @@ export function PetitionsPage() {
       <PageBanner
         title={
           language === 'fr' ? 'Pétitions citoyennes' :
-          language === 'de' ? 'Bürgerpetitionen' :
-          'Citizen Petitions'
+            language === 'de' ? 'Bürgerpetitionen' :
+              'Citizen Petitions'
         }
         description={
           language === 'fr' ? 'Signez ou lancez une pétition pour faire entendre votre voix' :
-          language === 'de' ? 'Unterschreiben oder starten Sie eine Petition, um Ihre Stimme zu erheben' :
-          'Sign or start a petition to make your voice heard'
+            language === 'de' ? 'Unterschreiben oder starten Sie eine Petition, um Ihre Stimme zu erheben' :
+              'Sign or start a petition to make your voice heard'
         }
         gradient="from-green-600 to-emerald-600"
         icon={<FileText className="w-12 h-12 text-white" />}
@@ -172,8 +172,8 @@ export function PetitionsPage() {
           <KPICard
             label={
               language === 'fr' ? 'Pétitions actives' :
-              language === 'de' ? 'Aktive Petitionen' :
-              'Active petitions'
+                language === 'de' ? 'Aktive Petitionen' :
+                  'Active petitions'
             }
             value={activePetitions}
             icon={FileText}
@@ -184,8 +184,8 @@ export function PetitionsPage() {
           <KPICard
             label={
               language === 'fr' ? 'Seuil atteint' :
-              language === 'de' ? 'Schwelle erreicht' :
-              'Threshold reached'
+                language === 'de' ? 'Schwelle erreicht' :
+                  'Threshold reached'
             }
             value={thresholdReached}
             icon={TrendingUp}
@@ -196,8 +196,8 @@ export function PetitionsPage() {
           <KPICard
             label={
               language === 'fr' ? 'Total pétitions' :
-              language === 'de' ? 'Petitionen insgesamt' :
-              'Total petitions'
+                language === 'de' ? 'Petitionen insgesamt' :
+                  'Total petitions'
             }
             value={totalPetitions}
             icon={FileText}
@@ -208,8 +208,8 @@ export function PetitionsPage() {
           <KPICard
             label={
               language === 'fr' ? 'Signatures totales' :
-              language === 'de' ? 'Unterschriften insgesamt' :
-              'Total signatures'
+                language === 'de' ? 'Unterschriften insgesamt' :
+                  'Total signatures'
             }
             value={totalSignatures.toLocaleString()}
             icon={Users}
@@ -223,8 +223,8 @@ export function PetitionsPage() {
           <FilterBar>
             <FilterField label={
               language === 'fr' ? `${t('common.filter')} par thème` :
-              language === 'de' ? `${t('common.filter')} nach Thema` :
-              `${t('common.filter')} by theme`
+                language === 'de' ? `${t('common.filter')} nach Thema` :
+                  `${t('common.filter')} by theme`
             }>
               <Select value={selectedTheme || 'all'} onValueChange={setSelectedTheme}>
                 <SelectTrigger>
@@ -243,8 +243,8 @@ export function PetitionsPage() {
 
             <FilterField label={
               language === 'fr' ? `${t('common.filter')} par statut` :
-              language === 'de' ? `${t('common.filter')} nach Status` :
-              `${t('common.filter')} by status`
+                language === 'de' ? `${t('common.filter')} nach Status` :
+                  `${t('common.filter')} by status`
             }>
               <Select value={selectedStatus || 'all'} onValueChange={setSelectedStatus}>
                 <SelectTrigger>
@@ -341,11 +341,10 @@ export function PetitionsPage() {
                       {/* Progress Bar */}
                       <div className="relative w-full h-2.5 bg-gray-200 rounded-full overflow-hidden">
                         <motion.div
-                          className={`absolute top-0 left-0 h-full rounded-full ${
-                            percentage >= 100 
-                              ? 'bg-gradient-to-r from-green-500 to-emerald-600' 
-                              : 'bg-gradient-to-r from-blue-500 to-blue-600'
-                          }`}
+                          className={`absolute top-0 left-0 h-full rounded-full ${percentage >= 100
+                            ? 'bg-gradient-to-r from-green-500 to-emerald-600'
+                            : 'bg-gradient-to-r from-blue-500 to-blue-600'
+                            }`}
                           initial={{ width: 0 }}
                           animate={{ width: `${Math.min(percentage, 100)}%` }}
                           transition={{ duration: 1, ease: "easeOut" }}
@@ -392,7 +391,7 @@ export function PetitionsPage() {
                       {(petition.status === 'open' || isSigned) && (
                         <>
                           {!isSigned ? (
-                            <Button 
+                            <Button
                               onClick={(e) => handleSignPetition(e, petition.id, petition.title)}
                               className="w-full gap-2 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
                             >
@@ -403,7 +402,7 @@ export function PetitionsPage() {
                             </Button>
                           ) : canUnsign ? (
                             <>
-                              <Button 
+                              <Button
                                 onClick={(e) => handleUnsignPetition(e, petition.id, petition.title)}
                                 variant="destructive"
                                 className="w-full gap-2"
@@ -421,7 +420,7 @@ export function PetitionsPage() {
                             </>
                           ) : (
                             <>
-                              <Button 
+                              <Button
                                 variant="secondary"
                                 className="w-full gap-2"
                                 disabled
@@ -440,13 +439,13 @@ export function PetitionsPage() {
                           )}
                         </>
                       )}
-                      
+
                       {/* View details button */}
-                      <Link to={`/petitions/${petition.slug}`} className="block">
-                        <Button 
+                      <Link to={`/petitions/${petition.id}`} className="block">
+                        <Button
                           variant={petition.status === 'open' || isSigned ? 'outline' : 'default'}
-                          className={petition.status === 'open' || isSigned ? 
-                            'w-full gap-2' : 
+                          className={petition.status === 'open' || isSigned ?
+                            'w-full gap-2' :
                             'w-full gap-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 group-hover:shadow-lg transition-all'
                           }
                         >

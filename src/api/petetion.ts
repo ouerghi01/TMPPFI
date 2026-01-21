@@ -10,3 +10,13 @@ export const getPetitions = async () => {
   }
 
 }
+
+export const getPetitionById = async (id: string) => {
+  try {
+    const response = await apiClient.get<any>(`/public/initiatives/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching petition:', error);
+    throw error;
+  }
+}

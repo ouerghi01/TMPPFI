@@ -10,15 +10,15 @@ import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Checkbox } from '../components/ui/checkbox';
 import { Separator } from '../components/ui/separator';
-import { 
-  ArrowLeft, 
-  FileText, 
-  Calendar, 
-  User, 
-  Users, 
-  MapPin, 
-  Target, 
-  Clock, 
+import {
+  ArrowLeft,
+  FileText,
+  Calendar,
+  User,
+  Users,
+  MapPin,
+  Target,
+  Clock,
   Share2,
   CheckCircle2,
   TrendingUp,
@@ -34,13 +34,13 @@ export function PetitionDetailPage() {
   const { petitionId } = useParams<{ petitionId: string }>();
   const navigate = useNavigate();
   const { language, tLocal } = useLanguage();
-  
+
   // Fetch petition using React Query
   const { data: petition, isLoading, error } = usePetition(petitionId || '');
-  
+
   // Fetch theme data
   const { data: theme } = useTheme(petition?.themeId || '');
-  
+
   const [signatureData, setSignatureData] = useState({
     firstName: '',
     lastName: '',
@@ -103,20 +103,20 @@ export function PetitionDetailPage() {
 
   const handleSign = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!signatureData.firstName || !signatureData.lastName || !signatureData.email || !signatureData.acceptTerms) {
       toast.error(
         language === 'fr' ? 'Veuillez remplir tous les champs obligatoires et accepter les conditions' :
-        language === 'de' ? 'Bitte füllen Sie alle Pflichtfelder aus und akzeptieren Sie die Bedingungen' :
-        'Please fill in all required fields and accept the terms'
+          language === 'de' ? 'Bitte füllen Sie alle Pflichtfelder aus und akzeptieren Sie die Bedingungen' :
+            'Please fill in all required fields and accept the terms'
       );
       return;
     }
 
     toast.success(
       language === 'fr' ? '✅ Signature enregistrée ! Vérifiez votre email pour confirmer.' :
-      language === 'de' ? '✅ Unterschrift registriert! Überprüfen Sie Ihre E-Mail zur Bestätigung.' :
-      '✅ Signature recorded! Check your email to confirm.'
+        language === 'de' ? '✅ Unterschrift registriert! Überprüfen Sie Ihre E-Mail zur Bestätigung.' :
+          '✅ Signature recorded! Check your email to confirm.'
     );
 
     // Reset form
@@ -153,8 +153,8 @@ export function PetitionDetailPage() {
         navigator.clipboard.writeText(url);
         toast.success(
           language === 'fr' ? 'Lien copié dans le presse-papiers' :
-          language === 'de' ? 'Link in die Zwischenablage kopiert' :
-          'Link copied to clipboard'
+            language === 'de' ? 'Link in die Zwischenablage kopiert' :
+              'Link copied to clipboard'
         );
       }
     }
@@ -253,11 +253,10 @@ export function PetitionDetailPage() {
                   {/* Progress Bar */}
                   <div className="relative w-full h-4 bg-gray-200 rounded-full overflow-hidden mb-4">
                     <motion.div
-                      className={`absolute top-0 left-0 h-full rounded-full ${
-                        percentage >= 100 
-                          ? 'bg-gradient-to-r from-green-500 to-emerald-600' 
+                      className={`absolute top-0 left-0 h-full rounded-full ${percentage >= 100
+                          ? 'bg-gradient-to-r from-green-500 to-emerald-600'
                           : 'bg-gradient-to-r from-blue-500 to-blue-600'
-                      }`}
+                        }`}
                       initial={{ width: 0 }}
                       animate={{ width: `${Math.min(percentage, 100)}%` }}
                       transition={{ duration: 1, ease: "easeOut" }}
@@ -378,10 +377,10 @@ export function PetitionDetailPage() {
                           {language === 'en' && 'Creation date'}
                         </p>
                         <p className="font-medium text-gray-900">
-                          {new Date(petition.createdAt).toLocaleDateString(
+                          {new Date(petition.startDate).toLocaleDateString(
                             language === 'fr' ? 'fr-FR' :
-                            language === 'de' ? 'de-DE' :
-                            'en-US',
+                              language === 'de' ? 'de-DE' :
+                                'en-US',
                             { year: 'numeric', month: 'long', day: 'numeric' }
                           )}
                         </p>
@@ -553,8 +552,8 @@ export function PetitionDetailPage() {
                           </p>
                         </div>
 
-                        <Button 
-                          type="submit" 
+                        <Button
+                          type="submit"
                           className="w-full h-11 gap-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
                         >
                           <CheckCircle2 className="w-4 h-4" />

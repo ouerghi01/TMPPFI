@@ -1,6 +1,6 @@
 import apiClient from "../client";
 
-const getSpeakerById = async (id: string) => {
+export const getSpeakerById = async (id: string) => {
   try {
     const response = await apiClient.get(`/public/speakers/${id}`);
     return response.data;
@@ -9,4 +9,3 @@ const getSpeakerById = async (id: string) => {
     throw error;
   }
 };
-export default getSpeakerById

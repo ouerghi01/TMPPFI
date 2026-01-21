@@ -47,12 +47,12 @@ export function AssembliesPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!formData.firstName || !formData.lastName || !formData.email || !formData.motivation) {
       toast.error(
         language === 'fr' ? 'Veuillez remplir tous les champs obligatoires' :
-        language === 'de' ? 'Bitte füllen Sie alle Pflichtfelder aus' :
-        'Please fill in all required fields'
+          language === 'de' ? 'Bitte füllen Sie alle Pflichtfelder aus' :
+            'Please fill in all required fields'
       );
       return;
     }
@@ -65,8 +65,8 @@ export function AssembliesPage() {
     // Simuler l'inscription
     toast.success(
       language === 'fr' ? `Demande d'inscription envoyée pour "${tLocal(selectedAssembly.name)}" !` :
-      language === 'de' ? `Beitrittsanfrage für "${tLocal(selectedAssembly.name)}" gesendet!` :
-      `Membership request sent for "${tLocal(selectedAssembly.name)}"!`
+        language === 'de' ? `Beitrittsanfrage für "${tLocal(selectedAssembly.name)}" gesendet!` :
+          `Membership request sent for "${tLocal(selectedAssembly.name)}"!`
     );
 
     // Réinitialiser le formulaire
@@ -85,11 +85,11 @@ export function AssembliesPage() {
   const handleLeaveAssembly = (assemblyId: string, assemblyTitle: string) => {
     // Remove assembly from joined list
     setJoinedAssemblies(prev => prev.filter(id => id !== assemblyId));
-    
+
     toast.success(
       language === 'fr' ? `Adhésion annulée pour "${assemblyTitle}"` :
-      language === 'de' ? `Mitgliedschaft für "${assemblyTitle}" gekündigt` :
-      `Membership cancelled for "${assemblyTitle}"`
+        language === 'de' ? `Mitgliedschaft für "${assemblyTitle}" gekündigt` :
+          `Membership cancelled for "${assemblyTitle}"`
     );
   };
 
@@ -111,26 +111,26 @@ export function AssembliesPage() {
       <PageBanner
         title={
           language === 'fr' ? 'Assemblées citoyennes' :
-          language === 'de' ? 'Bürgerversammlungen' :
-          'Citizen Assemblies'
+            language === 'de' ? 'Bürgerversammlungen' :
+              'Citizen Assemblies'
         }
         description={
           language === 'fr' ? 'Rejoignez les assemblées délibératives et contribuez aux décisions' :
-          language === 'de' ? 'Nehmen Sie an den Beratungsversammlungen teil und tragen Sie zu Entscheidungen bei' :
-          'Join deliberative assemblies and contribute to decisions'
+            language === 'de' ? 'Nehmen Sie an den Beratungsversammlungen teil und tragen Sie zu Entscheidungen bei' :
+              'Join deliberative assemblies and contribute to decisions'
         }
         gradient="from-orange-600 to-red-600"
         icon={<Users className="w-12 h-12 text-white" />}
       />
-      
+
       <PageLayout className="py-8">
         {/* Statistics Dashboard */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
           <KPICard
             label={
               language === 'fr' ? 'Total Assemblées' :
-              language === 'de' ? 'Gesamt Versammlungen' :
-              'Total Assemblies'
+                language === 'de' ? 'Gesamt Versammlungen' :
+                  'Total Assemblies'
             }
             value={totalAssemblies}
             icon={Users}
@@ -140,8 +140,8 @@ export function AssembliesPage() {
           <KPICard
             label={
               language === 'fr' ? 'Membres actifs' :
-              language === 'de' ? 'Aktive Mitglieder' :
-              'Active Members'
+                language === 'de' ? 'Aktive Mitglieder' :
+                  'Active Members'
             }
             value={totalMembers.toLocaleString()}
             icon={TrendingUp}
@@ -151,8 +151,8 @@ export function AssembliesPage() {
           <KPICard
             label={
               language === 'fr' ? 'Réunions à venir' :
-              language === 'de' ? 'Kommende Treffen' :
-              'Upcoming Meetings'
+                language === 'de' ? 'Kommende Treffen' :
+                  'Upcoming Meetings'
             }
             value={upcomingMeetings}
             icon={Calendar}
@@ -162,8 +162,8 @@ export function AssembliesPage() {
           <KPICard
             label={
               language === 'fr' ? 'Décisions adoptées' :
-              language === 'de' ? 'Beschlüsse gefasst' :
-              'Decisions Adopted'
+                language === 'de' ? 'Beschlüsse gefasst' :
+                  'Decisions Adopted'
             }
             value={totalDecisions}
             icon={CheckCircle}
@@ -171,14 +171,7 @@ export function AssembliesPage() {
           />
         </div>
 
-        {/* Filter Bar - Placeholder with empty children */}
-        <div className="mb-8">
-          <p className="text-sm text-gray-600">
-            {language === 'fr' && 'Filtrez par thème ou localisation pour trouver l\'assemblée qui vous correspond'}
-            {language === 'de' && 'Filtern Sie nach Thema oder Standort, um die passende Versammlung zu finden'}
-            {language === 'en' && 'Filter by theme or location to find the assembly that suits you'}
-          </p>
-        </div>
+
 
         {/* Assemblies List */}
         <div className="mb-8">
@@ -196,133 +189,133 @@ export function AssembliesPage() {
             const nextMeetingDate = new Date(assembly.nextMeeting?.date || '');
             const today = new Date();
             const canCancel = isJoined && nextMeetingDate > today; // Can only cancel if meeting hasn't happened yet
-            
+
             return (
-            <Card key={assembly.id} className="hover:shadow-lg transition-shadow flex flex-col h-full">
-              <CardHeader className="flex-shrink-0">
-                <div className="flex items-center justify-between mb-3">
-                  <ThemeTag themeId={assembly.themeId} />
-                  {isJoined && (
-                    <Badge className="bg-green-600 hover:bg-green-700">
-                      <CheckCircle className="w-3 h-3 mr-1" />
-                      {language === 'fr' && 'Membre'}
-                      {language === 'de' && 'Mitglied'}
-                      {language === 'en' && 'Member'}
-                    </Badge>
-                  )}
-                </div>
-                <CardTitle className="line-clamp-2">{tLocal(assembly.name)}</CardTitle>
-                <CardDescription className="text-base mt-2 line-clamp-3">{tLocal(assembly.description)}</CardDescription>
-              </CardHeader>
-              <CardContent className="flex flex-col flex-grow">
-                <div className="space-y-4 flex-grow">
-                  {/* Stats */}
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="flex items-center gap-2 text-gray-600">
-                      <Users className="w-5 h-5" />
-                      <span>{assembly.totalMembers} membres</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-gray-600">
-                      <FileText className="w-5 h-5" />
-                      <span>{assembly.pastMeetings?.length || 0} réunions</span>
-                    </div>
+              <Card key={assembly.id} className="hover:shadow-lg transition-shadow flex flex-col h-full">
+                <CardHeader className="flex-shrink-0">
+                  <div className="flex items-center justify-between mb-3">
+                    <ThemeTag themeId={assembly.themeId} />
+                    {isJoined && (
+                      <Badge className="bg-green-600 hover:bg-green-700">
+                        <CheckCircle className="w-3 h-3 mr-1" />
+                        {language === 'fr' && 'Membre'}
+                        {language === 'de' && 'Mitglied'}
+                        {language === 'en' && 'Member'}
+                      </Badge>
+                    )}
                   </div>
-
-                  {/* Next meeting */}
-                  <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                    <div className="flex items-center gap-2 text-blue-900 mb-1">
-                      <Calendar className="w-4 h-4" />
-                      <span className="font-medium">
-                        {language === 'fr' && 'Prochaine réunion'}
-                        {language === 'de' && 'Nächstes Treffen'}
-                        {language === 'en' && 'Next meeting'}
-                      </span>
-                    </div>
-                    <p className="text-sm text-blue-700">
-                      {nextMeetingDate.toLocaleDateString('fr-FR', {
-                        weekday: 'long',
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric',
-                      })}
-                    </p>
-                  </div>
-
-                  {/* Last meetings */}
-                  {assembly.pastMeetings?.length && (
-                    <div>
-                      <div className="text-sm font-medium text-gray-900 mb-2">
-                        {language === 'fr' && 'Réunions passées'}
-                        {language === 'de' && 'Vergangene Treffen'}
-                        {language === 'en' && 'Past meetings'}
+                  <CardTitle className="line-clamp-2">{tLocal(assembly.name)}</CardTitle>
+                  <CardDescription className="text-base mt-2 line-clamp-3">{tLocal(assembly.description)}</CardDescription>
+                </CardHeader>
+                <CardContent className="flex flex-col flex-grow">
+                  <div className="space-y-4 flex-grow">
+                    {/* Stats */}
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="flex items-center gap-2 text-gray-600">
+                        <Users className="w-5 h-5" />
+                        <span>{assembly.totalMembers} membres</span>
                       </div>
-                      {assembly.pastMeetings.slice(0, 2).map((meeting) => (
-                        <div
-                          key={meeting.id}
-                          className="p-3 bg-gray-50 border border-gray-200 rounded mb-2"
-                        >
-                          <div className="font-medium text-sm line-clamp-1">{meeting.title}</div>
-                          <div className="text-xs text-gray-600 mt-1">
-                            {new Date(meeting.date).toLocaleDateString('fr-FR')}
-                          </div>
-                        </div>
-                      ))}
+                      <div className="flex items-center gap-2 text-gray-600">
+                        <FileText className="w-5 h-5" />
+                        <span>{assembly.pastMeetings?.length || 0} réunions</span>
+                      </div>
                     </div>
-                  )}
-                </div>
 
-                {/* Button aligned at bottom */}
-                <div className="mt-4 pt-4 border-t border-gray-100 space-y-2">
-                  {!isJoined ? (
-                    <Button 
-                      className="w-full gap-2" 
-                      onClick={() => setSelectedAssembly(assembly)}
-                    >
-                      <UserPlus className="w-4 h-4" />
-                      {language === 'fr' && 'Rejoindre l\'assemblée'}
-                      {language === 'de' && 'Der Versammlung beitreten'}
-                      {language === 'en' && 'Join the assembly'}
-                    </Button>
-                  ) : canCancel ? (
-                    <>
-                      <Button 
-                        variant="destructive"
-                        className="w-full gap-2" 
-                        onClick={() => handleLeaveAssembly(assembly.id, tLocal(assembly.name))}
-                      >
-                        <UserMinus className="w-4 h-4" />
-                        {language === 'fr' && 'Annuler l\'adhésion'}
-                        {language === 'de' && 'Mitgliedschaft kündigen'}
-                        {language === 'en' && 'Cancel membership'}
-                      </Button>
-                      <p className="text-xs text-gray-600 text-center">
-                        {language === 'fr' && 'Vous pouvez annuler avant la réunion'}
-                        {language === 'de' && 'Sie können vor der Versammlung kündigen'}
-                        {language === 'en' && 'You can cancel before the meeting'}
+                    {/* Next meeting */}
+                    <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                      <div className="flex items-center gap-2 text-blue-900 mb-1">
+                        <Calendar className="w-4 h-4" />
+                        <span className="font-medium">
+                          {language === 'fr' && 'Prochaine réunion'}
+                          {language === 'de' && 'Nächstes Treffen'}
+                          {language === 'en' && 'Next meeting'}
+                        </span>
+                      </div>
+                      <p className="text-sm text-blue-700">
+                        {nextMeetingDate.toLocaleDateString('fr-FR', {
+                          weekday: 'long',
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric',
+                        })}
                       </p>
-                    </>
-                  ) : (
-                    <>
-                      <Button 
-                        variant="secondary"
+                    </div>
+
+                    {/* Last meetings */}
+                    {assembly.pastMeetings?.length && (
+                      <div>
+                        <div className="text-sm font-medium text-gray-900 mb-2">
+                          {language === 'fr' && 'Réunions passées'}
+                          {language === 'de' && 'Vergangene Treffen'}
+                          {language === 'en' && 'Past meetings'}
+                        </div>
+                        {assembly.pastMeetings.slice(0, 2).map((meeting) => (
+                          <div
+                            key={meeting.id}
+                            className="p-3 bg-gray-50 border border-gray-200 rounded mb-2"
+                          >
+                            <div className="font-medium text-sm line-clamp-1">{tLocal(meeting.title)}</div>
+                            <div className="text-xs text-gray-600 mt-1">
+                              {new Date(meeting.date).toLocaleDateString('fr-FR')}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Button aligned at bottom */}
+                  <div className="mt-4 pt-4 border-t border-gray-100 space-y-2">
+                    {!isJoined ? (
+                      <Button
                         className="w-full gap-2"
-                        disabled
+                        onClick={() => setSelectedAssembly(assembly)}
                       >
-                        <CheckCircle className="w-4 h-4" />
-                        {language === 'fr' && 'Membre actif'}
-                        {language === 'de' && 'Aktives Mitglied'}
-                        {language === 'en' && 'Active member'}
+                        <UserPlus className="w-4 h-4" />
+                        {language === 'fr' && 'Rejoindre l\'assemblée'}
+                        {language === 'de' && 'Der Versammlung beitreten'}
+                        {language === 'en' && 'Join the assembly'}
                       </Button>
-                      <p className="text-xs text-gray-500 text-center italic">
-                        {language === 'fr' && 'La date de réunion est passée'}
-                        {language === 'de' && 'Das Treffendatum ist abgelaufen'}
-                        {language === 'en' && 'The meeting date has passed'}
-                      </p>
-                    </>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
+                    ) : canCancel ? (
+                      <>
+                        <Button
+                          variant="destructive"
+                          className="w-full gap-2"
+                          onClick={() => handleLeaveAssembly(assembly.id, tLocal(assembly.name))}
+                        >
+                          <UserMinus className="w-4 h-4" />
+                          {language === 'fr' && 'Annuler l\'adhésion'}
+                          {language === 'de' && 'Mitgliedschaft kündigen'}
+                          {language === 'en' && 'Cancel membership'}
+                        </Button>
+                        <p className="text-xs text-gray-600 text-center">
+                          {language === 'fr' && 'Vous pouvez annuler avant la réunion'}
+                          {language === 'de' && 'Sie können vor der Versammlung kündigen'}
+                          {language === 'en' && 'You can cancel before the meeting'}
+                        </p>
+                      </>
+                    ) : (
+                      <>
+                        <Button
+                          variant="secondary"
+                          className="w-full gap-2"
+                          disabled
+                        >
+                          <CheckCircle className="w-4 h-4" />
+                          {language === 'fr' && 'Membre actif'}
+                          {language === 'de' && 'Aktives Mitglied'}
+                          {language === 'en' && 'Active member'}
+                        </Button>
+                        <p className="text-xs text-gray-500 text-center italic">
+                          {language === 'fr' && 'La date de réunion est passée'}
+                          {language === 'de' && 'Das Treffendatum ist abgelaufen'}
+                          {language === 'en' && 'The meeting date has passed'}
+                        </p>
+                      </>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
             );
           })}
         </ContentGrid>
@@ -425,8 +418,8 @@ export function AssembliesPage() {
                     onChange={(e) => handleInputChange('motivation', e.target.value)}
                     placeholder={
                       language === 'fr' ? 'Décrivez votre motivation, vos intérêts pour cette thématique...' :
-                      language === 'de' ? 'Beschreiben Sie Ihre Motivation, Ihre Interessen an diesem Thema...' :
-                      'Describe your motivation, your interests in this topic...'
+                        language === 'de' ? 'Beschreiben Sie Ihre Motivation, Ihre Interessen an diesem Thema...' :
+                          'Describe your motivation, your interests in this topic...'
                     }
                     rows={4}
                     required
@@ -451,8 +444,8 @@ export function AssembliesPage() {
                     onChange={(e) => handleInputChange('skills', e.target.value)}
                     placeholder={
                       language === 'fr' ? 'Ex: expertise professionnelle, expérience associative, formation...' :
-                      language === 'de' ? 'Bsp: berufliche Expertise, Vereinserfahrung, Ausbildung...' :
-                      'Ex: professional expertise, association experience, training...'
+                        language === 'de' ? 'Bsp: berufliche Expertise, Vereinserfahrung, Ausbildung...' :
+                          'Ex: professional expertise, association experience, training...'
                     }
                     rows={3}
                   />

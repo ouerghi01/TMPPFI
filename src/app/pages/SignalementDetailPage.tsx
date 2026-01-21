@@ -8,13 +8,13 @@ import { Badge } from '../components/ui/badge';
 import { Button } from '../components/ui/button';
 import { Separator } from '../components/ui/separator';
 import { useSignalement } from '../hooks/useApi';
-import { 
-  AlertCircle, 
-  MapPin, 
-  Calendar, 
-  User, 
-  ThumbsUp, 
-  Tag, 
+import {
+  AlertCircle,
+  MapPin,
+  Calendar,
+  User,
+  ThumbsUp,
+  Tag,
   Clock,
   CheckCircle,
   XCircle,
@@ -136,8 +136,8 @@ export function SignalementDetailPage() {
         <PageBanner
           title={
             language === 'fr' ? 'Signalement' :
-            language === 'de' ? 'Meldung' :
-            'Report'
+              language === 'de' ? 'Meldung' :
+                'Report'
           }
           description=""
           gradient="from-red-600 to-orange-600"
@@ -146,9 +146,9 @@ export function SignalementDetailPage() {
         <PageLayout className="py-8">
           <div className="text-center py-12">
             <p className="text-gray-600">
-              {language === 'fr' ? 'Chargement...' : 
-               language === 'de' ? 'Laden...' : 
-               'Loading...'}
+              {language === 'fr' ? 'Chargement...' :
+                language === 'de' ? 'Laden...' :
+                  'Loading...'}
             </p>
           </div>
         </PageLayout>
@@ -162,8 +162,8 @@ export function SignalementDetailPage() {
         <PageBanner
           title={
             language === 'fr' ? 'Signalement' :
-            language === 'de' ? 'Meldung' :
-            'Report'
+              language === 'de' ? 'Meldung' :
+                'Report'
           }
           description=""
           gradient="from-red-600 to-orange-600"
@@ -172,15 +172,15 @@ export function SignalementDetailPage() {
         <PageLayout className="py-8">
           <div className="text-center py-12">
             <p className="text-red-600">
-              {language === 'fr' ? 'Signalement non trouvé' : 
-               language === 'de' ? 'Meldung nicht gefunden' : 
-               'Report not found'}
+              {language === 'fr' ? 'Signalement non trouvé' :
+                language === 'de' ? 'Meldung nicht gefunden' :
+                  'Report not found'}
             </p>
             <Link to="/signalements">
               <Button variant="outline" className="mt-4">
                 {language === 'fr' ? 'Retour à la liste' :
-                 language === 'de' ? 'Zurück zur Liste' :
-                 'Back to list'}
+                  language === 'de' ? 'Zurück zur Liste' :
+                    'Back to list'}
               </Button>
             </Link>
           </div>
@@ -206,8 +206,8 @@ export function SignalementDetailPage() {
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
           {language === 'fr' ? 'Retour à la liste' :
-           language === 'de' ? 'Zurück zur Liste' :
-           'Back to list'}
+            language === 'de' ? 'Zurück zur Liste' :
+              'Back to list'}
         </Button>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -237,8 +237,8 @@ export function SignalementDetailPage() {
               <CardHeader>
                 <CardTitle>
                   {language === 'fr' ? 'Description' :
-                   language === 'de' ? 'Beschreibung' :
-                   'Description'}
+                    language === 'de' ? 'Beschreibung' :
+                      'Description'}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -252,8 +252,8 @@ export function SignalementDetailPage() {
                 <CardHeader>
                   <CardTitle>
                     {language === 'fr' ? 'Photos' :
-                     language === 'de' ? 'Fotos' :
-                     'Photos'}
+                      language === 'de' ? 'Fotos' :
+                        'Photos'}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -277,8 +277,8 @@ export function SignalementDetailPage() {
                 <CardTitle className="flex items-center gap-2">
                   <MapPin className="w-5 h-5" />
                   {language === 'fr' ? 'Localisation' :
-                   language === 'de' ? 'Standort' :
-                   'Location'}
+                    language === 'de' ? 'Standort' :
+                      'Location'}
                 </CardTitle>
                 <CardDescription>
                   {signalement.location.address}, {signalement.location.city}
@@ -302,7 +302,7 @@ export function SignalementDetailPage() {
                       <div className="w-16 h-16 bg-red-500 rounded-full border-4 border-white shadow-2xl flex items-center justify-center animate-pulse">
                         <MapPin className="w-8 h-8 text-white" />
                       </div>
-                      
+
                       {/* Info popup */}
                       <div className="absolute top-full mt-4 left-1/2 -translate-x-1/2 bg-white rounded-lg shadow-xl p-4 min-w-[280px] border border-gray-200">
                         <div className="space-y-2">
@@ -315,8 +315,8 @@ export function SignalementDetailPage() {
                             </div>
                           </div>
                           <div className="pt-2 border-t border-gray-100 text-xs text-gray-500">
-                            <p>Lat: {signalement.location.coordinates.lat.toFixed(6)}</p>
-                            <p>Lng: {signalement.location.coordinates.lng.toFixed(6)}</p>
+                            <p>Lat: {signalement.location.lat.toFixed(6)}</p>
+                            <p>Lng: {signalement.location.lng.toFixed(6)}</p>
                           </div>
                         </div>
                       </div>
@@ -360,8 +360,8 @@ export function SignalementDetailPage() {
                 <CardHeader>
                   <CardTitle>
                     {language === 'fr' ? 'Historique' :
-                     language === 'de' ? 'Verlauf' :
-                     'History'}
+                      language === 'de' ? 'Verlauf' :
+                        'History'}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -401,8 +401,8 @@ export function SignalementDetailPage() {
               <CardHeader>
                 <CardTitle>
                   {language === 'fr' ? 'Informations' :
-                   language === 'de' ? 'Informationen' :
-                   'Information'}
+                    language === 'de' ? 'Informationen' :
+                      'Information'}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -411,8 +411,8 @@ export function SignalementDetailPage() {
                   <div>
                     <p className="text-sm font-medium">
                       {language === 'fr' ? 'Créé le' :
-                       language === 'de' ? 'Erstellt am' :
-                       'Created on'}
+                        language === 'de' ? 'Erstellt am' :
+                          'Created on'}
                     </p>
                     <p className="text-sm text-gray-600">{formatDate(signalement.createdAt)}</p>
                   </div>
@@ -424,8 +424,8 @@ export function SignalementDetailPage() {
                     <div>
                       <p className="text-sm font-medium">
                         {language === 'fr' ? 'Mis à jour le' :
-                         language === 'de' ? 'Aktualisiert am' :
-                         'Updated on'}
+                          language === 'de' ? 'Aktualisiert am' :
+                            'Updated on'}
                       </p>
                       <p className="text-sm text-gray-600">{formatDate(signalement.updatedAt)}</p>
                     </div>
@@ -438,8 +438,8 @@ export function SignalementDetailPage() {
                     <div>
                       <p className="text-sm font-medium">
                         {language === 'fr' ? 'Résolu le' :
-                         language === 'de' ? 'Gelöst am' :
-                         'Resolved on'}
+                          language === 'de' ? 'Gelöst am' :
+                            'Resolved on'}
                       </p>
                       <p className="text-sm text-gray-600">{formatDate(signalement.resolvedAt)}</p>
                     </div>
@@ -453,10 +453,10 @@ export function SignalementDetailPage() {
                   <div>
                     <p className="text-sm font-medium">
                       {language === 'fr' ? 'Auteur' :
-                       language === 'de' ? 'Autor' :
-                       'Author'}
+                        language === 'de' ? 'Autor' :
+                          'Author'}
                     </p>
-                    <p className="text-sm text-gray-600">{signalement.author.name}</p>
+                    <p className="text-sm text-gray-600">{signalement.author.username}</p>
                   </div>
                 </div>
 
@@ -466,10 +466,10 @@ export function SignalementDetailPage() {
                     <div>
                       <p className="text-sm font-medium">
                         {language === 'fr' ? 'Assigné à' :
-                         language === 'de' ? 'Zugewiesen an' :
-                         'Assigned to'}
+                          language === 'de' ? 'Zugewiesen an' :
+                            'Assigned to'}
                       </p>
-                      <p className="text-sm text-gray-600">{signalement.assignedTo.name}</p>
+                      <p className="text-sm text-gray-600">{signalement.assignedTo.username}</p>
                     </div>
                   </div>
                 )}
@@ -481,8 +481,8 @@ export function SignalementDetailPage() {
                   <div>
                     <p className="text-sm font-medium">
                       {language === 'fr' ? 'Soutiens' :
-                       language === 'de' ? 'Unterstützungen' :
-                       'Upvotes'}
+                        language === 'de' ? 'Unterstützungen' :
+                          'Upvotes'}
                     </p>
                     <p className="text-sm text-gray-600">{localUpvotes}</p>
                   </div>
@@ -496,8 +496,8 @@ export function SignalementDetailPage() {
                 <CardHeader>
                   <CardTitle>
                     {language === 'fr' ? 'Thème' :
-                     language === 'de' ? 'Thema' :
-                     'Theme'}
+                      language === 'de' ? 'Thema' :
+                        'Theme'}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -516,8 +516,8 @@ export function SignalementDetailPage() {
               <CardHeader>
                 <CardTitle>
                   {language === 'fr' ? 'Actions' :
-                   language === 'de' ? 'Aktionen' :
-                   'Actions'}
+                    language === 'de' ? 'Aktionen' :
+                      'Actions'}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">

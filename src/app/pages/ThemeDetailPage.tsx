@@ -1,18 +1,25 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
-import { getThemeById } from '../data/themes';
 import { useConsultations, usePetitions, useVotes } from '../hooks/useApi';
 import { StatusBadge } from '../components/StatusBadge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { ArrowRight, Users } from 'lucide-react';
+import { getThemeById } from '../../api/themes';
 
 export function ThemeDetailPage() {
   const { themeId } = useParams<{ themeId: string }>();
   const { t, language, tLocal } = useLanguage();
-  const theme = themeId ? getThemeById(themeId) : null;
-  
+  const [theme, setTheme] = useState(null);
+  useEffect(() => {
+    const fetchTheme = async () => {
+      const theme = await getThemeById(themeId!);
+      setTheme(theme);
+    };
+    fetchTheme();
+  }, [themeId]);
+
   // Fetch data using React Query
   const { data: allConsultations, isLoading: isLoadingConsultations } = useConsultations();
   const { data: allPetitions, isLoading: isLoadingPetitions } = usePetitions();
@@ -30,14 +37,12 @@ export function ThemeDetailPage() {
   const themeConsultations = allConsultations?.filter((c) => c.themeId === themeId) || [];
   const themePetitions = allPetitions?.filter((p) => p.themeId === themeId) || [];
   const themeVotes = allVotes?.filter((v) => v.themeId === themeId) || [];
-  
+
   // Calculate total processes (for now, just consultations - can add other types later)
   const totalProcesses = themeConsultations.length;
 
   // Get localized theme name from legacy format
-  const themeName = language === 'fr' ? theme.name : 
-                    language === 'de' ? (theme.nameDE || theme.name) :
-                    (theme.nameEN || theme.name);
+  const themeName = tLocal(theme.name)
 
   const isLoading = isLoadingConsultations || isLoadingPetitions || isLoadingVotes;
 
@@ -209,7 +214,7 @@ export function ThemeDetailPage() {
               </div>
             </div>
           )}
-          
+
           {themeConsultations.length === 0 && themePetitions.length === 0 && themeVotes.length === 0 && (
             <div className="text-center py-12">
               <p className="text-gray-500">

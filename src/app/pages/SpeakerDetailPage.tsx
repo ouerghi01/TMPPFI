@@ -6,13 +6,13 @@ import { Button } from '../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Separator } from '../components/ui/separator';
 import { LoadingSpinner } from '../components/LoadingSpinner';
-import { 
-  ArrowLeft, 
-  Award, 
-  Briefcase, 
-  Mail, 
-  Linkedin, 
-  Twitter, 
+import {
+  ArrowLeft,
+  Award,
+  Briefcase,
+  Mail,
+  Linkedin,
+  Twitter,
   Globe,
   Users,
 } from 'lucide-react';
@@ -21,7 +21,7 @@ export function SpeakerDetailPage() {
   const { speakerId } = useParams<{ speakerId: string }>();
   const navigate = useNavigate();
   const { language, tLocal } = useLanguage();
-  
+
   // Fetch speaker data from API
   const { data: speaker, isLoading, error } = useSpeaker(speakerId || '');
 
@@ -36,8 +36,8 @@ export function SpeakerDetailPage() {
   if (error || !speaker) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <Button 
-          variant="ghost" 
+        <Button
+          variant="ghost"
           onClick={() => navigate('/conferences')}
           className="mb-6 gap-2"
         >
@@ -55,14 +55,14 @@ export function SpeakerDetailPage() {
     );
   }
 
-  const speakerName = `${speaker.firstName} ${speaker.lastName}`;
+  const speakerName = `${speaker.name}`;
   const speakerTitle = tLocal(speaker.title);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* Back Button */}
-      <Button 
-        variant="ghost" 
+      <Button
+        variant="ghost"
         onClick={() => navigate('/conferences')}
         className="mb-6 gap-2"
       >
@@ -78,18 +78,18 @@ export function SpeakerDetailPage() {
           {/* Avatar */}
           <div className="flex-shrink-0">
             {speaker.avatar ? (
-              <img 
-                src={speaker.avatar} 
+              <img
+                src={speaker.avatar}
                 alt={speakerName}
                 className="w-32 h-32 rounded-full object-cover border-4 border-white/20"
               />
             ) : (
               <div className="w-32 h-32 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center text-4xl font-bold">
-                {speaker.firstName.charAt(0)}{speaker.lastName.charAt(0)}
+                {speaker.name.charAt(0)}
               </div>
             )}
           </div>
-          
+
           {/* Info */}
           <div className="flex-1">
             <h1 className="text-4xl mb-2">{speakerName}</h1>

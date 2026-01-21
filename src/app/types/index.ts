@@ -152,6 +152,8 @@ export type ConsultationStatus = 'draft' | 'open' | 'closed' | 'archived';
 export type ConsultationType = 'public_meeting' | 'online_debate' | 'citizen_proposal' | 'expert_hearing' | 'workshop';
 
 export interface ConsultationDTO {
+  totalComments: ReactNode;
+  totalParticipants: number;
   id: string;
   slug: string;
   title: LocalizedString;
@@ -204,6 +206,7 @@ export interface LocationDTO {
 }
 
 export interface UserSummaryDTO {
+  username: ReactNode;
   id: string;
   firstName: string;
   lastName: string;
@@ -366,7 +369,7 @@ export interface PetitionSignatureDTO {
 
 // ==================== Vote DTOs ====================
 
-export type VoteStatus = 'draft' | 'upcoming' | 'open' | 'closed' | 'results_published';
+export type VoteStatus = 'DRAFT' | 'UPCOMING' | 'OPEN' | 'CLOSED' | 'RESULTS_PUBLISHED';
 export type VoteType = 'referendum' | 'consultation' | 'poll' | 'election';
 export type VotingMethod = 'single_choice' | 'multiple_choice' | 'ranked_choice' | 'approval';
 
@@ -415,6 +418,7 @@ export interface VoteSummaryDTO {
 }
 
 export interface VoteOptionDTO {
+  votesCount: any;
   id: string;
   label: LocalizedString;
   description?: LocalizedString;
@@ -472,6 +476,7 @@ export type AssemblyType = 'citizens_council' | 'youth_assembly' | 'expert_commi
 export type MemberRole = 'president' | 'vice_president' | 'secretary' | 'member' | 'observer';
 
 export interface AssemblyDTO {
+  title: any;
   id: string;
   slug: string;
   name: LocalizedString;
@@ -485,7 +490,7 @@ export interface AssemblyDTO {
   members: AssemblyMemberDTO[];
   nextMeeting?: AssemblyMeetingDTO;
   upcomingMeetings: AssemblyMeetingDTO[];
-  pastMeetings: AssemblyMeetingDTO[];
+  pastMeetings: any[];
   workingGroups: WorkingGroupDTO[];
   documents: DocumentDTO[];
   stats: AssemblyStatsDTO;
@@ -605,9 +610,8 @@ export interface ConferenceSummaryDTO {
 }
 
 export interface SpeakerDTO {
+  name: any;
   id: string;
-  firstName: string;
-  lastName: string;
   title: LocalizedString;
   organization: string;
   bio: LocalizedString;

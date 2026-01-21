@@ -90,12 +90,14 @@ import {
   mockApiData,
 } from '../data/api-mock';
 import { getThemesApi } from '../../api/themes';
-import { getPetitions } from '../../api/petetion';
+import { getPetitionById, getPetitions } from '../../api/petetion';
 import { getAssembly } from '../../api/assembly';
 import { getConferencesApi } from '../../api/conferences';
-import { getConsultations, getLegislativeConsultationsApi } from '../../api/consultations';
+import { getConsultationById, getConsultations, getLegislativeConsultationsApi } from '../../api/consultations';
 import { getPollsApi } from '../../api/votes';
-import { getSignalementsApi } from '../../api/signalements';
+import { getSignalementsApi, getSignalementsGeoApi, getSignalementStatsApi } from '../../api/signalements';
+import { getSpeakerById } from '../../api/speaker';
+import { Await } from 'react-router-dom';
 
 // Simulated API delay (remove in production)
 const simulateDelay = (ms: number = 500) => new Promise(resolve => setTimeout(resolve, ms));
@@ -338,8 +340,8 @@ export const themeApi = {
    */
   async getThemeById(id: string): Promise<ApiResponse<ThemeDTO>> {
     await simulateDelay();
-
-    const theme = mockThemes.find(t => t.id === id);
+    const themes = await getThemesApi()
+    const theme = themes.find(t => t.id === id);
     if (!theme) {
       throw new Error('Theme not found');
     }
@@ -396,11 +398,7 @@ export const consultationApi = {
    * GET /api/consultations/:idOrSlug
    */
   async getConsultation(idOrSlug: string): Promise<ApiResponse<ConsultationDTO>> {
-    await simulateDelay();
-
-    const consultation = mockConsultations.find(
-      c => c.id === idOrSlug || c.slug === idOrSlug
-    );
+    const consultation = await getConsultationById(idOrSlug)
 
     if (!consultation) {
       throw new Error('Consultation not found');
@@ -476,9 +474,7 @@ export const petitionApi = {
   async getPetition(idOrSlug: string): Promise<ApiResponse<PetitionDTO>> {
     await simulateDelay();
 
-    const petition = mockPetitions.find(
-      p => p.id === idOrSlug || p.slug === idOrSlug
-    );
+    const petition = await getPetitionById(idOrSlug);
 
     if (!petition) {
       throw new Error('Petition not found');
@@ -558,7 +554,7 @@ export const voteApi = {
   async getVote(idOrSlug: string): Promise<ApiResponse<VoteDTO>> {
     await simulateDelay();
 
-    const vote = mockVotes.find(
+    const vote = (await getPollsApi(PollType.OFFICIAL_ELECTION)).find(
       v => v.id === idOrSlug || v.slug === idOrSlug
     );
 
@@ -1066,7 +1062,7 @@ export const conferenceApi = {
   async getSpeaker(id: string): Promise<ApiResponse<SpeakerDTO>> {
     await simulateDelay();
 
-    const speaker = mockSpeakers.find(s => s.id === id);
+    const speaker = await getSpeakerById(id);
 
     if (!speaker) {
       throw new Error('Speaker not found');
@@ -1178,7 +1174,7 @@ export const signalementApi = {
   }): Promise<ApiResponse<import('../types').SignalementDTO[]>> {
     await simulateDelay();
 
-    let signalements = [...mockSignalements];
+    let signalements = await getSignalementsApi();
 
     if (params?.status) {
       signalements = signalements.filter(s => s.status === params.status);
@@ -1204,7 +1200,7 @@ export const signalementApi = {
   async getSignalement(id: string): Promise<ApiResponse<import('../types').SignalementDTO>> {
     await simulateDelay();
 
-    const signalement = mockSignalements.find(s => s.id === id);
+    const signalement = (await getSignalementsApi()).find(s => s.id === id);
 
     if (!signalement) {
       throw new Error('Signalement not found');
@@ -1223,9 +1219,9 @@ export const signalementApi = {
    */
   async getGeoSignalements(): Promise<ApiResponse<import('../types').GeoSignalementDTO[]>> {
     await simulateDelay();
-
+    let signalements = await getSignalementsGeoApi();
     return {
-      data: mockGeoSignalements,
+      data: signalements,
       timestamp: new Date().toISOString(),
       success: true,
     };
@@ -1235,11 +1231,11 @@ export const signalementApi = {
    * Get signalement statistics
    * GET /api/signalements/stats
    */
-  async getSignalementStats(): Promise<ApiResponse<import('../types').SignalementStatsDTO>> {
+  async getSignalementStats(): Promise<ApiResponse<any>> {
     await simulateDelay();
 
     return {
-      data: await getSignalementsApi(),
+      data: await getSignalementStatsApi(),
       timestamp: new Date().toISOString(),
       success: true,
     };

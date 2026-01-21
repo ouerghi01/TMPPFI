@@ -1,6 +1,6 @@
-import React from 'react';
-import { getThemeById } from '../data/themes';
+import React, { useEffect, useState } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
+import { getThemeById } from '../../api/themes';
 
 interface ThemeTagProps {
   themeId: string;
@@ -9,8 +9,17 @@ interface ThemeTagProps {
 }
 
 export function ThemeTag({ themeId, size = 'md', showIcon = true }: ThemeTagProps) {
-  const theme = getThemeById(themeId);
+
+  const [theme, setTheme] = useState<any>()
   const { t, language } = useLanguage();
+
+  useEffect(() => {
+    const fetchTheme = async () => {
+      const themeData = await getThemeById(themeId);
+      setTheme(themeData);
+    };
+    fetchTheme();
+  }, [themeId]);
 
   if (!theme) return null;
 
@@ -21,9 +30,7 @@ export function ThemeTag({ themeId, size = 'md', showIcon = true }: ThemeTagProp
   };
 
   // Use theme name directly, as it's already a string in the legacy format
-  const themeName = language === 'fr' ? theme.name : 
-                    language === 'de' ? (theme.nameDE || theme.name) :
-                    (theme.nameEN || theme.name);
+  const themeName = theme.name[language];
 
   return (
     <span

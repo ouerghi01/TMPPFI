@@ -31,13 +31,13 @@ export function VotesPage() {
         <PageBanner
           title={
             language === 'fr' ? 'Votes citoyens' :
-            language === 'de' ? 'Bürgerabstimmungen' :
-            'Citizen Votes'
+              language === 'de' ? 'Bürgerabstimmungen' :
+                'Citizen Votes'
           }
           description={
             language === 'fr' ? 'Participez aux votes et référendums de votre commune' :
-            language === 'de' ? 'Nehmen Sie an Abstimmungen und Referenden Ihrer Gemeinde teil' :
-            'Participate in votes and referendums of your community'
+              language === 'de' ? 'Nehmen Sie an Abstimmungen und Referenden Ihrer Gemeinde teil' :
+                'Participate in votes and referendums of your community'
           }
           gradient="from-purple-600 to-pink-600"
           icon={<VoteIcon className="w-12 h-12 text-white" />}
@@ -58,13 +58,13 @@ export function VotesPage() {
         <PageBanner
           title={
             language === 'fr' ? 'Votes citoyens' :
-            language === 'de' ? 'Bürgerabstimmungen' :
-            'Citizen Votes'
+              language === 'de' ? 'Bürgerabstimmungen' :
+                'Citizen Votes'
           }
           description={
             language === 'fr' ? 'Participez aux votes et référendums de votre commune' :
-            language === 'de' ? 'Nehmen Sie an Abstimmungen und Referenden Ihrer Gemeinde teil' :
-            'Participate in votes and referendums of your community'
+              language === 'de' ? 'Nehmen Sie an Abstimmungen und Referenden Ihrer Gemeinde teil' :
+                'Participate in votes and referendums of your community'
           }
           gradient="from-purple-600 to-pink-600"
           icon={<VoteIcon className="w-12 h-12 text-white" />}
@@ -85,36 +85,36 @@ export function VotesPage() {
   });
 
   // Calculate statistics
-  const openVotes = votes?.filter((v) => v.status === 'open').length || 0;
-  const upcomingVotes = votes?.filter((v) => v.status === 'upcoming').length || 0;
+  const openVotes = votes?.filter((v) => v.status === 'OPEN').length || 0;
+  const upcomingVotes = votes?.filter((v) => v.status === 'UPCOMING').length || 0;
   const totalVotes = votes?.length || 0;
-  const totalParticipants = votes?.reduce((sum, v) => sum + (v.stats?.totalVoters || 0), 0) || 0;
+  const totalParticipants = votes?.reduce((sum, v) => sum + (v.stats?.totalVotes || 0), 0) || 0;
 
   return (
     <div>
       <PageBanner
         title={
           language === 'fr' ? 'Votes citoyens' :
-          language === 'de' ? 'Bürgerabstimmungen' :
-          'Citizen Votes'
+            language === 'de' ? 'Bürgerabstimmungen' :
+              'Citizen Votes'
         }
         description={
           language === 'fr' ? 'Participez aux votes et référendums de votre commune' :
-          language === 'de' ? 'Nehmen Sie an Abstimmungen und Referenden Ihrer Gemeinde teil' :
-          'Participate in votes and referendums of your community'
+            language === 'de' ? 'Nehmen Sie an Abstimmungen und Referenden Ihrer Gemeinde teil' :
+              'Participate in votes and referendums of your community'
         }
         gradient="from-purple-600 to-pink-600"
         icon={<VoteIcon className="w-12 h-12 text-white" />}
       />
-      
+
       <PageLayout className="py-8">
         {/* KPI Cards - Standard 4-column grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
           <KPICard
             label={
               language === 'fr' ? 'Votes ouverts' :
-              language === 'de' ? 'Offene Abstimmungen' :
-              'Open votes'
+                language === 'de' ? 'Offene Abstimmungen' :
+                  'Open votes'
             }
             value={openVotes}
             icon={VoteIcon}
@@ -125,8 +125,8 @@ export function VotesPage() {
           <KPICard
             label={
               language === 'fr' ? 'À venir' :
-              language === 'de' ? 'Kommend' :
-              'Upcoming'
+                language === 'de' ? 'Kommend' :
+                  'Upcoming'
             }
             value={upcomingVotes}
             icon={Calendar}
@@ -137,8 +137,8 @@ export function VotesPage() {
           <KPICard
             label={
               language === 'fr' ? 'Total votes' :
-              language === 'de' ? 'Gesamt Abstimmungen' :
-              'Total votes'
+                language === 'de' ? 'Gesamt Abstimmungen' :
+                  'Total votes'
             }
             value={totalVotes}
             icon={TrendingUp}
@@ -149,8 +149,8 @@ export function VotesPage() {
           <KPICard
             label={
               language === 'fr' ? 'Participants' :
-              language === 'de' ? 'Teilnehmer' :
-              'Participants'
+                language === 'de' ? 'Teilnehmer' :
+                  'Participants'
             }
             value={totalParticipants.toLocaleString()}
             icon={Users}
@@ -164,11 +164,11 @@ export function VotesPage() {
           <FilterBar>
             <FilterField label={
               language === 'fr' ? `${t('common.filter')} par thème` :
-              language === 'de' ? `${t('common.filter')} nach Thema` :
-              `${t('common.filter')} by theme`
+                language === 'de' ? `${t('common.filter')} nach Thema` :
+                  `${t('common.filter')} by theme`
             }>
-              <Select 
-                value={selectedTheme || 'all'} 
+              <Select
+                value={selectedTheme || 'all'}
                 onValueChange={(value) => setSelectedTheme(value === 'all' ? null : value)}
               >
                 <SelectTrigger>
@@ -187,11 +187,11 @@ export function VotesPage() {
 
             <FilterField label={
               language === 'fr' ? `Statut du vote` :
-              language === 'de' ? `Abstimmungsstatus` :
-              `Vote status`
+                language === 'de' ? `Abstimmungsstatus` :
+                  `Vote status`
             }>
-              <Select 
-                value={selectedStatus || 'all'} 
+              <Select
+                value={selectedStatus || 'all'}
                 onValueChange={(value) => setSelectedStatus(value === 'all' ? null : value)}
               >
                 <SelectTrigger>
@@ -218,7 +218,7 @@ export function VotesPage() {
         {/* Votes List */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {filteredVotes.map((vote) => {
-            const totalVotes = vote.options.reduce((sum, opt) => sum + (opt.votes || 0), 0);
+            const totalVotes = vote.options.reduce((sum, opt) => sum + (opt.votesCount || 0), 0);
 
             return (
               <Card key={vote.id} className="hover:shadow-lg transition-shadow flex flex-col h-full">
@@ -229,7 +229,7 @@ export function VotesPage() {
                       <span className="text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-700 border border-gray-300">
                         {vote.type === 'referendum' ? 'Référendum' : 'Consultation'}
                       </span>
-                      {vote.status === 'open' && (
+                      {vote.status === 'OPEN' && (
                         <span className="text-xs px-2 py-1 rounded-full bg-gradient-to-r from-green-100 to-emerald-100 text-green-700 border border-green-300 flex items-center gap-1">
                           <Eye className="w-3 h-3" />
                           {language === 'fr' && 'Mode simplifié disponible'}
@@ -246,22 +246,22 @@ export function VotesPage() {
                 <CardContent className="flex flex-col flex-grow">
                   <div className="space-y-4 flex-grow">
                     {/* Vote options with results for open/closed votes */}
-                    {(vote.status === 'open' || vote.status === 'closed') && vote.options.length > 0 && vote.options[0].votes !== undefined && (
+                    {(vote.status === 'OPEN' || vote.status === 'CLOSED' || vote.status === 'DRAFT' || vote.status === 'RESULTS_PUBLISHED') && vote.options.length > 0 && (
                       <div className="space-y-3">
                         <div className="text-sm text-gray-600 mb-2">
-                          {vote.status === 'closed' ? 
+                          {vote.status === 'CLOSED' ?
                             (language === 'fr' ? 'Résultats finaux :' : language === 'de' ? 'Endergebnisse:' : 'Final results:') :
                             (language === 'fr' ? 'Résultats actuels :' : language === 'de' ? 'Aktuelle Ergebnisse:' : 'Current results:')
                           }
                         </div>
                         {vote.options.map((option) => {
-                          const percentage = totalVotes > 0 ? ((option.votes || 0) / totalVotes) * 100 : 0;
+                          const percentage = totalVotes > 0 ? ((option.votesCount || 0) / totalVotes) * 100 : 0;
                           return (
                             <div key={option.id}>
                               <div className="flex justify-between text-sm mb-1">
                                 <span className="text-gray-700">{tLocal(option.label)}</span>
                                 <span className="font-medium">
-                                  {option.votes?.toLocaleString()} ({percentage.toFixed(1)}%)
+                                  {option.votesCount?.toLocaleString()} ({percentage.toFixed(1)}%)
                                 </span>
                               </div>
                               <div className="w-full bg-gray-200 rounded-full h-2">
@@ -277,7 +277,7 @@ export function VotesPage() {
                     )}
 
                     {/* Upcoming vote - just show options */}
-                    {vote.status === 'upcoming' && (
+                    {vote.status === 'UPCOMING' && (
                       <div className="space-y-2">
                         <div className="text-sm text-gray-600 mb-2">Options de vote :</div>
                         {vote.options.map((option) => (
@@ -310,9 +310,9 @@ export function VotesPage() {
 
                   {/* Buttons aligned at bottom */}
                   <div className="mt-4 pt-4 border-t border-gray-100">
-                    {vote.status === 'open' && (
+                    {vote.status === 'OPEN' && (
                       <Link
-                        to={`/votes/${vote.slug}`}
+                        to={`/votes/${vote.id}`}
                         className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors font-medium"
                       >
                         <VoteIcon className="w-4 h-4" />
@@ -322,7 +322,7 @@ export function VotesPage() {
                       </Link>
                     )}
 
-                    {vote.status === 'upcoming' && (
+                    {vote.status === 'UPCOMING' && (
                       <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
                         <p className="text-sm text-blue-800">
                           {language === 'fr' && `Ce vote ouvrira le ${new Date(vote.startDate).toLocaleDateString('fr-FR')}`}
@@ -332,7 +332,7 @@ export function VotesPage() {
                       </div>
                     )}
 
-                    {vote.status === 'closed' && (
+                    {vote.status === 'CLOSED' && (
                       <Link
                         to={`/votes/${vote.slug}`}
                         className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors font-medium"
