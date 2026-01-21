@@ -19,38 +19,41 @@ export function SignalementsPage() {
   const [activeTab, setActiveTab] = useState<'list' | 'map'>('list');
 
   // Fetch data using React Query hooks
-  const { data: signalements, isLoading, error } = useSignalements({ 
+  const { data: signalements, isLoading, error } = useSignalements({
     category: selectedCategory || undefined,
-    status: selectedStatus || undefined 
+    status: selectedStatus || undefined
   });
   const { data: geoSignalements } = useGeoSignalements();
   const { data: stats } = useSignalementStats();
 
   const getCategoryLabel = (category: string) => {
     const labels: Record<string, { fr: string; de: string; en: string }> = {
-      infrastructure: { fr: 'Infrastructure', de: 'Infrastruktur', en: 'Infrastructure' },
-      cleanliness: { fr: 'Propreté', de: 'Sauberkeit', en: 'Cleanliness' },
-      safety: { fr: 'Sécurité', de: 'Sicherheit', en: 'Safety' },
-      environment: { fr: 'Environnement', de: 'Umwelt', en: 'Environment' },
-      public_space: { fr: 'Espace public', de: 'Öffentlicher Raum', en: 'Public space' },
-      transport: { fr: 'Transport', de: 'Transport', en: 'Transport' },
-      noise: { fr: 'Nuisances sonores', de: 'Lärmbelästigung', en: 'Noise' },
-      other: { fr: 'Autre', de: 'Andere', en: 'Other' },
+      INFRASTRUCTURE: { fr: 'Infrastructure', de: 'Infrastruktur', en: 'Infrastructure' },
+      CLEANLINESS: { fr: 'Propreté', de: 'Sauberkeit', en: 'Cleanliness' },
+      SAFETY: { fr: 'Sécurité', de: 'Sicherheit', en: 'Safety' },
+      ENVIRONMENT: { fr: 'Environnement', de: 'Umwelt', en: 'Environment' },
+      PUBLIC_SPACE: { fr: 'Espace public', de: 'Öffentlicher Raum', en: 'Public space' },
+      TRANSPORT: { fr: 'Transport', de: 'Transport', en: 'Transport' },
+      NOISE: { fr: 'Nuisances sonores', de: 'Lärmbelästigung', en: 'Noise' },
+      OTHER: { fr: 'Autre', de: 'Andere', en: 'Other' },
     };
-    return labels[category]?.[language] || category;
+
+    return labels[category.toUpperCase()]?.[language] || category;
   };
 
   const getStatusLabel = (status: string) => {
     const labels: Record<string, { fr: string; de: string; en: string }> = {
-      submitted: { fr: 'Soumis', de: 'Eingereicht', en: 'Submitted' },
-      under_review: { fr: 'En examen', de: 'In Prüfung', en: 'Under review' },
-      in_progress: { fr: 'En cours', de: 'In Bearbeitung', en: 'In progress' },
-      resolved: { fr: 'Résolu', de: 'Gelöst', en: 'Resolved' },
-      rejected: { fr: 'Rejeté', de: 'Abgelehnt', en: 'Rejected' },
-      archived: { fr: 'Archivé', de: 'Archiviert', en: 'Archived' },
+      SUBMITTED: { fr: 'Soumis', de: 'Eingereicht', en: 'Submitted' },
+      UNDER_REVIEW: { fr: 'En examen', de: 'In Prüfung', en: 'Under review' },
+      IN_PROGRESS: { fr: 'En cours', de: 'In Bearbeitung', en: 'In progress' },
+      RESOLVED: { fr: 'Résolu', de: 'Gelöst', en: 'Resolved' },
+      REJECTED: { fr: 'Rejeté', de: 'Abgelehnt', en: 'Rejected' },
+      ARCHIVED: { fr: 'Archivé', de: 'Archiviert', en: 'Archived' },
     };
-    return labels[status]?.[language] || status;
+
+    return labels[status.toUpperCase()]?.[language] || status;
   };
+
 
   // Show loading state
   if (isLoading) {
@@ -59,13 +62,13 @@ export function SignalementsPage() {
         <PageBanner
           title={
             language === 'fr' ? 'Signalements citoyens' :
-            language === 'de' ? 'Bürgermeldungen' :
-            'Citizen Reports'
+              language === 'de' ? 'Bürgermeldungen' :
+                'Citizen Reports'
           }
           description={
             language === 'fr' ? 'Signalez les problèmes de votre commune et suivez leur traitement' :
-            language === 'de' ? 'Melden Sie Probleme in Ihrer Gemeinde und verfolgen Sie deren Bearbeitung' :
-            'Report issues in your community and track their resolution'
+              language === 'de' ? 'Melden Sie Probleme in Ihrer Gemeinde und verfolgen Sie deren Bearbeitung' :
+                'Report issues in your community and track their resolution'
           }
           gradient="from-red-600 to-orange-600"
           icon={<AlertCircle className="w-12 h-12 text-white" />}
@@ -73,9 +76,9 @@ export function SignalementsPage() {
         <PageLayout className="py-8">
           <div className="text-center py-12">
             <p className="text-gray-600">
-              {language === 'fr' ? 'Chargement des signalements...' : 
-               language === 'de' ? 'Meldungen laden...' : 
-               'Loading reports...'}
+              {language === 'fr' ? 'Chargement des signalements...' :
+                language === 'de' ? 'Meldungen laden...' :
+                  'Loading reports...'}
             </p>
           </div>
         </PageLayout>
@@ -90,13 +93,13 @@ export function SignalementsPage() {
         <PageBanner
           title={
             language === 'fr' ? 'Signalements citoyens' :
-            language === 'de' ? 'Bürgermeldungen' :
-            'Citizen Reports'
+              language === 'de' ? 'Bürgermeldungen' :
+                'Citizen Reports'
           }
           description={
             language === 'fr' ? 'Signalez les problèmes de votre commune et suivez leur traitement' :
-            language === 'de' ? 'Melden Sie Probleme in Ihrer Gemeinde und verfolgen Sie deren Bearbeitung' :
-            'Report issues in your community and track their resolution'
+              language === 'de' ? 'Melden Sie Probleme in Ihrer Gemeinde und verfolgen Sie deren Bearbeitung' :
+                'Report issues in your community and track their resolution'
           }
           gradient="from-red-600 to-orange-600"
           icon={<AlertCircle className="w-12 h-12 text-white" />}
@@ -104,9 +107,9 @@ export function SignalementsPage() {
         <PageLayout className="py-8">
           <div className="text-center py-12">
             <p className="text-red-600">
-              {language === 'fr' ? 'Erreur lors du chargement des données' : 
-               language === 'de' ? 'Fehler beim Laden der Daten' : 
-               'Error loading data'}
+              {language === 'fr' ? 'Erreur lors du chargement des données' :
+                language === 'de' ? 'Fehler beim Laden der Daten' :
+                  'Error loading data'}
             </p>
           </div>
         </PageLayout>
@@ -121,13 +124,13 @@ export function SignalementsPage() {
       <PageBanner
         title={
           language === 'fr' ? 'Signalements citoyens' :
-          language === 'de' ? 'Bürgermeldungen' :
-          'Citizen Reports'
+            language === 'de' ? 'Bürgermeldungen' :
+              'Citizen Reports'
         }
         description={
           language === 'fr' ? 'Signalez les problèmes de votre commune et suivez leur traitement' :
-          language === 'de' ? 'Melden Sie Probleme in Ihrer Gemeinde und verfolgen Sie deren Bearbeitung' :
-          'Report issues in your community and track their resolution'
+            language === 'de' ? 'Melden Sie Probleme in Ihrer Gemeinde und verfolgen Sie deren Bearbeitung' :
+              'Report issues in your community and track their resolution'
         }
         gradient="from-red-600 to-orange-600"
         icon={<AlertCircle className="w-12 h-12 text-white" />}
@@ -144,13 +147,13 @@ export function SignalementsPage() {
           />
           <KPICard
             label={language === 'fr' ? 'En cours' : language === 'de' ? 'In Bearbeitung' : 'In Progress'}
-            value={stats?.byStatus.in_progress || 0}
+            value={stats?.byStatus.IN_PROGRESS || 0}
             variant="orange"
             icon={TrendingUp}
           />
           <KPICard
             label={language === 'fr' ? 'Résolus' : language === 'de' ? 'Gelöst' : 'Resolved'}
-            value={stats?.byStatus.resolved || 0}
+            value={stats?.byStatus.RESOLVED || 0}
             variant="green"
             icon={TrendingUp}
           />
@@ -198,9 +201,9 @@ export function SignalementsPage() {
             <Link to="/signalements/create">
               <Button className="w-full sm:w-auto">
                 <Plus className="w-4 h-4 mr-2" />
-                {language === 'fr' ? 'Créer un signalement' : 
-                 language === 'de' ? 'Meldung erstellen' : 
-                 'Create Report'}
+                {language === 'fr' ? 'Créer un signalement' :
+                  language === 'de' ? 'Meldung erstellen' :
+                    'Create Report'}
               </Button>
             </Link>
           </div>
@@ -224,9 +227,9 @@ export function SignalementsPage() {
               <div className="text-center py-12 bg-gray-50 rounded-lg">
                 <AlertCircle className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                 <p className="text-gray-600">
-                  {language === 'fr' ? 'Aucun signalement trouvé' : 
-                   language === 'de' ? 'Keine Meldungen gefunden' : 
-                   'No reports found'}
+                  {language === 'fr' ? 'Aucun signalement trouvé' :
+                    language === 'de' ? 'Keine Meldungen gefunden' :
+                      'No reports found'}
                 </p>
               </div>
             ) : (
@@ -283,7 +286,7 @@ export function SignalementsPage() {
                             <div className="w-10 h-10 bg-red-500 rounded-full border-4 border-white shadow-lg flex items-center justify-center group-hover:scale-110 transition-transform cursor-pointer">
                               <MapPin className="w-5 h-5 text-white" />
                             </div>
-                            
+
                             {/* Popup on hover */}
                             <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
                               <div className="bg-white rounded-lg shadow-xl p-3 w-64 border border-gray-200">
@@ -314,13 +317,13 @@ export function SignalementsPage() {
                       <div>
                         <p className="text-lg font-medium text-gray-700">
                           {language === 'fr' ? 'Vue cartographique' :
-                           language === 'de' ? 'Kartenansicht' :
-                           'Map View'}
+                            language === 'de' ? 'Kartenansicht' :
+                              'Map View'}
                         </p>
                         <p className="text-sm text-gray-500 mt-2">
                           {language === 'fr' ? 'Aucun signalement géolocalisé' :
-                           language === 'de' ? 'Keine georeferenzierten Meldungen' :
-                           'No geolocated reports'}
+                            language === 'de' ? 'Keine georeferenzierten Meldungen' :
+                              'No geolocated reports'}
                         </p>
                       </div>
                     </div>
@@ -332,22 +335,22 @@ export function SignalementsPage() {
                   <div className="absolute bottom-4 left-4 bg-white rounded-lg shadow-lg p-4 border border-gray-200">
                     <h4 className="text-sm font-semibold mb-2">
                       {language === 'fr' ? 'Légende' :
-                       language === 'de' ? 'Legende' :
-                       'Legend'}
+                        language === 'de' ? 'Legende' :
+                          'Legend'}
                     </h4>
                     <div className="space-y-2 text-xs">
                       <div className="flex items-center gap-2">
                         <div className="w-3 h-3 bg-red-500 rounded-full" />
                         <span>
                           {language === 'fr' ? 'Signalement' :
-                           language === 'de' ? 'Meldung' :
-                           'Report'}
+                            language === 'de' ? 'Meldung' :
+                              'Report'}
                         </span>
                       </div>
                       <div className="text-gray-600">
                         {language === 'fr' ? `${geoSignalements.length} signalements affichés` :
-                         language === 'de' ? `${geoSignalements.length} angezeigte Meldungen` :
-                         `${geoSignalements.length} reports displayed`}
+                          language === 'de' ? `${geoSignalements.length} angezeigte Meldungen` :
+                            `${geoSignalements.length} reports displayed`}
                       </div>
                     </div>
                   </div>

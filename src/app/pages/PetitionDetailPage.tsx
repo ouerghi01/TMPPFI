@@ -254,8 +254,8 @@ export function PetitionDetailPage() {
                   <div className="relative w-full h-4 bg-gray-200 rounded-full overflow-hidden mb-4">
                     <motion.div
                       className={`absolute top-0 left-0 h-full rounded-full ${percentage >= 100
-                          ? 'bg-gradient-to-r from-green-500 to-emerald-600'
-                          : 'bg-gradient-to-r from-blue-500 to-blue-600'
+                        ? 'bg-gradient-to-r from-green-500 to-emerald-600'
+                        : 'bg-gradient-to-r from-blue-500 to-blue-600'
                         }`}
                       initial={{ width: 0 }}
                       animate={{ width: `${Math.min(percentage, 100)}%` }}
@@ -286,7 +286,7 @@ export function PetitionDetailPage() {
                   </div>
 
                   {/* Success Message */}
-                  {petition.status === 'under_review' && (
+                  {petition.status === 'under_review'.toUpperCase() && (
                     <div className="mt-4 p-4 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg">
                       <div className="flex items-center gap-3">
                         <CheckCircle2 className="w-6 h-6 text-green-600 flex-shrink-0" />
