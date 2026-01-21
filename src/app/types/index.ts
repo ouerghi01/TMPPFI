@@ -148,11 +148,11 @@ export interface ThemeWithProcessesDTO extends ThemeDTO {
 
 // ==================== Consultation DTOs ====================
 
-export type ConsultationStatus = 'draft' | 'open' | 'closed' | 'archived';
-export type ConsultationType = 'public_meeting' | 'online_debate' | 'citizen_proposal' | 'expert_hearing' | 'workshop';
+export type ConsultationStatus = 'DRAFT' | 'OPEN' | 'CLOSED' | 'ARCHIVED' | 'UPCOMING';
+export type ConsultationType = 'PUBLIC_MEETING' | 'ONLINE_DEBATE' | 'CITIZEN_PROPOSAL' | 'EXPERT_HEARING' | 'WORKSHOP';
 
 export interface ConsultationDTO {
-  totalComments: ReactNode;
+  totalComments: any;
   totalParticipants: number;
   id: string;
   slug: string;
@@ -284,7 +284,7 @@ export interface CreateConsultationCommentDTO {
 
 // ==================== Petition DTOs ====================
 
-export type PetitionStatus = 'draft' | 'open' | 'threshold_reached' | 'in_review' | 'accepted' | 'rejected' | 'closed';
+export type PetitionStatus = 'DRAFT' | 'OPEN' | 'THRESHOLD_REACHED' | 'IN_REVIEW' | 'ACCEPTED' | 'REJECTED' | 'CLOSED';
 
 export interface PetitionDTO {
   id: string;
@@ -988,6 +988,8 @@ export interface SignalementDTO {
 }
 
 export interface GeoSignalementDTO {
+  upvotes: ReactNode;
+  description: string | LocalizedString | undefined;
   id: string;
   title: LocalizedString;
   category: SignalementCategory;

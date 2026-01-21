@@ -84,7 +84,7 @@ export function ConsultationDetailPage() {
     fetchComments();
   }, [id]);
   // Check if debate is active
-  const isDebateActive = consultation?.status === 'open' || consultation?.status === 'upcoming';
+  const isDebateActive = consultation?.status === 'OPEN' || consultation?.status === 'UPCOMING';
 
   // Show loading state
   if (isLoading) {
