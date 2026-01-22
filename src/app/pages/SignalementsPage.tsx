@@ -14,8 +14,8 @@ import { StatusBadge } from '../components/StatusBadge';
 
 export function SignalementsPage() {
   const { t, language, tLocal } = useLanguage();
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>('all');
+  const [selectedStatus, setSelectedStatus] = useState<string | null>('all');
   const [activeTab, setActiveTab] = useState<'list' | 'map'>('list');
 
   // Fetch data using React Query hooks
@@ -117,7 +117,13 @@ export function SignalementsPage() {
     );
   }
 
-  const filteredSignalements = signalements || [];
+  const filteredSignalements =
+    signalements?.filter(s => {
+      const categoryMatch = selectedCategory === 'all' || s.category?.toLowerCase() === selectedCategory?.toLowerCase();
+      const statusMatch = selectedStatus === 'all' || s.status?.toLowerCase() === selectedStatus?.toLowerCase();
+      return categoryMatch && statusMatch;
+    }) ?? [];
+
 
   return (
     <div>
@@ -167,20 +173,20 @@ export function SignalementsPage() {
 
         {/* Filters and Create Button */}
         <div className="flex flex-col sm:flex-row gap-4 mb-6">
-          <Select value={selectedCategory || 'all'} onValueChange={(v) => setSelectedCategory(v === 'all' ? null : v)}>
+          <Select value={selectedCategory || 'all'} onValueChange={(v) => setSelectedCategory(v === 'all' ? 'all' : v)}>
             <SelectTrigger className="w-full sm:w-[200px]">
               <SelectValue placeholder={language === 'fr' ? 'Catégorie' : language === 'de' ? 'Kategorie' : 'Category'} />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">{language === 'fr' ? 'Toutes' : language === 'de' ? 'Alle' : 'All'}</SelectItem>
-              <SelectItem value="infrastructure">{getCategoryLabel('infrastructure')}</SelectItem>
-              <SelectItem value="cleanliness">{getCategoryLabel('cleanliness')}</SelectItem>
-              <SelectItem value="safety">{getCategoryLabel('safety')}</SelectItem>
-              <SelectItem value="environment">{getCategoryLabel('environment')}</SelectItem>
-              <SelectItem value="public_space">{getCategoryLabel('public_space')}</SelectItem>
-              <SelectItem value="transport">{getCategoryLabel('transport')}</SelectItem>
-              <SelectItem value="noise">{getCategoryLabel('noise')}</SelectItem>
-              <SelectItem value="other">{getCategoryLabel('other')}</SelectItem>
+              <SelectItem value="INFRASTRUCTURE">{getCategoryLabel('INFRASTRUCTURE')}</SelectItem>
+              <SelectItem value="CLEANLINESS">{getCategoryLabel('CLEANLINESS')}</SelectItem>
+              <SelectItem value="SAFETY">{getCategoryLabel('SAFETY')}</SelectItem>
+              <SelectItem value="ENVIRONMENT">{getCategoryLabel('ENVIRONMENT')}</SelectItem>
+              <SelectItem value="PUBLIC_SPACE">{getCategoryLabel('PUBLIC_SPACE')}</SelectItem>
+              <SelectItem value="TRANSPORT">{getCategoryLabel('TRANSPORT')}</SelectItem>
+              <SelectItem value="NOISE">{getCategoryLabel('NOISE')}</SelectItem>
+              <SelectItem value="OTHER">{getCategoryLabel('OTHER')}</SelectItem>
             </SelectContent>
           </Select>
 

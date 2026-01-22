@@ -716,7 +716,7 @@ export interface NotificationPreferencesDTO {
 
 export type YouthPollQuestionType = 'single_choice' | 'multiple_choice' | 'rating' | 'emoji' | 'yes_no';
 export type YouthPollStatus = 'draft' | 'active' | 'closed' | 'archived';
-export type YouthPollTargetAge = '12-15' | '16-18' | '19-25' | 'all';
+export type YouthPollTargetAge = 'all' | 'ALL' | 'AGE_12_15' | 'AGE_16_18' | 'AGE_19_25' | 'AGE_14_18' | 'AGE_15_20' | 'AGE_16_21' | 'AGE_14_19';
 
 export interface YouthPollOptionDTO {
   id: string;

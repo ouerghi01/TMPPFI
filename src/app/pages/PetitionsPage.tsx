@@ -252,20 +252,30 @@ export function PetitionsPage() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">{t('common.all')}</SelectItem>
-                  <SelectItem value="open">
+                  <SelectItem value="OPEN">
                     {language === 'fr' && 'Ouvertes'}
                     {language === 'de' && 'Offen'}
                     {language === 'en' && 'Open'}
                   </SelectItem>
-                  <SelectItem value="closed">
+                  <SelectItem value="CLOSED">
                     {language === 'fr' && 'Fermées'}
                     {language === 'de' && 'Geschlossen'}
                     {language === 'en' && 'Closed'}
                   </SelectItem>
-                  <SelectItem value="under_review">
+                  <SelectItem value="THRESHOLD_REACHED">
                     {language === 'fr' && 'Seuil atteint'}
                     {language === 'de' && 'Schwelle erreicht'}
                     {language === 'en' && 'Threshold reached'}
+                  </SelectItem>
+                  <SelectItem value="IN_PROGRESS">
+                    {language === 'fr' && 'En cours'}
+                    {language === 'de' && 'In Bearbeitung'}
+                    {language === 'en' && 'In progress'}
+                  </SelectItem>
+                  <SelectItem value="DRAFT">
+                    {language === 'fr' && 'Brouillon'}
+                    {language === 'de' && 'Entwurf'}
+                    {language === 'en' && 'Draft'}
                   </SelectItem>
                 </SelectContent>
               </Select>

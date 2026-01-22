@@ -8,11 +8,9 @@ import { ContentGrid } from '@/app/components/layout/ContentGrid';
 import { YouthPollCard } from '@/app/components/cards/YouthPollCard';
 import { EmptyState } from '@/app/components/EmptyState';
 import { LoadingSpinner } from '@/app/components/LoadingSpinner';
-import { Button } from '@/app/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/app/components/ui/tabs';
-import { useYouthPolls, useYouthSpaceStats, useThemes } from '@/app/hooks/useApi';
+import { Tabs, TabsList, TabsTrigger } from '@/app/components/ui/tabs';
 import { Star, Users, TrendingUp, Clock, Heart } from 'lucide-react';
-import type { YouthPollTargetAge } from '@/app/types';
+import { useThemes, useYouthPolls, useYouthSpaceStats } from '../hooks/useApi';
 
 /**
  * YouthSpacePage - Page dédiée aux espaces jeunesse
@@ -30,15 +28,15 @@ export default function YouthSpacePage() {
     themeId: '',
     targetAge: '',
   });
-  const [activeTab, setActiveTab] = useState<'all' | 'active' | 'featured'>('all');
+  const [activeTab, setActiveTab] = useState<'all' | 'OPEN' | 'featured'>('all');
 
   const { data: themes } = useThemes();
   const { data: stats, isLoading: isLoadingStats } = useYouthSpaceStats();
-  
+
   // Build filters based on active tab
   const pollFilters = {
     ...filters,
-    ...(activeTab === 'active' && { status: 'active' }),
+    ...(activeTab === 'OPEN' && { status: 'OPEN' }),
     ...(activeTab === 'featured' && { featured: true }),
   };
 
@@ -81,7 +79,7 @@ export default function YouthSpacePage() {
 
   const themeOptions = themes ? [
     { value: '', label: language === 'fr' ? 'Tous les thèmes' : language === 'de' ? 'Alle Themen' : 'All themes' },
-    ...themes.map((theme) => ({
+    ...themes.map((theme: any) => ({
       value: theme.id,
       label: tLocal(theme.name),
     })),
@@ -117,7 +115,7 @@ export default function YouthSpacePage() {
         {!isLoadingStats && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {kpiStats.map((stat, index) => (
-              <KPICard 
+              <KPICard
                 key={index}
                 label={stat.label}
                 value={stat.value}
@@ -136,7 +134,7 @@ export default function YouthSpacePage() {
                 <TabsTrigger value="all">
                   {language === 'fr' ? 'Tous' : language === 'de' ? 'Alle' : 'All'}
                 </TabsTrigger>
-                <TabsTrigger value="active">
+                <TabsTrigger value="OPEN">
                   {language === 'fr' ? 'Actifs' : language === 'de' ? 'Aktiv' : 'Active'}
                 </TabsTrigger>
                 <TabsTrigger value="featured">
@@ -153,14 +151,14 @@ export default function YouthSpacePage() {
                     type: 'select',
                     label: language === 'fr' ? 'Tranche d\'âge' : language === 'de' ? 'Altersgruppe' : 'Age group',
                     value: filters.targetAge,
-                    onChange: (value) => handleFilterChange('targetAge', value),
+                    onChange: (value: any) => handleFilterChange('targetAge', value),
                     options: ageGroupOptions,
                   },
                   {
                     type: 'select',
                     label: language === 'fr' ? 'Thème' : language === 'de' ? 'Thema' : 'Theme',
                     value: filters.themeId,
-                    onChange: (value) => handleFilterChange('themeId', value),
+                    onChange: (value: any) => handleFilterChange('themeId', value),
                     options: themeOptions,
                   },
                 ]}
@@ -193,7 +191,7 @@ export default function YouthSpacePage() {
           />
         ) : (
           <ContentGrid>
-            {polls.map((poll) => (
+            {polls.map((poll: any) => (
               <YouthPollCard key={poll.id} poll={poll} />
             ))}
           </ContentGrid>

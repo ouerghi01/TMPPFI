@@ -94,7 +94,7 @@ import { getPetitionById, getPetitions } from '../../api/petetion';
 import { getAssembly } from '../../api/assembly';
 import { getConferencesApi } from '../../api/conferences';
 import { getConsultationById, getConsultations, getLegislativeConsultationsApi } from '../../api/consultations';
-import { getPollsApi } from '../../api/votes';
+import { getPollsApi, getYouthPollsApi } from '../../api/votes';
 import { getSignalementsApi, getSignalementsGeoApi, getSignalementStatsApi } from '../../api/signalements';
 import { getSpeakerById } from '../../api/speaker';
 import { Await } from 'react-router-dom';
@@ -847,19 +847,18 @@ export const youthPollsApi = {
     targetAge?: string;
     featured?: boolean;
   }): Promise<ApiResponse<YouthPollDTO[]>> {
-    await simulateDelay();
 
-    let polls = await getPollsApi(PollType.YOUTH_POLL);
+    let polls = await getYouthPollsApi();
 
-    if (params?.status) {
+    if (params?.status && params.status.length != 0) {
       polls = polls.filter(p => p.status === params.status);
     }
 
-    if (params?.themeId) {
+    if (params?.themeId && params.themeId.length != 0) {
       polls = polls.filter(p => p.themeId === params.themeId);
     }
 
-    if (params?.targetAge) {
+    if (params?.targetAge && params.targetAge.length != 0) {
       polls = polls.filter(p => p.targetAge === params.targetAge || p.targetAge === 'all');
     }
 
@@ -877,9 +876,8 @@ export const youthPollsApi = {
    * GET /api/youth-polls/:id
    */
   async getYouthPollById(id: string): Promise<ApiResponse<YouthPollDTO>> {
-    await simulateDelay();
-
-    const poll = mockYouthPolls.find(p => p.id === id);
+    const polls = (await getYouthPollsApi())
+    const poll = polls.find(p => p.id === parseInt(id));
 
     if (!poll) {
       throw new Error(`Youth poll with id "${id}" not found`);
@@ -1176,11 +1174,11 @@ export const signalementApi = {
 
     let signalements = await getSignalementsApi();
 
-    if (params?.status) {
-      signalements = signalements.filter(s => s.status === params.status);
+    if (params?.status && params.status !== 'all') {
+      signalements = signalements.filter(s => s.status.toLowerCase() === params.status?.toLowerCase());
     }
-    if (params?.category) {
-      signalements = signalements.filter(s => s.category === params.category);
+    if (params?.category && params.category !== 'all') {
+      signalements = signalements.filter(s => s.category.toLowerCase() === params.category?.toLowerCase());
     }
     if (params?.themeId) {
       signalements = signalements.filter(s => s.themeId === params.themeId);

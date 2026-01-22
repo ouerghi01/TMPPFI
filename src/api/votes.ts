@@ -20,3 +20,15 @@ export const getPollsApi = async (
     throw error;
   }
 };
+
+export const getYouthPollsApi = async (
+
+): Promise<any[]> => {
+  try {
+    const response = await apiClient.get<any[]>('/public/polls/youth-poll-collections');
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching polls:', error);
+    throw error;
+  }
+};

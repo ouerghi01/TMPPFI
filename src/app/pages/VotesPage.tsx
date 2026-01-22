@@ -199,12 +199,17 @@ export function VotesPage() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">{t('common.all')}</SelectItem>
-                  <SelectItem value="open">
+                  <SelectItem value="OPEN">
                     {language === 'fr' && 'Ouvert'}
                     {language === 'de' && 'Offen'}
                     {language === 'en' && 'Open'}
                   </SelectItem>
-                  <SelectItem value="upcoming">
+                  <SelectItem value="CLOSED">
+                    {language === 'fr' && 'Fermé'}
+                    {language === 'de' && 'Geschlossen'}
+                    {language === 'en' && 'Closed'}
+                  </SelectItem>
+                  <SelectItem value="UPCOMING">
                     {language === 'fr' && 'À venir'}
                     {language === 'de' && 'Kommend'}
                     {language === 'en' && 'Upcoming'}

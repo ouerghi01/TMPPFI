@@ -1,21 +1,21 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useLanguage } from '@/app/contexts/LanguageContext';
-import { PageBanner } from '@/app/components/PageBanner';
-import { PageLayout } from '@/app/components/layout/PageLayout';
-import { LoadingSpinner } from '@/app/components/LoadingSpinner';
-import { ErrorMessage } from '@/app/components/ErrorMessage';
-import { Button } from '@/app/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/app/components/ui/card';
-import { Badge } from '@/app/components/ui/badge';
-import { RadioGroup, RadioGroupItem } from '@/app/components/ui/radio-group';
-import { Checkbox } from '@/app/components/ui/checkbox';
-import { Label } from '@/app/components/ui/label';
-import { Progress } from '@/app/components/ui/progress';
-import { useYouthPoll, useRespondToYouthPoll } from '@/app/hooks/useApi';
-import { Sparkles, Clock, Users, CheckCircle, ArrowLeft, Eye, Check, X, Circle, Square } from 'lucide-react';
+
+import { Sparkles, Clock, Users, CheckCircle, ArrowLeft, Eye, Check, X, Circle, Square, Badge } from 'lucide-react';
 import { toast } from 'sonner';
-import type { CreateYouthPollResponseDTO } from '@/app/types';
+import { useYouthPoll, useRespondToYouthPoll } from '../hooks/useApi';
+import { useLanguage } from '../contexts/LanguageContext';
+import { CreateYouthPollResponseDTO } from '../types';
+import { Checkbox } from '../components/ui/checkbox';
+import { Progress } from '../components/ui/progress';
+import { Label } from '../components/ui/label';
+import { RadioGroup, RadioGroupItem } from '../components/ui/radio-group';
+import { ErrorMessage } from '../components/ErrorMessage';
+import { PageLayout } from '../components/layout/PageLayout';
+import { LoadingSpinner } from '../components/LoadingSpinner';
+import { PageBanner } from '../components/PageBanner';
+import { Button } from '../components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 
 /**
  * YouthPollDetailPage - Page de détail d'un micro-sondage
@@ -73,8 +73,8 @@ export default function YouthPollDetailPage() {
     if (missingResponses.length > 0) {
       toast.error(
         language === 'fr' ? 'Veuillez répondre à toutes les questions obligatoires' :
-        language === 'de' ? 'Bitte beantworten Sie alle Pflichtfragen' :
-        'Please answer all required questions'
+          language === 'de' ? 'Bitte beantworten Sie alle Pflichtfragen' :
+            'Please answer all required questions'
       );
       return;
     }
@@ -91,14 +91,14 @@ export default function YouthPollDetailPage() {
       await respondMutation.mutateAsync(responseData);
       toast.success(
         language === 'fr' ? `🎉 Merci ! Tu as gagné ${poll.gamificationPoints} points` :
-        language === 'de' ? `🎉 Danke! Du hast ${poll.gamificationPoints} Punkte gewonnen` :
-        `🎉 Thanks! You earned ${poll.gamificationPoints} points`
+          language === 'de' ? `🎉 Danke! Du hast ${poll.gamificationPoints} Punkte gewonnen` :
+            `🎉 Thanks! You earned ${poll.gamificationPoints} points`
       );
     } catch (error) {
       toast.error(
         language === 'fr' ? 'Erreur lors de la soumission' :
-        language === 'de' ? 'Fehler beim Senden' :
-        'Error submitting response'
+          language === 'de' ? 'Fehler beim Senden' :
+            'Error submitting response'
       );
     }
   };
@@ -129,12 +129,12 @@ export default function YouthPollDetailPage() {
           icon={<Sparkles className="w-12 h-12 text-white" />}
         />
         <PageLayout className="py-8">
-          <ErrorMessage 
-            message={
-              language === 'fr' ? 'Sondage introuvable' :
+          <ErrorMessage
+            title={language === 'fr' ? 'Sondage introuvable' :
               language === 'de' ? 'Umfrage nicht gefunden' :
-              'Poll not found'
-            } 
+                'Poll not found'
+            }
+            onRetry={() => navigate('/youth-space')}
           />
         </PageLayout>
       </div>
@@ -154,15 +154,15 @@ export default function YouthPollDetailPage() {
 
       <PageLayout className="py-8 max-w-4xl">
         {/* Retour */}
-        <Button 
-          variant="ghost" 
+        <Button
+          variant="ghost"
           onClick={() => navigate('/youth-space')}
           className="mb-6"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
           {language === 'fr' ? 'Retour aux sondages' :
-           language === 'de' ? 'Zurück zu Umfragen' :
-           'Back to polls'}
+            language === 'de' ? 'Zurück zu Umfragen' :
+              'Back to polls'}
         </Button>
 
         {/* Info Card */}
@@ -177,24 +177,24 @@ export default function YouthPollDetailPage() {
                 <Users className="w-4 h-4 text-gray-500" />
                 <span>
                   {poll.totalResponses} {language === 'fr' ? 'réponses' :
-                   language === 'de' ? 'Antworten' :
-                   'responses'}
+                    language === 'de' ? 'Antworten' :
+                      'responses'}
                 </span>
               </div>
               <div className="flex items-center gap-2">
                 <Sparkles className="w-4 h-4 text-yellow-600" />
                 <span className="font-semibold text-yellow-700">
                   {poll.gamificationPoints} {language === 'fr' ? 'points' :
-                   language === 'de' ? 'Punkte' :
-                   'points'}
+                    language === 'de' ? 'Punkte' :
+                      'points'}
                 </span>
               </div>
               {hasResponded && (
                 <Badge className="bg-green-100 text-green-800">
                   <CheckCircle className="w-3 h-3 mr-1" />
                   {language === 'fr' ? 'Complété' :
-                   language === 'de' ? 'Abgeschlossen' :
-                   'Completed'}
+                    language === 'de' ? 'Abgeschlossen' :
+                      'Completed'}
                 </Badge>
               )}
             </div>
@@ -239,14 +239,14 @@ export default function YouthPollDetailPage() {
                   {visualMode ? (
                     <>
                       {language === 'fr' ? '📝 Mode normal' :
-                      language === 'de' ? '📝 Normaler Modus' :
-                      '📝 Normal mode'}
+                        language === 'de' ? '📝 Normaler Modus' :
+                          '📝 Normal mode'}
                     </>
                   ) : (
                     <>
                       {language === 'fr' ? '🎨 Mode simplifié' :
-                      language === 'de' ? '🎨 Vereinfachter Modus' :
-                      '🎨 Simplified mode'}
+                        language === 'de' ? '🎨 Vereinfachter Modus' :
+                          '🎨 Simplified mode'}
                     </>
                   )}
                 </Button>
@@ -281,29 +281,25 @@ export default function YouthPollDetailPage() {
                             key={option.id}
                             onClick={() => handleOptionSelect(question.id, option.id, false)}
                             disabled={hasResponded}
-                            className={`p-6 rounded-2xl border-4 transition-all transform hover:scale-105 ${
-                              isSelected
-                                ? `${visual.borderColor} ${visual.color} bg-opacity-10 shadow-xl`
-                                : 'border-gray-300 bg-white hover:border-gray-400'
-                            } ${hasResponded ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}
+                            className={`p-6 rounded-2xl border-4 transition-all transform hover:scale-105 ${isSelected
+                              ? `${visual.borderColor} ${visual.color} bg-opacity-10 shadow-xl`
+                              : 'border-gray-300 bg-white hover:border-gray-400'
+                              } ${hasResponded ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}
                           >
                             <div className="flex flex-col items-center gap-3">
-                              <div className={`w-20 h-20 rounded-full flex items-center justify-center ${
-                                isSelected
-                                  ? `${visual.color} text-white`
-                                  : `bg-gray-100 ${visual.textColor}`
-                              }`}>
+                              <div className={`w-20 h-20 rounded-full flex items-center justify-center ${isSelected
+                                ? `${visual.color} text-white`
+                                : `bg-gray-100 ${visual.textColor}`
+                                }`}>
                                 <VisualIcon className="w-10 h-10 stroke-[3]" />
                               </div>
                               <div className="text-center">
-                                <div className={`text-4xl mb-2 ${
-                                  isSelected ? visual.textColor : 'text-gray-400'
-                                }`}>
+                                <div className={`text-4xl mb-2 ${isSelected ? visual.textColor : 'text-gray-400'
+                                  }`}>
                                   {option.emoji || visual.emoji}
                                 </div>
-                                <span className={`text-lg font-bold block ${
-                                  isSelected ? 'text-gray-900' : 'text-gray-700'
-                                }`}>
+                                <span className={`text-lg font-bold block ${isSelected ? 'text-gray-900' : 'text-gray-700'
+                                  }`}>
                                   {tLocal(option.text)}
                                 </span>
                               </div>
@@ -363,29 +359,25 @@ export default function YouthPollDetailPage() {
                             key={option.id}
                             onClick={() => handleOptionSelect(question.id, option.id, true)}
                             disabled={hasResponded}
-                            className={`p-6 rounded-2xl border-4 transition-all transform hover:scale-105 ${
-                              isSelected
-                                ? `${visual.borderColor} ${visual.color} bg-opacity-10 shadow-xl`
-                                : 'border-gray-300 bg-white hover:border-gray-400'
-                            } ${hasResponded ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}
+                            className={`p-6 rounded-2xl border-4 transition-all transform hover:scale-105 ${isSelected
+                              ? `${visual.borderColor} ${visual.color} bg-opacity-10 shadow-xl`
+                              : 'border-gray-300 bg-white hover:border-gray-400'
+                              } ${hasResponded ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}
                           >
                             <div className="flex flex-col items-center gap-3">
-                              <div className={`w-20 h-20 rounded-full flex items-center justify-center ${
-                                isSelected
-                                  ? `${visual.color} text-white`
-                                  : `bg-gray-100 ${visual.textColor}`
-                              }`}>
+                              <div className={`w-20 h-20 rounded-full flex items-center justify-center ${isSelected
+                                ? `${visual.color} text-white`
+                                : `bg-gray-100 ${visual.textColor}`
+                                }`}>
                                 <VisualIcon className="w-10 h-10 stroke-[3]" />
                               </div>
                               <div className="text-center">
-                                <div className={`text-4xl mb-2 ${
-                                  isSelected ? visual.textColor : 'text-gray-400'
-                                }`}>
+                                <div className={`text-4xl mb-2 ${isSelected ? visual.textColor : 'text-gray-400'
+                                  }`}>
                                   {option.emoji || visual.emoji}
                                 </div>
-                                <span className={`text-lg font-bold block ${
-                                  isSelected ? 'text-gray-900' : 'text-gray-700'
-                                }`}>
+                                <span className={`text-lg font-bold block ${isSelected ? 'text-gray-900' : 'text-gray-700'
+                                  }`}>
                                   {tLocal(option.text)}
                                 </span>
                               </div>
@@ -446,29 +438,25 @@ export default function YouthPollDetailPage() {
                             key={option.id}
                             onClick={() => handleOptionSelect(question.id, option.id, false)}
                             disabled={hasResponded}
-                            className={`p-8 rounded-2xl border-4 transition-all transform hover:scale-105 ${
-                              isSelected
-                                ? `${visual.borderColor} ${visual.color} bg-opacity-10 shadow-xl`
-                                : 'border-gray-300 bg-white hover:border-gray-400'
-                            } ${hasResponded ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}
+                            className={`p-8 rounded-2xl border-4 transition-all transform hover:scale-105 ${isSelected
+                              ? `${visual.borderColor} ${visual.color} bg-opacity-10 shadow-xl`
+                              : 'border-gray-300 bg-white hover:border-gray-400'
+                              } ${hasResponded ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}
                           >
                             <div className="flex flex-col items-center gap-4">
-                              <div className={`w-24 h-24 rounded-full flex items-center justify-center ${
-                                isSelected
-                                  ? `${visual.color} text-white`
-                                  : `bg-gray-100 ${visual.textColor}`
-                              }`}>
+                              <div className={`w-24 h-24 rounded-full flex items-center justify-center ${isSelected
+                                ? `${visual.color} text-white`
+                                : `bg-gray-100 ${visual.textColor}`
+                                }`}>
                                 <VisualIcon className="w-12 h-12 stroke-[3]" />
                               </div>
                               <div className="text-center">
-                                <div className={`text-5xl mb-3 ${
-                                  isSelected ? visual.textColor : 'text-gray-400'
-                                }`}>
+                                <div className={`text-5xl mb-3 ${isSelected ? visual.textColor : 'text-gray-400'
+                                  }`}>
                                   {option.emoji || visual.emoji}
                                 </div>
-                                <span className={`text-2xl font-bold block ${
-                                  isSelected ? 'text-gray-900' : 'text-gray-700'
-                                }`}>
+                                <span className={`text-2xl font-bold block ${isSelected ? 'text-gray-900' : 'text-gray-700'
+                                  }`}>
                                   {tLocal(option.text)}
                                 </span>
                               </div>
@@ -526,19 +514,17 @@ export default function YouthPollDetailPage() {
                             key={option.id}
                             onClick={() => handleOptionSelect(question.id, option.id, false)}
                             disabled={hasResponded}
-                            className={`p-6 rounded-2xl border-4 transition-all transform hover:scale-105 ${
-                              isSelected
-                                ? 'border-purple-500 bg-purple-50 shadow-xl'
-                                : 'border-gray-300 bg-white hover:border-gray-400'
-                            } ${hasResponded ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}
+                            className={`p-6 rounded-2xl border-4 transition-all transform hover:scale-105 ${isSelected
+                              ? 'border-purple-500 bg-purple-50 shadow-xl'
+                              : 'border-gray-300 bg-white hover:border-gray-400'
+                              } ${hasResponded ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}
                           >
                             <div className="flex flex-col items-center gap-3">
                               <div className={`text-6xl ${isSelected ? 'scale-125' : ''} transition-transform`}>
                                 {option.emoji}
                               </div>
-                              <span className={`text-base font-bold text-center ${
-                                isSelected ? 'text-purple-700' : 'text-gray-700'
-                              }`}>
+                              <span className={`text-base font-bold text-center ${isSelected ? 'text-purple-700' : 'text-gray-700'
+                                }`}>
                                 {tLocal(option.text)}
                               </span>
                               {isSelected && (
@@ -564,13 +550,12 @@ export default function YouthPollDetailPage() {
                         {question.options.map((option) => {
                           const isSelected = responses[question.id]?.[0] === option.id;
                           return (
-                            <div 
-                              key={option.id} 
-                              className={`flex items-center space-x-3 p-4 rounded-lg border-2 transition-all ${
-                                isSelected 
-                                  ? 'border-purple-500 bg-purple-50' 
-                                  : 'border-gray-200 hover:bg-gray-50'
-                              }`}
+                            <div
+                              key={option.id}
+                              className={`flex items-center space-x-3 p-4 rounded-lg border-2 transition-all ${isSelected
+                                ? 'border-purple-500 bg-purple-50'
+                                : 'border-gray-200 hover:bg-gray-50'
+                                }`}
                             >
                               <RadioGroupItem value={option.id} id={option.id} />
                               <Label htmlFor={option.id} className="flex-1 cursor-pointer flex items-center gap-3">
@@ -602,18 +587,17 @@ export default function YouthPollDetailPage() {
                       ).map((rating) => {
                         const ratingId = `rating_${rating}`;
                         const isSelected = responses[question.id]?.[0] === ratingId;
-                        
+
                         return (
                           <button
                             key={rating}
                             type="button"
                             onClick={() => handleOptionSelect(question.id, ratingId, false)}
                             disabled={hasResponded}
-                            className={`w-14 h-14 rounded-full text-2xl font-bold transition-all ${
-                              isSelected
-                                ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white scale-110 shadow-lg'
-                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200 hover:scale-105'
-                            } ${hasResponded ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}
+                            className={`w-14 h-14 rounded-full text-2xl font-bold transition-all ${isSelected
+                              ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white scale-110 shadow-lg'
+                              : 'bg-gray-100 text-gray-600 hover:bg-gray-200 hover:scale-105'
+                              } ${hasResponded ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}
                           >
                             {rating}
                           </button>
@@ -622,14 +606,14 @@ export default function YouthPollDetailPage() {
                     </div>
                     <div className="flex justify-between text-sm text-gray-500 px-2">
                       <span>
-                        {language === 'fr' ? 'Pas satisfait' : 
-                         language === 'de' ? 'Nicht zufrieden' : 
-                         'Not satisfied'}
+                        {language === 'fr' ? 'Pas satisfait' :
+                          language === 'de' ? 'Nicht zufrieden' :
+                            'Not satisfied'}
                       </span>
                       <span>
-                        {language === 'fr' ? 'Très satisfait' : 
-                         language === 'de' ? 'Sehr zufrieden' : 
-                         'Very satisfied'}
+                        {language === 'fr' ? 'Très satisfait' :
+                          language === 'de' ? 'Sehr zufrieden' :
+                            'Very satisfied'}
                       </span>
                     </div>
                   </div>
@@ -650,13 +634,13 @@ export default function YouthPollDetailPage() {
             >
               {respondMutation.isPending ? (
                 language === 'fr' ? 'Envoi...' :
-                language === 'de' ? 'Senden...' :
-                'Submitting...'
+                  language === 'de' ? 'Senden...' :
+                    'Submitting...'
               ) : (
                 <>
                   {language === 'fr' ? 'Valider mes réponses' :
-                   language === 'de' ? 'Antworten absenden' :
-                   'Submit answers'}
+                    language === 'de' ? 'Antworten absenden' :
+                      'Submit answers'}
                   <Sparkles className="w-4 h-4 ml-2" />
                 </>
               )}

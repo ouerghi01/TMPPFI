@@ -81,6 +81,7 @@ export function ConsultationsPage() {
   }
 
   const filteredConsultations = (consultations || []).filter((consultation) => {
+    if (selectedTheme === "all" || selectedStatus === "all") return true;
     if (selectedTheme && consultation.themeId !== selectedTheme) return false;
     if (selectedStatus && consultation.status !== selectedStatus) return false;
     return true;
@@ -194,8 +195,8 @@ export function ConsultationsPage() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">{t('common.all')}</SelectItem>
-                  <SelectItem value="open">Ouvertes</SelectItem>
-                  <SelectItem value="closed">Fermées</SelectItem>
+                  <SelectItem value="OPEN">Ouvertes</SelectItem>
+                  <SelectItem value="CLOSED">Fermées</SelectItem>
                 </SelectContent>
               </Select>
             </FilterField>
@@ -354,7 +355,7 @@ function ConsultationsList({ consultations }: { consultations: ConsultationDTO[]
             </div>
 
             {/* Button aligned at bottom */}
-            {consultation.status === 'open' && (
+            {consultation.status === 'OPEN' && (
               <div className="mt-4 pt-4 border-t border-gray-100">
                 <Link to={`/consultations/${consultation.id}`}>
                   <Button className="w-full gap-2">

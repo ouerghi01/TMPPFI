@@ -32,7 +32,7 @@ export function SignalementCard({ signalement }: SignalementCardProps) {
   const handleSupport = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     if (!isSupported) {
       setIsSupported(true);
       setLocalUpvotes(prev => prev + 1);
@@ -44,16 +44,17 @@ export function SignalementCard({ signalement }: SignalementCardProps) {
 
   const getCategoryLabel = (category: string) => {
     const labels: Record<string, { fr: string; de: string; en: string }> = {
-      infrastructure: { fr: 'Infrastructure', de: 'Infrastruktur', en: 'Infrastructure' },
-      cleanliness: { fr: 'Propreté', de: 'Sauberkeit', en: 'Cleanliness' },
-      safety: { fr: 'Sécurité', de: 'Sicherheit', en: 'Safety' },
-      environment: { fr: 'Environnement', de: 'Umwelt', en: 'Environment' },
-      public_space: { fr: 'Espace public', de: 'Öffentlicher Raum', en: 'Public space' },
-      transport: { fr: 'Transport', de: 'Transport', en: 'Transport' },
-      noise: { fr: 'Nuisances sonores', de: 'Lärmbelästigung', en: 'Noise' },
-      other: { fr: 'Autre', de: 'Andere', en: 'Other' },
+      INFRASTRUCTURE: { fr: 'Infrastructure', de: 'Infrastruktur', en: 'Infrastructure' },
+      CLEANLINESS: { fr: 'Propreté', de: 'Sauberkeit', en: 'Cleanliness' },
+      SAFETY: { fr: 'Sécurité', de: 'Sicherheit', en: 'Safety' },
+      ENVIRONMENT: { fr: 'Environnement', de: 'Umwelt', en: 'Environment' },
+      PUBLIC_SPACE: { fr: 'Espace public', de: 'Öffentlicher Raum', en: 'Public space' },
+      TRANSPORT: { fr: 'Transport', de: 'Transport', en: 'Transport' },
+      NOISE: { fr: 'Nuisances sonores', de: 'Lärmbelästigung', en: 'Noise' },
+      OTHER: { fr: 'Autre', de: 'Andere', en: 'Other' },
     };
-    return labels[category]?.[language] || category;
+
+    return labels[category.toUpperCase()]?.[language] || category;
   };
 
   const getPriorityColor = (priority: string) => {
@@ -131,28 +132,28 @@ export function SignalementCard({ signalement }: SignalementCardProps) {
               <ThumbsUp className={`w-4 h-4 ${isSupported ? "fill-current" : ""}`} />
               <span className="ml-1">
                 {language === 'fr' ? 'Soutenir' :
-                 language === 'de' ? 'Unterstützen' :
-                 'Support'}
+                  language === 'de' ? 'Unterstützen' :
+                    'Support'}
               </span>
             </Button>
           </div>
 
           {/* Date */}
           <div className="text-sm text-gray-500">
-            {language === 'fr' ? 'Signalé le' : 
-             language === 'de' ? 'Gemeldet am' : 
-             'Reported on'} {formatDate(signalement.createdAt)}
+            {language === 'fr' ? 'Signalé le' :
+              language === 'de' ? 'Gemeldet am' :
+                'Reported on'} {formatDate(signalement.createdAt)}
           </div>
 
           {/* CTA */}
           <div className="pt-2">
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               className="w-full group-hover:bg-blue-50 group-hover:border-blue-300 group-hover:text-blue-700 transition-all"
             >
-              {language === 'fr' ? 'Voir le détail' : 
-               language === 'de' ? 'Details ansehen' : 
-               'View details'}
+              {language === 'fr' ? 'Voir le détail' :
+                language === 'de' ? 'Details ansehen' :
+                  'View details'}
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </Button>
           </div>

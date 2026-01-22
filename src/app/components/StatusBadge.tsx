@@ -6,7 +6,7 @@ interface StatusBadgeProps {
   'draft' | 'open' | 'closed' | 'upcoming' | 'active' | 'pending' | 'accepted' | 'rejected' | 'completed' | 'threshold_reached' | 'in_progress' | 'archived' | 'in_review' | 'inactive' | 'cancelled' | 'registration_open' | 'registration_closed';
 }
 
-export function StatusBadge({ status }: StatusBadgeProps) {
+export function StatusBadge({ status }: any) {
   const { t } = useLanguage();
 
   const statusConfig: Record<string, { label: string; className: string }> = {

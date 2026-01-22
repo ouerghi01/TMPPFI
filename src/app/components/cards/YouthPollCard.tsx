@@ -5,13 +5,16 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui
 import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
 import { ThemeTag } from '../ThemeTag';
-import { useLanguage } from '@/app/contexts/LanguageContext';
-import type { YouthPollDTO } from '@/app/types';
+import { AGE_LABELS, TargetAgeRange } from '../../types/age';
+import { YouthPollDTO } from '../../types';
+import { useLanguage } from '../../contexts/LanguageContext';
+
 
 interface YouthPollCardProps {
   poll: YouthPollDTO;
   compact?: boolean;
 }
+
 
 /**
  * YouthPollCard - Carte de micro-sondage jeunesse
@@ -48,12 +51,13 @@ export function YouthPollCard({ poll, compact = false }: YouthPollCardProps) {
     return labels[status]?.[language] || status;
   };
 
-  const getAgeLabel = (targetAge: string) => {
-    if (targetAge === 'all') {
-      return language === 'fr' ? 'Tous âges' : language === 'de' ? 'Alle Altersgruppen' : 'All ages';
-    }
-    return `${targetAge} ${language === 'fr' ? 'ans' : language === 'de' ? 'Jahre' : 'years'}`;
+  const getAgeLabel = (
+    targetAge: TargetAgeRange,
+    language: 'fr' | 'en' | 'de'
+  ): string => {
+    return AGE_LABELS[targetAge]?.[language] ?? AGE_LABELS[TargetAgeRange.ALL][language];
   };
+
 
   const getDurationLabel = () => {
     const duration = poll.estimatedDuration;
@@ -71,8 +75,8 @@ export function YouthPollCard({ poll, compact = false }: YouthPollCardProps) {
             <div className="flex items-start gap-3">
               {poll.imageUrl && (
                 <div className="flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden bg-gray-100">
-                  <img 
-                    src={poll.imageUrl} 
+                  <img
+                    src={poll.imageUrl}
                     alt={tLocal(poll.title)}
                     className="w-full h-full object-cover"
                   />
@@ -106,8 +110,8 @@ export function YouthPollCard({ poll, compact = false }: YouthPollCardProps) {
         {/* Image */}
         {poll.imageUrl && (
           <div className="relative w-full h-40 bg-gradient-to-br from-blue-100 to-purple-100 overflow-hidden">
-            <img 
-              src={poll.imageUrl} 
+            <img
+              src={poll.imageUrl}
               alt={tLocal(poll.title)}
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
             />
@@ -145,7 +149,7 @@ export function YouthPollCard({ poll, compact = false }: YouthPollCardProps) {
           <div className="flex flex-wrap gap-2">
             {poll.themeId && <ThemeTag themeId={poll.themeId} size="sm" />}
             <Badge variant="secondary" className="text-xs">
-              {getAgeLabel(poll.targetAge)}
+              {getAgeLabel(poll.targetAge, language)}
             </Badge>
           </div>
 
@@ -169,20 +173,20 @@ export function YouthPollCard({ poll, compact = false }: YouthPollCardProps) {
 
           {/* CTA */}
           <div className="pt-2">
-            <Button 
+            <Button
               variant={poll.hasUserResponded ? 'outline' : 'default'}
-              className={poll.hasUserResponded 
+              className={poll.hasUserResponded
                 ? 'w-full'
                 : 'w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white'
               }
             >
-              {poll.hasUserResponded 
-                ? (language === 'fr' ? 'Voir les résultats' : 
-                   language === 'de' ? 'Ergebnisse anzeigen' : 
-                   'View results')
-                : (language === 'fr' ? 'Participer maintenant' : 
-                   language === 'de' ? 'Jetzt teilnehmen' : 
-                   'Participate now')
+              {poll.hasUserResponded
+                ? (language === 'fr' ? 'Voir les résultats' :
+                  language === 'de' ? 'Ergebnisse anzeigen' :
+                    'View results')
+                : (language === 'fr' ? 'Participer maintenant' :
+                  language === 'de' ? 'Jetzt teilnehmen' :
+                    'Participate now')
               }
             </Button>
           </div>
