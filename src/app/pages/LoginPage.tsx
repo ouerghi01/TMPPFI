@@ -50,31 +50,36 @@ export function LoginPage() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (validateForm()) {
-      // Extract name from email (simulated - in real app, would come from server)
-      const emailName = email.split('@')[0];
-      const firstName = emailName.charAt(0).toUpperCase() + emailName.slice(1);
-      const lastName = 'Utilisateur'; // Would come from server in real app
-      
-      // Login with auth context
-      login(email, firstName, lastName);
-      
-      // Show success message
-      toast.success(
-        language === 'fr' 
-          ? 'Connexion réussie !' 
-          : language === 'de' 
-          ? 'Anmeldung erfolgreich!' 
-          : 'Login successful!'
-      );
-      
-      // Redirect to dashboard
-      setTimeout(() => {
-        navigate('/');
-      }, 1000);
+      try {
+        // Login with auth context
+        await login(email, password);
+
+        // Show success message
+        toast.success(
+          language === 'fr'
+            ? 'Connexion réussie !'
+            : language === 'de'
+              ? 'Anmeldung erfolgreich!'
+              : 'Login successful!'
+        );
+
+        // Redirect to dashboard
+        setTimeout(() => {
+          navigate('/');
+        }, 1000);
+      } catch (error) {
+        toast.error(
+          language === 'fr'
+            ? 'Échec de la connexion. Veuillez vérifier vos identifiants.'
+            : language === 'de'
+              ? 'Anmeldung fehlgeschlagen. Bitte überprüfen Sie Ihre Anmeldeinformationen.'
+              : 'Login failed. Please check your credentials.'
+        );
+      }
     }
   };
 
@@ -94,11 +99,11 @@ export function LoginPage() {
             CiviAgora
           </h1>
           <p className="text-gray-600">
-            {language === 'fr' 
-              ? 'Plateforme de démocratie participative' 
-              : language === 'de' 
-              ? 'Plattform für partizipative Demokratie' 
-              : 'Participatory Democracy Platform'}
+            {language === 'fr'
+              ? 'Plateforme de démocratie participative'
+              : language === 'de'
+                ? 'Plattform für partizipative Demokratie'
+                : 'Participatory Democracy Platform'}
           </p>
         </motion.div>
 
@@ -118,8 +123,8 @@ export function LoginPage() {
                 {language === 'fr'
                   ? 'Accédez à votre espace citoyen'
                   : language === 'de'
-                  ? 'Zugang zu Ihrem Bürgerbereich'
-                  : 'Access your citizen space'}
+                    ? 'Zugang zu Ihrem Bürgerbereich'
+                    : 'Access your citizen space'}
               </CardDescription>
             </CardHeader>
 
@@ -219,11 +224,11 @@ export function LoginPage() {
                 {/* Register Link */}
                 <div className="text-center">
                   <p className="text-sm text-gray-600 mb-3">
-                    {language === 'fr' 
-                      ? 'Vous n\'avez pas encore de compte ?' 
-                      : language === 'de' 
-                      ? 'Sie haben noch kein Konto?' 
-                      : 'Don\'t have an account yet?'}
+                    {language === 'fr'
+                      ? 'Vous n\'avez pas encore de compte ?'
+                      : language === 'de'
+                        ? 'Sie haben noch kein Konto?'
+                        : 'Don\'t have an account yet?'}
                   </p>
                   <Link to="/register">
                     <Button
@@ -250,8 +255,8 @@ export function LoginPage() {
                       {language === 'fr'
                         ? 'Vos données sont chiffrées et protégées. Un citoyen = Un compte.'
                         : language === 'de'
-                        ? 'Ihre Daten sind verschlüsselt und geschützt. Ein Bürger = Ein Konto.'
-                        : 'Your data is encrypted and protected. One citizen = One account.'}
+                          ? 'Ihre Daten sind verschlüsselt und geschützt. Ein Bürger = Ein Konto.'
+                          : 'Your data is encrypted and protected. One citizen = One account.'}
                     </p>
                   </div>
                 </div>

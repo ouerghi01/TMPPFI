@@ -82,7 +82,10 @@ export function Dashboard() {
         (votes?.length ?? 0) +
         (assemblies?.length ?? 0) +
         (legislativeConsultations?.length ?? 0) +
-        (conferences?.length ?? 0)
+        (conferences?.length ?? 0) + 
+         
+        (youthPolls?.length ?? 0) +
+        (signalementStats?.totalSignalements ?? 0)
 
       ).toString(),
 
@@ -687,7 +690,7 @@ export function Dashboard() {
                 <Card className="h-full hover:shadow-lg transition-shadow">
                   <CardContent className="p-6">
                     <div className="flex items-center gap-2 mb-4">
-                      {petition.status === 'open' && (
+                      {petition.status === 'OPEN' && (
                         <Badge className="bg-emerald-50 text-emerald-600 border border-emerald-200 hover:bg-emerald-100 transition-colors">
                           <TrendingUp className="w-3 h-3 mr-1" />
                           {language === "fr" && "En tendance"}

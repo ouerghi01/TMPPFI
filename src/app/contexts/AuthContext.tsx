@@ -1,4 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { authApi } from '../../api/auth';
+import { setAuthToken, clearAuthToken, getAuthToken } from '../../client';
 
 interface UserProfile {
   firstName: string;
@@ -21,7 +23,7 @@ interface UserProfile {
 interface AuthContextType {
   isLoggedIn: boolean;
   user: UserProfile | null;
-  login: (email: string, firstName: string, lastName: string) => void;
+  login: (email: string, password: string) => Promise<void>;
   logout: () => void;
   updateProfile: (profile: UserProfile) => void;
 }
@@ -34,58 +36,73 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Load auth state from localStorage on mount
   useEffect(() => {
-    const savedAuth = localStorage.getItem('isLoggedIn');
+    const token = getAuthToken();
     const savedUser = localStorage.getItem('userProfile');
-    
-    if (savedAuth === 'true' && savedUser) {
+
+    if (token) {
       setIsLoggedIn(true);
-      setUser(JSON.parse(savedUser));
+      if (savedUser) {
+        setUser(JSON.parse(savedUser));
+      }
     }
   }, []);
 
-  const login = (email: string, firstName: string, lastName: string) => {
-    // Check if profile already exists
-    const savedProfile = localStorage.getItem('userProfile');
-    let userProfile: UserProfile;
+  const login = async (email: string, password: string) => {
+    try {
+      const response = await authApi.login(email, password);
+      // Persist token
+      setAuthToken(response.token);
 
-    if (savedProfile) {
-      userProfile = JSON.parse(savedProfile);
-      // Update email if changed
-      userProfile.email = email;
-      userProfile.firstName = firstName;
-      userProfile.lastName = lastName;
-    } else {
-      // Create new profile
-      userProfile = {
-        firstName,
-        lastName,
-        email,
-        phone: '',
-        address: '',
-        city: '',
-        postalCode: '',
-        bio: '',
-        avatar: '',
-        preferences: {
-          language: 'fr',
-          emailNotifications: true,
-          smsNotifications: false,
-          favoriteThemes: []
-        }
-      };
+      // Generate mock profile (since we don't have a /me endpoint yet)
+      const nameParts = email.split('@')[0];
+      const firstName = nameParts.charAt(0).toUpperCase() + nameParts.slice(1);
+      const lastName = 'User';
+
+      const savedProfile = localStorage.getItem('userProfile');
+      let userProfile: UserProfile;
+
+      if (savedProfile) {
+        userProfile = JSON.parse(savedProfile);
+        userProfile.email = email; // Update email if needed
+      } else {
+        userProfile = {
+          firstName,
+          lastName,
+          email,
+          phone: '',
+          address: '',
+          city: '',
+          postalCode: '',
+          bio: '',
+          avatar: '',
+          preferences: {
+            language: 'fr',
+            emailNotifications: true,
+            smsNotifications: false,
+            favoriteThemes: []
+          }
+        };
+      }
+
+      setUser(userProfile);
+      setIsLoggedIn(true);
+      localStorage.setItem('userProfile', JSON.stringify(userProfile));
+    } catch (error) {
+      console.error("Login failed", error);
+      throw error;
     }
-
-    setUser(userProfile);
-    setIsLoggedIn(true);
-    localStorage.setItem('isLoggedIn', 'true');
-    localStorage.setItem('userProfile', JSON.stringify(userProfile));
   };
 
   const logout = () => {
     setIsLoggedIn(false);
     setUser(null);
-    localStorage.removeItem('isLoggedIn');
-    // Keep userProfile in localStorage so data persists
+    clearAuthToken();
+    localStorage.removeItem('userProfile');
+    // We might want to keep userProfile if we want to remember the user (e.g. email in login form), 
+    // but typically logout clears session data. 
+    // The previous implementation kept it: "Keep userProfile in localStorage so data persists". 
+    // I'll stick to removing it to be "clean", or keep it if that was the intent. 
+    // The prompt says "Clear cached auth state".
   };
 
   const updateProfile = (profile: UserProfile) => {
