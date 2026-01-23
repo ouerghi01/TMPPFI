@@ -471,7 +471,7 @@ export interface VoteResultsDTO {
 
 // ==================== Assembly DTOs ====================
 
-export type AssemblyStatus = 'active' | 'inactive' | 'archived';
+export type AssemblyStatus = 'registration_open' | 'registration_closed' | 'active' | 'inactive' | 'archived';
 export type AssemblyType = 'citizens_council' | 'youth_assembly' | 'expert_committee' | 'working_group';
 export type MemberRole = 'president' | 'vice_president' | 'secretary' | 'member' | 'observer';
 
@@ -715,7 +715,7 @@ export interface NotificationPreferencesDTO {
 // ==================== Youth Engagement DTOs ====================
 
 export type YouthPollQuestionType = 'single_choice' | 'multiple_choice' | 'rating' | 'emoji' | 'yes_no';
-export type YouthPollStatus = 'draft' | 'active' | 'closed' | 'archived';
+export type YouthPollStatus = 'draft' | 'active' | 'closed' | 'archived' | 'OPEN';
 export type YouthPollTargetAge = 'all' | 'ALL' | 'AGE_12_15' | 'AGE_16_18' | 'AGE_19_25' | 'AGE_14_18' | 'AGE_15_20' | 'AGE_16_21' | 'AGE_14_19';
 
 export interface YouthPollOptionDTO {

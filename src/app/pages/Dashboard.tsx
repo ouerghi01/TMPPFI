@@ -73,19 +73,20 @@ export function Dashboard() {
     return parts.length >= 2 ? parts[1] : 'blue';
   };
 
+  const processus_actifs = (consultations?.filter((consultation) => consultation.status === 'OPEN')?.length ?? 0) +
+    (petitions?.filter((petition) => petition.status === 'OPEN')?.length ?? 0) +
+    (votes?.filter((vote) => vote.status === 'OPEN')?.length ?? 0) +
+    (assemblies?.filter((assembly) => assembly.status === 'registration_open')?.length ?? 0) +
+    (legislativeConsultations?.filter((legislativeConsultation) => legislativeConsultation.status === 'OPEN')?.length ?? 0) +
+    (conferences?.filter((conference) => conference.status === 'registration_open')?.length ?? 0) +
+
+    (youthPolls?.filter((youthPoll) => youthPoll.status === 'OPEN')?.length ?? 0) +
+    (signalementStats?.ByStatus?.IN_PROGRESS?.totalSignalements ?? 0);
   const kpiStats = [
     {
       label: language === 'fr' ? 'Processus actifs' : language === 'de' ? 'Aktive Prozesse' : 'Active processes',
       value: (
-        (consultations?.length ?? 0) +
-        (petitions?.length ?? 0) +
-        (votes?.length ?? 0) +
-        (assemblies?.length ?? 0) +
-        (legislativeConsultations?.length ?? 0) +
-        (conferences?.length ?? 0) + 
-         
-        (youthPolls?.length ?? 0) +
-        (signalementStats?.totalSignalements ?? 0)
+        processus_actifs
 
       ).toString(),
 

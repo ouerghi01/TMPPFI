@@ -53,7 +53,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Persist token
       setAuthToken(response.token);
 
-      // Generate mock profile (since we don't have a /me endpoint yet)
       const nameParts = email.split('@')[0];
       const firstName = nameParts.charAt(0).toUpperCase() + nameParts.slice(1);
       const lastName = 'User';
