@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useLanguage } from '@/app/contexts/LanguageContext';
-import { 
+import {
   useLegislativeConsultation,
   useCreateAnnotation,
-  useVoteOnAnnotation 
+  useVoteOnAnnotation
 } from '@/app/hooks/useApi';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/app/components/ui/card';
 import { Button } from '@/app/components/ui/button';
@@ -16,11 +16,11 @@ import { Alert, AlertDescription } from '@/app/components/ui/alert';
 import { StatusBadge } from '@/app/components/StatusBadge';
 import { ThemeTag } from '@/app/components/ThemeTag';
 import { LoadingSpinner } from '@/app/components/LoadingSpinner';
-import { 
-  ArrowLeft, 
-  FileText, 
-  Calendar, 
-  Users, 
+import {
+  ArrowLeft,
+  FileText,
+  Calendar,
+  Users,
   MessageSquare,
   ThumbsUp,
   ThumbsDown,
@@ -43,7 +43,7 @@ export function LegislativeConsultationDetailPage() {
 
   // Fetch data
   const { data: consultation, isLoading, error } = useLegislativeConsultation(id || '');
-  
+
   // Mutations
   const createAnnotationMutation = useCreateAnnotation();
   const voteOnAnnotationMutation = useVoteOnAnnotation();
@@ -62,11 +62,11 @@ export function LegislativeConsultationDetailPage() {
   const handleSubmitAnnotation = async () => {
     if (!annotationContent.trim() || !selectedArticleId) {
       toast.error(
-        language === 'fr' 
-          ? 'Veuillez entrer un commentaire' 
+        language === 'fr'
+          ? 'Veuillez entrer un commentaire'
           : language === 'de'
-          ? 'Bitte geben Sie einen Kommentar ein'
-          : 'Please enter a comment'
+            ? 'Bitte geben Sie einen Kommentar ein'
+            : 'Please enter a comment'
       );
       return;
     }
@@ -76,23 +76,23 @@ export function LegislativeConsultationDetailPage() {
         articleId: selectedArticleId,
         content: annotationContent,
       });
-      
+
       setAnnotationContent('');
-      
+
       toast.success(
         language === 'fr'
           ? 'Annotation ajoutée avec succès'
           : language === 'de'
-          ? 'Anmerkung erfolgreich hinzugefügt'
-          : 'Annotation added successfully'
+            ? 'Anmerkung erfolgreich hinzugefügt'
+            : 'Annotation added successfully'
       );
     } catch (error) {
       toast.error(
         language === 'fr'
           ? 'Erreur lors de l\'ajout de l\'annotation'
           : language === 'de'
-          ? 'Fehler beim Hinzufügen der Anmerkung'
-          : 'Error adding annotation'
+            ? 'Fehler beim Hinzufügen der Anmerkung'
+            : 'Error adding annotation'
       );
     }
   };
@@ -109,8 +109,8 @@ export function LegislativeConsultationDetailPage() {
         language === 'fr'
           ? 'Erreur lors du vote'
           : language === 'de'
-          ? 'Fehler beim Abstimmen'
-          : 'Error voting'
+            ? 'Fehler beim Abstimmen'
+            : 'Error voting'
       );
     }
   };
@@ -161,7 +161,7 @@ export function LegislativeConsultationDetailPage() {
     return labels[consultation.textType][language];
   };
 
-  const isActive = consultation.status === 'open';
+  const isActive = consultation.status === 'OPEN';
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -186,9 +186,9 @@ export function LegislativeConsultationDetailPage() {
                   <FileText className="w-3 h-3 mr-1" />
                   {getTextTypeLabel()}
                 </Badge>
-                {consultation.referenceNumber && (
+                {consultation.id && (
                   <Badge variant="outline" className="bg-gray-50 text-gray-700">
-                    {consultation.referenceNumber}
+                    {consultation.id}
                   </Badge>
                 )}
                 <StatusBadge status={consultation.status} />
@@ -207,14 +207,14 @@ export function LegislativeConsultationDetailPage() {
             <div className="flex items-center gap-2">
               <Calendar className="w-4 h-4" />
               <span>
-                {new Date(consultation.startDate).toLocaleDateString(language)} - {new Date(consultation.endDate).toLocaleDateString(language)}
+                {new Date(consultation.createdAt).toLocaleDateString(language)} - {new Date(consultation.updatedAt).toLocaleDateString(language)}
               </span>
             </div>
             <Separator orientation="vertical" className="h-4" />
             <div className="flex items-center gap-2">
               <FileText className="w-4 h-4" />
               <span>
-                {consultation.stats.totalArticles} {language === 'fr' ? 'articles' : language === 'de' ? 'Artikel' : 'articles'}
+                {consultation.articles.length} {language === 'fr' ? 'articles' : language === 'de' ? 'Artikel' : 'articles'}
               </span>
             </div>
             <Separator orientation="vertical" className="h-4" />
@@ -281,9 +281,8 @@ export function LegislativeConsultationDetailPage() {
                         <button
                           key={article.id}
                           onClick={() => setSelectedArticleId(article.id)}
-                          className={`w-full text-left px-4 py-3 border-b border-gray-100 hover:bg-gray-50 transition-colors ${
-                            selectedArticleId === article.id ? 'bg-indigo-50 border-l-4 border-l-indigo-600' : ''
-                          }`}
+                          className={`w-full text-left px-4 py-3 border-b border-gray-100 hover:bg-gray-50 transition-colors ${selectedArticleId === article.id ? 'bg-indigo-50 border-l-4 border-l-indigo-600' : ''
+                            }`}
                         >
                           <div className="flex items-start justify-between gap-2">
                             <div className="flex-1 min-w-0">
@@ -355,11 +354,11 @@ export function LegislativeConsultationDetailPage() {
                           <div className="space-y-3">
                             <Textarea
                               placeholder={
-                                language === 'fr' 
+                                language === 'fr'
                                   ? 'Partagez votre point de vue sur cet article...'
                                   : language === 'de'
-                                  ? 'Teilen Sie Ihre Meinung zu diesem Artikel...'
-                                  : 'Share your thoughts on this article...'
+                                    ? 'Teilen Sie Ihre Meinung zu diesem Artikel...'
+                                    : 'Share your thoughts on this article...'
                               }
                               value={annotationContent}
                               onChange={(e) => setAnnotationContent(e.target.value)}
@@ -367,7 +366,7 @@ export function LegislativeConsultationDetailPage() {
                               className="resize-none"
                             />
                             <div className="flex justify-end">
-                              <Button 
+                              <Button
                                 onClick={handleSubmitAnnotation}
                                 disabled={createAnnotationMutation.isPending || !annotationContent.trim()}
                               >
@@ -461,11 +460,11 @@ function AnnotationItem({ annotation, onVote, language }: AnnotationItemProps) {
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center text-sm font-medium text-gray-600">
-            {annotation.author.firstName[0]}{annotation.author.lastName[0]}
+            {annotation.author.username[0]}
           </div>
           <div>
             <div className="font-medium text-sm text-gray-900">
-              {annotation.author.firstName} {annotation.author.lastName}
+              {annotation.author.username}
             </div>
             <div className="text-xs text-gray-500">
               {new Date(annotation.createdAt).toLocaleDateString(language)}

@@ -27,9 +27,9 @@ export function LoginPage() {
   const { language } = useLanguage();
   const { login } = useAuth();
   const navigate = useNavigate();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [rememberMe, setRememberMe] = useState(false);
+  const [email, setEmail] = useState(localStorage.getItem('email') || '');
+  const [password, setPassword] = useState(localStorage.getItem('password') || '');
+  const [rememberMe, setRememberMe] = useState(localStorage.getItem('rememberMe') === 'true');
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
 
@@ -57,7 +57,11 @@ export function LoginPage() {
       try {
         // Login with auth context
         await login(email, password);
-
+        if (rememberMe) {
+          localStorage.setItem('rememberMe', 'true');
+          localStorage.setItem('email', email);
+          localStorage.setItem('password', password);
+        }
         // Show success message
         toast.success(
           language === 'fr'
@@ -70,7 +74,7 @@ export function LoginPage() {
         // Redirect to dashboard
         setTimeout(() => {
           navigate('/');
-        }, 1000);
+        }, 100);
       } catch (error) {
         toast.error(
           language === 'fr'

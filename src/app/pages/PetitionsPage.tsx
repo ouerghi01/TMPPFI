@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
 import { PageBanner } from '../components/PageBanner';
@@ -17,21 +17,55 @@ import { FileText, Users, TrendingUp, ArrowRight, Clock, CheckCircle2 } from 'lu
 import { motion } from 'motion/react';
 import { toast } from 'sonner';
 import { Edit } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
+import apiClient from '@/client';
 
 export function PetitionsPage() {
   const { t, language, tLocal } = useLanguage();
   const [selectedTheme, setSelectedTheme] = useState<string | null>(null);
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
   const [signedPetitions, setSignedPetitions] = useState<string[]>([]); // Track signed petitions by ID
-
+  const { user, isLoggedIn } = useAuth();
   // Fetch data using React Query hooks
-  const { data: petitions, isLoading, error } = usePetitions();
+  const { data: petitions_use, isLoading, error } = usePetitions();
+  const [petitions, setPetitions] = useState<PetitionDTO[]>(petitions_use || []);
+  useEffect(() => {
+    setPetitions(petitions_use || []);
+  }, [petitions_use])
   const { data: themesData } = useThemes();
-
-  const handleSignPetition = (e: React.MouseEvent, petitionId: string, petitionTitle: LocalizedString) => {
+  useEffect(() => {
+    const fetch_initiativesByuser = async () => {
+      const response = await apiClient.get("/initiatives/all_signed_by_user")
+      if (response.status !== 200) {
+        toast.error('Une erreur est survenue lors de la récupération des pétitions signées');
+        return;
+      }
+      const initiatives = response.data;
+      setSignedPetitions(initiatives.map((v: any) => v.id));
+    }
+    fetch_initiativesByuser();
+  }, [user])
+  const handleSignPetition = async (e: React.MouseEvent, petitionId: string, petitionTitle: LocalizedString) => {
     e.preventDefault(); // Prevent Link navigation
     e.stopPropagation();
-
+    if (!isLoggedIn) {
+      toast.error('Vous devez être connecté pour signer une pétition');
+      return;
+    }
+    const response = await apiClient.post(`/initiatives/${petitionId}/sign`);
+    if (response.status !== 200) {
+      toast.error('Une erreur est survenue lors de la signature de la pétition');
+      return;
+    }
+    const updatedPetitions = petitions?.map(petition => {
+      if (petition.id === petitionId) {
+        return response.data;
+      }
+      return petition;
+    });
+    if (updatedPetitions) {
+      setPetitions(updatedPetitions);
+    }
     setSignedPetitions(prev => [...prev, petitionId]);
 
     toast.success(
@@ -41,10 +75,18 @@ export function PetitionsPage() {
     );
   };
 
-  const handleUnsignPetition = (e: React.MouseEvent, petitionId: string, petitionTitle: LocalizedString) => {
+  const handleUnsignPetition = async (e: React.MouseEvent, petitionId: string, petitionTitle: LocalizedString) => {
     e.preventDefault(); // Prevent Link navigation
     e.stopPropagation();
-
+    if (!isLoggedIn) {
+      toast.error('Vous devez être connecté pour signer une pétition');
+      return;
+    }
+    const response = await apiClient.delete(`/initiatives/${petitionId}/unsigned`);
+    if (response.status !== 200) {
+      toast.error('Une erreur est survenue lors de la signature de la pétition');
+      return;
+    }
     setSignedPetitions(prev => prev.filter(id => id !== petitionId));
 
     toast.success(

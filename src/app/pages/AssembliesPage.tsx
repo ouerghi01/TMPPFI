@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
 import { PageBanner } from '../components/PageBanner';
@@ -18,25 +18,27 @@ import { Label } from '../components/ui/label';
 import { Badge } from '../components/ui/badge';
 import { Checkbox } from '../components/ui/checkbox';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '../components/ui/dialog';
-import { useAssemblies, useThemes } from '../hooks/useApi';
+import { useAssemblies, useThemes, useParticipationHistory } from '../hooks/useApi';
 import type { AssemblyDTO } from '../types';
 import { Calendar, MapPin, Users, Filter, UserPlus, Clock, FileText, CheckCircle, TrendingUp, UserMinus } from 'lucide-react';
 import { toast } from 'sonner';
+import apiClient from '@/client';
+import { useAuth } from '../contexts/AuthContext';
+import { AuthModal } from '../components/AuthModal';
 
 export function AssembliesPage() {
   const { t, language, tLocal } = useLanguage();
   const { data: assemblies, isLoading, error } = useAssemblies();
   const [selectedAssembly, setSelectedAssembly] = useState<AssemblyDTO | null>(null);
   const [joinedAssemblies, setJoinedAssemblies] = useState<string[]>([]); // Track joined assemblies by ID
+  const { user, isLoggedIn } = useAuth();
   const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    phone: '',
     motivation: '',
     skills: '',
-    availability: true
+    availability: true,
+    assemblyRole: 'APPLICANT'
   });
+  const [authModalOpen, setAuthModalOpen] = useState(false);
 
   const handleInputChange = (field: string, value: string | boolean) => {
     setFormData(prev => ({
@@ -45,10 +47,23 @@ export function AssembliesPage() {
     }));
   };
 
+  useEffect(() => {
+    const fetchAssemblies = async () => {
+      try {
+        const response = await apiClient.get('/assemblies/user_joined_assemblies');
+        const assemblies = response.data;
+        setJoinedAssemblies(assemblies.map((assembly: any) => assembly.id.toString()));
+      } catch (error) {
+        console.error('Error fetching assemblies:', error);
+      }
+    };
+    fetchAssemblies();
+  }, [user]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.firstName || !formData.lastName || !formData.email || !formData.motivation) {
+    if (!formData.motivation || !formData.skills) {
       toast.error(
         language === 'fr' ? 'Veuillez remplir tous les champs obligatoires' :
           language === 'de' ? 'Bitte füllen Sie alle Pflichtfelder aus' :
@@ -56,31 +71,41 @@ export function AssembliesPage() {
       );
       return;
     }
-
+    const joinAssembly = async (id: string) => {
+      try {
+        const response = await apiClient.post(`/assemblies/${id}/participate`, formData);
+        toast.success(
+          language === 'fr' ? 'Adhésion réussie' :
+            language === 'de' ? 'Mitgliedschaft erfolgreich' :
+              'Membership successful'
+        );
+        return response.data;
+      } catch (error) {
+        toast.error(
+          language === 'fr' ? 'Erreur lors de l\'adhésion' :
+            language === 'de' ? 'Fehler bei der Mitgliedschaft' :
+              'Error during membership'
+        );
+      }
+    }
     // Add assembly to joined list
     if (selectedAssembly) {
+      joinAssembly(selectedAssembly.id);
       setJoinedAssemblies(prev => [...prev, selectedAssembly.id]);
     }
 
-    // Simuler l'inscription
-    toast.success(
-      language === 'fr' ? `Demande d'inscription envoyée pour "${tLocal(selectedAssembly.name)}" !` :
-        language === 'de' ? `Beitrittsanfrage für "${tLocal(selectedAssembly.name)}" gesendet!` :
-          `Membership request sent for "${tLocal(selectedAssembly.name)}"!`
-    );
+
 
     // Réinitialiser le formulaire
     setFormData({
-      firstName: '',
-      lastName: '',
-      email: '',
-      phone: '',
       motivation: '',
       skills: '',
-      availability: true
+      availability: true,
+      assemblyRole: 'APPLICANT'
     });
     setSelectedAssembly(null);
   };
+
 
   const handleLeaveAssembly = (assemblyId: string, assemblyTitle: string) => {
     // Remove assembly from joined list
@@ -105,6 +130,8 @@ export function AssembliesPage() {
     return nextMeeting >= today && nextMeeting <= thirtyDaysFromNow;
   }).length : 0;
   const totalDecisions = assemblies ? assemblies.reduce((sum, a) => sum + (a.pastMeetings?.length || 0), 0) : 0;
+
+
 
   return (
     <div>
@@ -183,9 +210,9 @@ export function AssembliesPage() {
         </div>
         <ContentGrid>
           {isLoading && <LoadingSpinner />}
-          {error && <ErrorMessage message={tLocal('error.loadingData')} />}
+          {error && <ErrorMessage error={error} />}
           {assemblies && assemblies.map((assembly) => {
-            const isJoined = joinedAssemblies.includes(assembly.id);
+            const isJoined = joinedAssemblies.includes(assembly.id.toString());
             const nextMeetingDate = new Date(assembly.nextMeeting?.date || '');
             const today = new Date();
             const canCancel = isJoined && nextMeetingDate > today; // Can only cancel if meeting hasn't happened yet
@@ -269,7 +296,13 @@ export function AssembliesPage() {
                     {!isJoined ? (
                       <Button
                         className="w-full gap-2"
-                        onClick={() => setSelectedAssembly(assembly)}
+                        onClick={() => {
+                          if (!isLoggedIn) {
+                            setAuthModalOpen(true);
+                            return;
+                          }
+                          setSelectedAssembly(assembly);
+                        }}
                       >
                         <UserPlus className="w-4 h-4" />
                         {language === 'fr' && 'Rejoindre l\'assemblée'}
@@ -338,72 +371,14 @@ export function AssembliesPage() {
             <form onSubmit={handleSubmit}>
               <div className="space-y-6 py-4">
                 {/* Informations personnelles */}
-                <div>
-                  <h3 className="font-medium text-gray-900 mb-4">
-                    {language === 'fr' && 'Informations personnelles'}
-                    {language === 'de' && 'Persönliche Informationen'}
-                    {language === 'en' && 'Personal information'}
-                  </h3>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="firstName">
-                        {language === 'fr' && 'Prénom *'}
-                        {language === 'de' && 'Vorname *'}
-                        {language === 'en' && 'First name *'}
-                      </Label>
-                      <Input
-                        id="firstName"
-                        value={formData.firstName}
-                        onChange={(e) => handleInputChange('firstName', e.target.value)}
-                        required
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="lastName">
-                        {language === 'fr' && 'Nom *'}
-                        {language === 'de' && 'Nachname *'}
-                        {language === 'en' && 'Last name *'}
-                      </Label>
-                      <Input
-                        id="lastName"
-                        value={formData.lastName}
-                        onChange={(e) => handleInputChange('lastName', e.target.value)}
-                        required
-                      />
-                    </div>
-                  </div>
-                </div>
+                {
+                  /*
+                  {Info_Per}
+                  */
+                }
 
-                {/* Contact */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="email">
-                      {language === 'fr' && 'Email *'}
-                      {language === 'de' && 'E-Mail *'}
-                      {language === 'en' && 'Email *'}
-                    </Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      value={formData.email}
-                      onChange={(e) => handleInputChange('email', e.target.value)}
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="phone">
-                      {language === 'fr' && 'Téléphone (optionnel)'}
-                      {language === 'de' && 'Telefon (optional)'}
-                      {language === 'en' && 'Phone (optional)'}
-                    </Label>
-                    <Input
-                      id="phone"
-                      type="tel"
-                      value={formData.phone}
-                      onChange={(e) => handleInputChange('phone', e.target.value)}
-                    />
-                  </div>
-                </div>
+                {/* {Contact} */}
+
 
                 {/* Motivation */}
                 <div className="space-y-2">
@@ -542,6 +517,11 @@ export function AssembliesPage() {
             </div>
           </div>
         </div>
+        <AuthModal
+          open={authModalOpen}
+          onOpenChange={setAuthModalOpen}
+        />
+
       </PageLayout>
     </div>
   );

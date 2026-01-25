@@ -149,9 +149,11 @@ export interface ThemeWithProcessesDTO extends ThemeDTO {
 // ==================== Consultation DTOs ====================
 
 export type ConsultationStatus = 'DRAFT' | 'OPEN' | 'CLOSED' | 'ARCHIVED' | 'UPCOMING';
-export type ConsultationType = 'PUBLIC_MEETING' | 'ONLINE_DEBATE' | 'CITIZEN_PROPOSAL' | 'EXPERT_HEARING' | 'WORKSHOP';
+export type ConsultationType = 'public_meeting' | 'citizen_proposal' | 'PUBLIC_MEETING' | 'ONLINE_DEBATE' | 'CITIZEN_PROPOSAL' | 'EXPERT_HEARING' | 'WORKSHOP';
 
 export interface ConsultationDTO {
+  consultation: any;
+  [x: string]: any;
   totalComments: any;
   totalParticipants: number;
   id: string;

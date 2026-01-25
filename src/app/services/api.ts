@@ -98,6 +98,7 @@ import { getPollsApi, getYouthPollsApi } from '../../api/votes';
 import { getSignalementsApi, getSignalementsGeoApi, getSignalementStatsApi } from '../../api/signalements';
 import { getSpeakerById } from '../../api/speaker';
 import { Await } from 'react-router-dom';
+import { getUserCount } from '@/api/user';
 
 // Simulated API delay (remove in production)
 const simulateDelay = (ms: number = 500) => new Promise(resolve => setTimeout(resolve, ms));
@@ -628,10 +629,9 @@ export const legislativeConsultationApi = {
    * GET /api/legislative-consultations/:id
    */
   async getLegislativeConsultation(idOrSlug: string): Promise<ApiResponse<LegislativeConsultationDTO>> {
-    await simulateDelay();
-
-    const consultation = mockLegislativeConsultations.find(
-      c => c.id === idOrSlug || c.slug === idOrSlug
+    let consultations = await getLegislativeConsultationsApi();
+    const consultation = consultations.find(
+      c => c.id === parseInt(idOrSlug) || c.slug === idOrSlug
     );
 
     if (!consultation) {
@@ -1109,11 +1109,11 @@ export const dashboardApi = {
    * Get dashboard statistics
    * GET /api/dashboard/stats
    */
-  async getDashboardStats(): Promise<ApiResponse<DashboardStatsDTO>> {
+  async getDashboardStats(): Promise<ApiResponse<any>> {
     await simulateDelay();
-
+    const count_users = await getUserCount();
     return {
-      data: mockDashboardStats,
+      data: { count: count_users },
       timestamp: new Date().toISOString(),
       success: true,
     };

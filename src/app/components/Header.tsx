@@ -4,10 +4,10 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Button } from './ui/button';
-import { 
-  Users, 
-  Menu, 
-  LogIn, 
+import {
+  Users,
+  Menu,
+  LogIn,
   Search,
   Home,
   MessageSquare,
@@ -66,7 +66,7 @@ export function Header() {
           <div className="grid grid-cols-[auto_1fr_auto] items-center h-16 gap-6">
             {/* Logo */}
             <Link to="/" className="flex items-center gap-3">
-              <motion.div 
+              <motion.div
                 className="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg"
                 whileHover={{ scale: 1.05, rotate: 5 }}
                 whileTap={{ scale: 0.95 }}
@@ -148,7 +148,7 @@ export function Header() {
               )}
 
               {/* Mobile menu button */}
-              <button 
+              <button
                 onClick={() => setMobileMenuOpen(true)}
                 className="lg:hidden p-2 rounded-lg hover:bg-blue-50/50 transition-colors"
               >

@@ -25,8 +25,12 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { getCommentsByConsultation } from '../../api/comments';
+import apiClient from '@/client';
+import { useAuth } from '../contexts/AuthContext';
+import { AuthModal } from '../components/AuthModal';
 
 interface Comment {
+  userId: string | undefined;
   id: string;
   author: string;
   date: string;
@@ -34,29 +38,7 @@ interface Comment {
   likes: number;
 }
 
-const mockComments: Comment[] = [
-  {
-    id: '1',
-    author: 'Marie Dubois',
-    date: '2024-12-20',
-    content: 'Excellente initiative ! Je suis totalement favorable à ce projet. Il est temps d\'agir pour notre environnement local.',
-    likes: 12
-  },
-  {
-    id: '2',
-    author: 'Pierre Martin',
-    date: '2024-12-19',
-    content: 'Je pense qu\'il faudrait aussi considérer l\'impact sur les commerces locaux. Avez-vous prévu des consultations avec les commerçants ?',
-    likes: 8
-  },
-  {
-    id: '3',
-    author: 'Sophie Laurent',
-    date: '2024-12-18',
-    content: 'Super projet ! J\'aimerais proposer d\'ajouter également des espaces de jeux pour enfants.',
-    likes: 15
-  }
-];
+
 
 export function ConsultationDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -64,25 +46,38 @@ export function ConsultationDetailPage() {
   const navigate = useNavigate();
   const [newComment, setNewComment] = useState('');
   const [comments, setComments] = useState<Comment[]>([]);
+  const [hasParticipated, setHasParticipated] = useState(true);
 
+  const [authModalOpen, setAuthModalOpen] = useState(false);
 
   const [hasSupported, setHasSupported] = useState(false);
   const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
   const [editingContent, setEditingContent] = useState('');
-
-  // Fetch consultation using React Query
-  const { data: consultation, isLoading, error } = useConsultation(id || '');
-
-  // Fetch theme data
+  const { user, isLoggedIn } = useAuth();
+  const { data: consultation_v1, isLoading, error } = useConsultation(id || '');
+  const [consultation, setConsultation] = useState<any | null>(null);
+  useEffect(() => {
+    setConsultation(consultation_v1);
+  }, [consultation_v1]);
   const { data: theme } = useTheme(consultation?.themeId || '');
   useEffect(() => {
     const fetchComments = async () => {
       const data = await getCommentsByConsultation(id || '');
       setComments(data);
     };
+    const computeDisabled = async () => {
+      if (!isLoggedIn) {
+        setHasParticipated(true);
+        return;
+      }
 
+      const alreadyParticipating = await check_participe_inConsultation(id || '');
+      setHasParticipated(alreadyParticipating);
+    };
+
+    computeDisabled();
     fetchComments();
-  }, [id]);
+  }, [id, consultation]);
   // Check if debate is active
   const isDebateActive = consultation?.status === 'OPEN' || consultation?.status === 'UPCOMING';
 
@@ -132,22 +127,52 @@ export function ConsultationDetailPage() {
 
   const handleSubmitComment = () => {
     if (!newComment.trim()) return;
+    /*
+    public class CommentRequestDto {
+        private String content;
+        private CommentModule moduleType;
+        private String moduleId;
+        private Long parentId; // Optionnel pour les réponses
+    }
+    */
 
-    const comment: Comment = {
-      id: Date.now().toString(),
-      author: 'Vous',
-      date: new Date().toISOString().split('T')[0],
+
+    const comment: any = {
+
+      moduleType: "CONSULTATION",
+      moduleId: id,
+      parentId: null,
       content: newComment,
-      likes: 0
+    };
+    const submitComment = async () => {
+      try {
+        const response = await apiClient.post('/comments', comment);
+        if (response.status === 201) {
+          const comment_data = response.data;
+          setComments([comment_data, ...comments]);
+          setNewComment('');
+          toast.success(
+            language === 'fr' ? 'Commentaire publié !' :
+              language === 'de' ? 'Kommentar veröffentlicht!' :
+                'Comment posted!'
+          );
+        } else {
+          toast.error(
+            language === 'fr' ? 'Une erreur est survenue lors de la publication de votre commentaire' :
+              language === 'de' ? 'Ein Fehler ist aufgetreten, Ihr Kommentar konnte nicht veröffentlicht werden' :
+                'An error occurred while posting your comment'
+          );
+        }
+      } catch (error) {
+        toast.error(
+          language === 'fr' ? 'Une erreur est survenue lors de la publication de votre commentaire' :
+            language === 'de' ? 'Ein Fehler ist aufgetreten, Ihr Kommentar konnte nicht veröffentlicht werden' :
+              'An error occurred while posting your comment'
+        );
+      }
     };
 
-    setComments([comment, ...comments]);
-    setNewComment('');
-    toast.success(
-      language === 'fr' ? 'Commentaire publié !' :
-        language === 'de' ? 'Kommentar veröffentlicht!' :
-          'Comment posted!'
-    );
+    submitComment();
   };
 
   const handleEditComment = (commentId: string) => {
@@ -158,21 +183,32 @@ export function ConsultationDetailPage() {
     }
   };
 
-  const handleSaveEdit = () => {
+  const handleSaveEdit = async () => {
     if (!editingContent.trim()) return;
+    const formData = {
+      content: editingContent,
 
-    const updatedComments = comments.map(comment =>
-      comment.id === editingCommentId ? { ...comment, content: editingContent } : comment
-    );
-
-    setComments(updatedComments);
-    setEditingCommentId(null);
-    setEditingContent('');
-    toast.success(
-      language === 'fr' ? 'Commentaire mis à jour !' :
-        language === 'de' ? 'Kommentar aktualisiert!' :
-          'Comment updated!'
-    );
+    };
+    const response = await apiClient.put(`/comments/${editingCommentId}`, formData);
+    if (response.status === 200) {
+      const updatedComments = comments.map(comment =>
+        comment.id === editingCommentId ? { ...comment, content: editingContent } : comment
+      );
+      setComments(updatedComments);
+      setEditingCommentId(null);
+      setEditingContent('');
+      toast.success(
+        language === 'fr' ? 'Commentaire mis à jour !' :
+          language === 'de' ? 'Kommentar aktualisiert!' :
+            'Comment updated!'
+      );
+    } else {
+      toast.error(
+        language === 'fr' ? 'Une erreur est survenue lors de la mise à jour de votre commentaire' :
+          language === 'de' ? 'Ein Fehler ist aufgetreten, Ihr Kommentar konnte nicht aktualisiert werden' :
+            'An error occurred while updating your comment'
+      );
+    }
   };
 
   const handleCancelEdit = () => {
@@ -180,14 +216,23 @@ export function ConsultationDetailPage() {
     setEditingContent('');
   };
 
-  const handleDeleteComment = (commentId: string) => {
-    const updatedComments = comments.filter(comment => comment.id !== commentId);
-    setComments(updatedComments);
-    toast.success(
-      language === 'fr' ? 'Commentaire supprimé !' :
-        language === 'de' ? 'Kommentar gelöscht!' :
-          'Comment deleted!'
-    );
+  const handleDeleteComment = async (commentId: string) => {
+    const response = await apiClient.delete(`/comments/${commentId}`);
+    if (response.status === 204) {
+      const updatedComments = comments.filter(comment => comment.id !== commentId);
+      setComments(updatedComments);
+      toast.success(
+        language === 'fr' ? 'Commentaire supprimé !' :
+          language === 'de' ? 'Kommentar gelöscht!' :
+            'Comment deleted!'
+      );
+    } else {
+      toast.error(
+        language === 'fr' ? 'Une erreur est survenue lors de la suppression de votre commentaire' :
+          language === 'de' ? 'Ein Fehler ist aufgetreten, Ihr Kommentar konnte nicht gelöscht werden' :
+            'An error occurred while deleting your comment'
+      );
+    }
   };
 
   const getTypeLabel = () => {
@@ -195,10 +240,37 @@ export function ConsultationDetailPage() {
     const labels = {
       public_meeting: { fr: 'Rencontre', de: 'Treffen', en: 'Meeting' },
       online_debate: { fr: 'Débat', de: 'Debatte', en: 'Debate' },
-      citizen_proposal: { fr: 'Proposition', de: 'Vorschlag', en: 'Proposal' }
+      citizen_proposal: { fr: 'Proposition', de: 'Vorschlag', en: 'Proposal' },
+      PUBLIC_MEETING: { fr: 'Rencontre', de: 'Treffen', en: 'Meeting' },
+      ONLINE_DEBATE: { fr: 'Débat', de: 'Debatte', en: 'Debate' },
+      CITIZEN_PROPOSAL: { fr: 'Proposition', de: 'Vorschlag', en: 'Proposal' }
     };
-    return labels[consultation.type]?.[language] || '';
+    return labels[consultation.type as keyof typeof labels]?.[language] || '';
   };
+
+  const handleLikeComment = async (commentId: string) => {
+    const updatedComment = await apiClient.post(`/comments/${commentId}/like`);
+    if (updatedComment.status === 200 && updatedComment.data) {
+      const updatedComments = comments.map(comment =>
+        comment.id === commentId ? { ...comment, likes: updatedComment.data.likes } : comment
+      );
+      setComments(updatedComments);
+    }
+    toast.success(
+      language === 'fr' ? 'Commentaire aimé !' :
+        language === 'de' ? 'Kommentar geliked!' :
+          'Comment liked!'
+    );
+  };
+
+  async function check_participe_inConsultation(id: string): Promise<boolean> {
+    const response = await apiClient.post(`/consultations/${id}/has-participated`)
+    if (response.status === 200) {
+      return response.data
+    } else {
+      return false
+    }
+  }
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -280,7 +352,7 @@ export function ConsultationDetailPage() {
                         {language === 'de' && 'Beiträge'}
                         {language === 'en' && 'Contributions'}
                       </p>
-                      <p className="font-medium">{consultation.totalComments + (hasSupported ? 1 : 0)}</p>
+                      <p className="font-medium">{comments.length}</p>
                     </div>
                   </div>
                 )}
@@ -322,7 +394,7 @@ export function ConsultationDetailPage() {
 
               {/* Comments List */}
               <div className="space-y-4 pt-4 border-t">
-                {comments.map((comment) => (
+                {comments.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).map((comment) => (
                   <div key={comment.id} className="border-b border-gray-100 pb-4 last:border-0">
                     {editingCommentId === comment.id ? (
                       // Edit Mode
@@ -376,7 +448,9 @@ export function ConsultationDetailPage() {
                               {new Date(comment.date).toLocaleDateString(language)}
                             </p>
                           </div>
-                          <Button variant="ghost" size="sm" className="gap-1">
+                          <Button
+                            onClick={() => handleLikeComment(comment.id)}
+                            variant="ghost" size="sm" className="gap-1">
                             <ThumbsUp className="w-4 h-4" />
                             {comment.likes}
                           </Button>
@@ -384,7 +458,7 @@ export function ConsultationDetailPage() {
                         <p className="text-gray-700 mb-2">{comment.content}</p>
 
                         {/* Edit and Delete buttons - only for own comments and active debates */}
-                        {comment.author === 'Vous' && isDebateActive && (
+                        {comment.userId === user?.userId && isDebateActive && (
                           <div className="flex items-center gap-2">
                             <Button
                               variant="ghost"
@@ -427,7 +501,10 @@ export function ConsultationDetailPage() {
             </CardContent>
           </Card>
         </div>
-
+        <AuthModal
+          open={authModalOpen}
+          onOpenChange={setAuthModalOpen}
+        />
         {/* Sidebar */}
         <div className="space-y-6">
           {/* Actions */}
@@ -453,13 +530,80 @@ export function ConsultationDetailPage() {
                   }
                 </Button>
               )}
-              {consultation.type === 'public_meeting' && consultation.status === 'upcoming' && (
-                <Button className="w-full gap-2">
+              {consultation.type === 'public_meeting' && consultation.status === 'OPEN' && (
+                <Button
+
+                  onMouseEnter={() => {
+                    if (!isLoggedIn) {
+                      setAuthModalOpen(true);
+                      return;
+                    }
+                  }}
+                  onClick={() => {
+                    if (!isLoggedIn) {
+                      setAuthModalOpen(true);
+                      return;
+                    }
+
+                    if (hasParticipated) {
+                      return;
+                    }
+
+                    const participateCall = async () => {
+                      try {
+                        const response = await apiClient.post(
+                          `/consultations/${consultation.id}/participate`
+                        );
+
+                        toast.success(
+                          language === 'fr'
+                            ? 'Vous êtes inscrit à la consultation'
+                            : language === 'de'
+                              ? 'Sie haben sich für die Konsultation angemeldet'
+                              : 'You have registered for the consultation'
+                        );
+
+                        setConsultation(response.data);
+                      } catch (e) {
+                        toast.error(
+                          language === 'fr'
+                            ? 'Vous êtes déjà inscrit à la consultation'
+                            : language === 'de'
+                              ? 'Sie haben sich bereits für die Konsultation angemeldet'
+                              : 'You are already registered for the consultation'
+                        );
+                      }
+                    };
+
+                    participateCall();
+                  }}
+                  className="w-full gap-2"
+                >
                   <Users className="w-4 h-4" />
-                  {language === 'fr' && 'S\'inscrire'}
-                  {language === 'de' && 'Anmelden'}
-                  {language === 'en' && 'Register'}
+
+                  {/* Button text */}
+                  {!isLoggedIn &&
+                    (language === 'fr'
+                      ? 'Connexion requise'
+                      : language === 'de'
+                        ? 'Anmeldung erforderlich'
+                        : 'Login required')}
+
+                  {isLoggedIn && hasParticipated &&
+                    (language === 'fr'
+                      ? 'Déjà inscrit'
+                      : language === 'de'
+                        ? 'Bereits angemeldet'
+                        : 'Already registered')}
+
+                  {isLoggedIn && !hasParticipated &&
+                    (language === 'fr'
+                      ? "S'inscrire"
+                      : language === 'de'
+                        ? 'Anmelden'
+                        : 'Register')}
                 </Button>
+
               )}
               <Button variant="outline" className="w-full gap-2">
                 <Share2 className="w-4 h-4" />

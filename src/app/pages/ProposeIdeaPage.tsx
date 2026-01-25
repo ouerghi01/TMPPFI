@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
-import { themes } from '../data/themes';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
@@ -10,11 +9,14 @@ import { Label } from '../components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { ArrowLeft, Send, Lightbulb } from 'lucide-react';
 import { toast } from 'sonner';
+import { useThemes } from '../hooks/useApi';
+import apiClient from '@/client';
 
 export function ProposeIdeaPage() {
   const { language, t } = useLanguage();
   const navigate = useNavigate();
-  
+  const { data: themes } = useThemes();
+
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -26,22 +28,35 @@ export function ProposeIdeaPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!formData.title || !formData.description || !formData.themeId) {
       toast.error(
         language === 'fr' ? 'Veuillez remplir tous les champs obligatoires' :
-        language === 'de' ? 'Bitte füllen Sie alle Pflichtfelder aus' :
-        'Please fill in all required fields'
+          language === 'de' ? 'Bitte füllen Sie alle Pflichtfelder aus' :
+            'Please fill in all required fields'
       );
       return;
     }
-
-    // Simuler l'envoi de l'idée
-    toast.success(
-      language === 'fr' ? 'Votre idée a été soumise avec succès !' :
-      language === 'de' ? 'Ihre Idee wurde erfolgreich eingereicht!' :
-      'Your idea has been submitted successfully!'
-    );
+    const submitIdea = async () => {
+      try {
+        const response = await apiClient.post('/ideas', formData);
+        if (response.status === 201) {
+          toast.success(
+            language === 'fr' ? 'Votre idée a été soumise avec succès !' :
+              language === 'de' ? 'Ihre Idee wurde erfolgreich eingereicht!' :
+                'Your idea has been submitted successfully!'
+          );
+          navigate('/consultations');
+        }
+      } catch (error) {
+        toast.error(
+          language === 'fr' ? 'Une erreur est survenue lors de la soumission de votre idée' :
+            language === 'de' ? 'Ein Fehler ist aufgetreten, Ihre Idee konnte nicht eingereicht werden' :
+              'An error occurred while submitting your idea'
+        );
+      }
+    };
+    submitIdea();
 
     // Réinitialiser le formulaire
     setFormData({
@@ -66,7 +81,7 @@ export function ProposeIdeaPage() {
     }));
   };
 
-  const selectedTheme = themes.find(theme => theme.id === formData.themeId);
+  const selectedTheme = themes?.find(theme => theme.id === formData.themeId);
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -128,8 +143,8 @@ export function ProposeIdeaPage() {
                 onChange={(e) => handleInputChange('title', e.target.value)}
                 placeholder={
                   language === 'fr' ? 'Ex: Créer un jardin communautaire au centre-ville' :
-                  language === 'de' ? 'Bsp: Gemeinschaftsgarten im Stadtzentrum anlegen' :
-                  'Ex: Create a community garden in the city center'
+                    language === 'de' ? 'Bsp: Gemeinschaftsgarten im Stadtzentrum anlegen' :
+                      'Ex: Create a community garden in the city center'
                 }
                 required
               />
@@ -147,32 +162,32 @@ export function ProposeIdeaPage() {
                 onValueChange={(value) => handleInputChange('themeId', value)}
               >
                 <SelectTrigger id="theme">
-                  <SelectValue 
+                  <SelectValue
                     placeholder={
                       language === 'fr' ? 'Sélectionnez une thématique' :
-                      language === 'de' ? 'Wählen Sie ein Thema' :
-                      'Select a theme'
+                        language === 'de' ? 'Wählen Sie ein Thema' :
+                          'Select a theme'
                     }
                   />
                 </SelectTrigger>
                 <SelectContent>
-                  {themes.map((theme) => (
+                  {themes?.map((theme) => (
                     <SelectItem key={theme.id} value={theme.id}>
                       <div className="flex items-center gap-2">
                         <span>{theme.icon}</span>
-                        <span>{language === 'fr' ? theme.name : language === 'de' ? (theme.nameDE || theme.name) : (theme.nameEN || theme.name)}</span>
+                        <span>{theme.name[language]}</span>
                       </div>
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
               {selectedTheme && (
-                <div 
+                <div
                   className="p-3 rounded-lg flex items-center gap-2 text-sm"
                   style={{ backgroundColor: `${selectedTheme.color}20`, color: selectedTheme.color }}
                 >
                   <span>{selectedTheme.icon}</span>
-                  <span>{language === 'fr' ? selectedTheme.name : language === 'de' ? (selectedTheme.nameDE || selectedTheme.name) : (selectedTheme.nameEN || selectedTheme.name)}</span>
+                  <span>{selectedTheme.name[language]}</span>
                 </div>
               )}
             </div>
@@ -190,8 +205,8 @@ export function ProposeIdeaPage() {
                 onChange={(e) => handleInputChange('description', e.target.value)}
                 placeholder={
                   language === 'fr' ? 'Décrivez votre idée en détail, ses objectifs et ses bénéfices pour la collectivité...' :
-                  language === 'de' ? 'Beschreiben Sie Ihre Idee im Detail, ihre Ziele und Vorteile für die Gemeinschaft...' :
-                  'Describe your idea in detail, its objectives and benefits for the community...'
+                    language === 'de' ? 'Beschreiben Sie Ihre Idee im Detail, ihre Ziele und Vorteile für die Gemeinschaft...' :
+                      'Describe your idea in detail, its objectives and benefits for the community...'
                 }
                 rows={6}
                 required
@@ -216,8 +231,8 @@ export function ProposeIdeaPage() {
                 onChange={(e) => handleInputChange('location', e.target.value)}
                 placeholder={
                   language === 'fr' ? 'Ex: Place de la Mairie, Quartier Nord' :
-                  language === 'de' ? 'Bsp: Rathausplatz, Nordviertel' :
-                  'Ex: Town Hall Square, North District'
+                    language === 'de' ? 'Bsp: Rathausplatz, Nordviertel' :
+                      'Ex: Town Hall Square, North District'
                 }
               />
             </div>
@@ -235,8 +250,8 @@ export function ProposeIdeaPage() {
                 onChange={(e) => handleInputChange('impact', e.target.value)}
                 placeholder={
                   language === 'fr' ? 'Quel serait l\'impact de cette idée sur la collectivité ?' :
-                  language === 'de' ? 'Welche Auswirkungen hätte diese Idee auf die Gemeinschaft?' :
-                  'What would be the impact of this idea on the community?'
+                    language === 'de' ? 'Welche Auswirkungen hätte diese Idee auf die Gemeinschaft?' :
+                      'What would be the impact of this idea on the community?'
                 }
                 rows={3}
               />
@@ -255,8 +270,8 @@ export function ProposeIdeaPage() {
                 onChange={(e) => handleInputChange('resources', e.target.value)}
                 placeholder={
                   language === 'fr' ? 'Budget estimé, équipement, personnel, partenaires...' :
-                  language === 'de' ? 'Geschätztes Budget, Ausrüstung, Personal, Partner...' :
-                  'Estimated budget, equipment, staff, partners...'
+                    language === 'de' ? 'Geschätztes Budget, Ausrüstung, Personal, Partner...' :
+                      'Estimated budget, equipment, staff, partners...'
                 }
                 rows={3}
               />

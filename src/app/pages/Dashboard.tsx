@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useLanguage } from "../contexts/LanguageContext";
 import { PageBanner } from "../components/PageBanner";
@@ -41,13 +41,16 @@ import {
   useSignalementStats
 } from "../hooks/useApi";
 import { format } from "date-fns";
+import { useAuth } from "../contexts/AuthContext";
+import { AuthModal } from "../components/AuthModal";
 
 export function Dashboard() {
   const { t, language, tLocal } = useLanguage();
+  const [authModalOpen, setAuthModalOpen] = useState(false);
   const navigate = useNavigate();
-
+  const { isLoggedIn, user, login, logout, updateProfile } = useAuth();
   // Fetch data using React Query hooks
-  const { data: statsx, isLoading: isLoadingStats } = useDashboardStats();
+  const { data: stats, isLoading: isLoadingStats } = useDashboardStats();
   const { data: themes } = useThemes();
   const { data: consultations } = useConsultations();
   const { data: petitions } = usePetitions();
@@ -107,7 +110,7 @@ export function Dashboard() {
     },
     {
       label: language === 'fr' ? 'Participants totaux' : language === 'de' ? 'Teilnehmer insgesamt' : 'Total participants',
-      value: consultations?.reduce((acc, consultation) => acc + consultation.stats.totalParticipants, 0)?.toLocaleString() || "0",
+      value: stats?.count || "0",
       icon: Users,
       variant: 'orange' as const,
     },
@@ -296,7 +299,7 @@ export function Dashboard() {
                       <MessageSquare className="w-6 h-6 text-blue-600" />
                     </div>
                     <Badge className="bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-100 transition-colors">
-                      {consultations?.length || 0} {language === "fr" && "actives"}
+                      {consultations?.filter((consultation) => consultation.status === 'OPEN')?.length || 0} {language === "fr" && "actives"}
                       {language === "de" && "aktiv"}
                       {language === "en" && "active"}
                     </Badge>
@@ -362,7 +365,7 @@ export function Dashboard() {
                       <Vote className="w-6 h-6 text-purple-600" />
                     </div>
                     <Badge className="bg-indigo-50 text-indigo-600 border border-indigo-200 hover:bg-indigo-100 transition-colors">
-                      {votes?.length || 0} {language === "fr" && "en cours"}
+                      {votes?.filter((vote) => vote.status === 'OPEN')?.length || 0} {language === "fr" && "en cours"}
                       {language === "de" && "laufend"}
                       {language === "en" && "ongoing"}
                     </Badge>
@@ -976,19 +979,35 @@ export function Dashboard() {
               {language === "en" &&
                 "Share your proposals to improve local life. Every idea counts and can make a difference!"}
             </p>
-            <Link to="/propose-idea">
-              <Button
-                size="lg"
-                className="gap-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-lg px-8 py-6"
-              >
-                <Lightbulb className="w-5 h-5" />
-                {language === "fr" && "Proposer une idée"}
-                {language === "de" && "Eine Idee vorschlagen"}
-                {language === "en" && "Propose an idea"}
-              </Button>
-            </Link>
+            <Button
+              onClick={() => {
+                if (!isLoggedIn) {
+                  setAuthModalOpen(true);
+                } else {
+                  navigate('/propose-idea');
+                }
+              }}
+              size="lg"
+              className="gap-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-lg px-8 py-6"
+            >
+              <Lightbulb className="w-5 h-5" />
+              {language === "fr" && "Proposer une idée"}
+              {language === "de" && "Eine Idee vorschlagen"}
+              {language === "en" && "Propose an idea"}
+            </Button>
+            {/* Login requirement note */}
+            <p className="mt-4 text-sm text-gray-500">
+              {language === "fr" && "Connexion requise pour soumettre une idée."}
+              {language === "de" && "Anmeldung erforderlich, um eine Idee einzureichen."}
+              {language === "en" && "Login required to submit an idea."}
+            </p>
           </CardContent>
         </Card>
+        {/* Auth Modal */}
+        <AuthModal
+          open={authModalOpen}
+          onOpenChange={setAuthModalOpen}
+        />
       </PageLayout>
     </div>
   );

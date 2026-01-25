@@ -5,6 +5,7 @@ import { setAuthToken, clearAuthToken, getAuthToken } from '../../client';
 interface UserProfile {
   firstName: string;
   lastName: string;
+  userId: string;
   email: string;
   phone: string;
   address: string;
@@ -52,7 +53,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const response = await authApi.login(email, password);
       // Persist token
       setAuthToken(response.token);
-
+      const userId = response.userId;
       const nameParts = email.split('@')[0];
       const firstName = nameParts.charAt(0).toUpperCase() + nameParts.slice(1);
       const lastName = 'User';
@@ -68,6 +69,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           firstName,
           lastName,
           email,
+          userId,
           phone: '',
           address: '',
           city: '',

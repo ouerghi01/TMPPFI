@@ -1,6 +1,7 @@
 import apiClient from '../client';
 
 export interface LoginResponse {
+    userId: any;
     token: string;
 }
 
