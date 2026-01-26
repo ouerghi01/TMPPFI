@@ -243,7 +243,8 @@ export function ConsultationDetailPage() {
       citizen_proposal: { fr: 'Proposition', de: 'Vorschlag', en: 'Proposal' },
       PUBLIC_MEETING: { fr: 'Rencontre', de: 'Treffen', en: 'Meeting' },
       ONLINE_DEBATE: { fr: 'Débat', de: 'Debatte', en: 'Debate' },
-      CITIZEN_PROPOSAL: { fr: 'Proposition', de: 'Vorschlag', en: 'Proposal' }
+      CITIZEN_PROPOSAL: { fr: 'Proposition', de: 'Vorschlag', en: 'Proposal' },
+      legislative: { fr: 'Proposition', de: 'Vorschlag', en: 'Proposal' }
     };
     return labels[consultation.type as keyof typeof labels]?.[language] || '';
   };
@@ -530,7 +531,7 @@ export function ConsultationDetailPage() {
                   }
                 </Button>
               )}
-              {consultation.type === 'public_meeting' && consultation.status === 'OPEN' && (
+              {consultation.status === 'OPEN' && (
                 <Button
 
                   onMouseEnter={() => {

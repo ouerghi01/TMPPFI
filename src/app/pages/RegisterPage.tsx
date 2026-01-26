@@ -56,7 +56,7 @@ export function RegisterPage() {
   const [isEmailVerified, setIsEmailVerified] = useState(false);
   const [isPhoneVerified, setIsPhoneVerified] = useState(false);
   const [accountStatus, setAccountStatus] = useState<'pending' | 'verified' | 'active' | 'restricted'>('pending');
-
+  const [registerClicked, setRegisterClicked] = useState(false);
   const [formData, setFormData] = useState<FormData>({
     firstName: '',
     lastName: '',
@@ -202,10 +202,10 @@ export function RegisterPage() {
     if (validateStep(currentStep)) {
       if (currentStep === 1) {
         // Create account logic simulation and send codes
+        setRegisterClicked(true);
         console.log('Creating account payload:', formData);
         const user = await createUser(formData);
-        //sendEmailVerificationCode();
-        //sendPhoneVerificationCode();
+
       }
 
       if (currentStep === 2) {
@@ -224,6 +224,7 @@ export function RegisterPage() {
       }
 
       setCurrentStep(prev => Math.min(prev + 1, steps.length - 1));
+      setRegisterClicked(false);
     }
   };
 
@@ -943,6 +944,7 @@ export function RegisterPage() {
                   </Button>
 
                   <Button
+                    disabled={registerClicked}
                     onClick={handleNext}
                     className={`gap-2 ${currentStep === 2 ? 'bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700' : 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700'}`}
                   >

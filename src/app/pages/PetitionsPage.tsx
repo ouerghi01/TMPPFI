@@ -19,6 +19,7 @@ import { toast } from 'sonner';
 import { Edit } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import apiClient from '@/client';
+import { AuthModal } from '../components/AuthModal';
 
 export function PetitionsPage() {
   const { t, language, tLocal } = useLanguage();
@@ -26,6 +27,7 @@ export function PetitionsPage() {
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
   const [signedPetitions, setSignedPetitions] = useState<string[]>([]); // Track signed petitions by ID
   const { user, isLoggedIn } = useAuth();
+  const [authModalOpen, setAuthModalOpen] = useState(false);
   // Fetch data using React Query hooks
   const { data: petitions_use, isLoading, error } = usePetitions();
   const [petitions, setPetitions] = useState<PetitionDTO[]>(petitions_use || []);
@@ -87,8 +89,17 @@ export function PetitionsPage() {
       toast.error('Une erreur est survenue lors de la signature de la pétition');
       return;
     }
-    setSignedPetitions(prev => prev.filter(id => id !== petitionId));
-
+    const new_ls = signedPetitions.filter(id => id !== petitionId);
+    setSignedPetitions(new_ls);
+    const updatedPetitions = petitions?.map(petition => {
+      if (petition.id === petitionId) {
+        return response.data;
+      }
+      return petition;
+    });
+    if (updatedPetitions) {
+      setPetitions(updatedPetitions);
+    }
     toast.success(
       language === 'fr' ? `Signature retirée de "${tLocal(petitionTitle)}"` :
         language === 'de' ? `Unterschrift von "${tLocal(petitionTitle)}" entfernt` :
@@ -444,7 +455,13 @@ export function PetitionsPage() {
                         <>
                           {!isSigned ? (
                             <Button
-                              onClick={(e) => handleSignPetition(e, petition.id, petition.title)}
+                              onClick={(e) => {
+                                if (!isLoggedIn) {
+                                  setAuthModalOpen(true);
+                                  return;
+                                }
+                                handleSignPetition(e, petition.id, petition.title)
+                              }}
                               className="w-full gap-2 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
                             >
                               <Edit className="w-4 h-4" />
@@ -455,7 +472,13 @@ export function PetitionsPage() {
                           ) : canUnsign ? (
                             <>
                               <Button
-                                onClick={(e) => handleUnsignPetition(e, petition.id, petition.title)}
+                                onClick={(e) => {
+                                  if (!isLoggedIn) {
+                                    setAuthModalOpen(true);
+                                    return;
+                                  }
+                                  handleUnsignPetition(e, petition.id, petition.title)
+                                }}
                                 variant="destructive"
                                 className="w-full gap-2"
                               >
@@ -538,6 +561,10 @@ export function PetitionsPage() {
           </motion.div>
         )}
       </PageLayout>
+      <AuthModal
+        open={authModalOpen}
+        onOpenChange={setAuthModalOpen}
+      />
     </div>
   );
 }
