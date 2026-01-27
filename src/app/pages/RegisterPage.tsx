@@ -54,7 +54,7 @@ export function RegisterPage() {
   const [emailVerificationCode, setEmailVerificationCode] = useState('');
   const [phoneVerificationCode, setPhoneVerificationCode] = useState('');
   const [isEmailVerified, setIsEmailVerified] = useState(false);
-  const [isPhoneVerified, setIsPhoneVerified] = useState(false);
+  const [isPhoneVerified, setIsPhoneVerified] = useState(true);
   const [accountStatus, setAccountStatus] = useState<'pending' | 'verified' | 'active' | 'restricted'>('pending');
   const [registerClicked, setRegisterClicked] = useState(false);
   const [formData, setFormData] = useState<FormData>({
@@ -590,6 +590,7 @@ export function RegisterPage() {
                           </p>
                         )}
                       </div>
+                      {/* Phone */}
                       <div className="space-y-2">
                         <Label htmlFor="phone" className="flex items-center gap-2">
                           <Phone className="w-4 h-4 text-gray-600" />
@@ -796,7 +797,7 @@ export function RegisterPage() {
                       )}
                     </div>
 
-                    {/* Phone Verification */}
+                    {/* Phone Verification 
                     <div className="bg-purple-50 border border-purple-200 rounded-lg p-6 space-y-4">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
@@ -836,6 +837,9 @@ export function RegisterPage() {
                         <p className="text-sm text-red-600">{errors.phoneVerification}</p>
                       )}
                     </div>
+                    
+                    */}
+
                   </motion.div>
                 )}
 

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useNavigate } from 'react-router-dom';
 import { PageBanner } from '../components/PageBanner';
@@ -22,6 +22,8 @@ import { toast } from 'sonner';
 import { Badge } from '../components/ui/badge';
 import { UserMinus } from 'lucide-react';
 import { CheckCircle } from 'lucide-react';
+import apiClient from '@/client';
+import { useAuth } from '../contexts/AuthContext';
 
 // Speaker profile interface
 interface SpeakerProfile {
@@ -188,10 +190,12 @@ const speakerProfiles: { [key: string]: SpeakerProfile } = {
 export function ConferencesPage() {
   const { t, language, tLocal } = useLanguage();
   const navigate = useNavigate();
-  const { data: conferences, isLoading, error } = useConferences();
+  const { data: conferences_use, isLoading, error } = useConferences();
+  const [conferences, setConferences] = useState<any[]>([]);
   const [selectedConference, setSelectedConference] = useState<ConferenceDTO | null>(null);
   const [selectedSpeaker, setSelectedSpeaker] = useState<SpeakerProfile | null>(null);
   const [registeredConferences, setRegisteredConferences] = useState<string[]>([]); // Track registered conferences by ID
+  const { isLoggedIn } = useAuth();
   const [registrationData, setRegistrationData] = useState({
     firstName: '',
     lastName: '',
@@ -203,7 +207,26 @@ export function ConferencesPage() {
     newsletter: false,
     acceptTerms: false
   });
-
+  useEffect(() => {
+    if (conferences_use) {
+      setConferences(conferences_use);
+    }
+  }, [conferences_use]);
+  useEffect(() => {
+    const fetchRegisteredConferences = async () => {
+      try {
+        const response = await apiClient.get('/conferences/my-registrations');
+        if (response.status === 200) {
+          setRegisteredConferences(response.data);
+        }
+      } catch (error) {
+        console.error('Error fetching registered conferences:', error);
+      }
+    };
+    if (isLoggedIn) {
+      fetchRegisteredConferences();
+    }
+  }, [isLoggedIn]);
   const handleInputChange = (field: string, value: string | boolean) => {
     setRegistrationData(prev => ({
       ...prev,
@@ -218,7 +241,7 @@ export function ConferencesPage() {
     }
   };
 
-  const handleRegistration = (e: React.FormEvent) => {
+  const handleRegistration = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!registrationData.firstName || !registrationData.lastName ||
@@ -242,12 +265,23 @@ export function ConferencesPage() {
       );
       return;
     }
+    const response = await apiClient.post(`/conferences/${selectedConference?.id}`, registrationData);
+    if (response.status === 201) {
+      toast.success(
+        language === 'fr' ? `Votre inscription à \"${selectedConference ? tLocal(selectedConference.title) : ''}\" est confirmée ! Vous recevrez un email de confirmation.` :
+          language === 'de' ? `Ihre Anmeldung zu \"${selectedConference ? tLocal(selectedConference.title) : ''}\" ist bestätigt! Sie erhalten eine Bestätigungs-E-Mail.` :
+            `Your registration for \"${selectedConference ? tLocal(selectedConference.title) : ''}\" is confirmed! You will receive a confirmation email.`
+      );
+      setConferences(prev => prev.map(conf => conf.id === selectedConference?.id ? response.data : conf));
 
-    toast.success(
-      language === 'fr' ? `Votre inscription à \"${selectedConference ? tLocal(selectedConference.title) : ''}\" est confirmée ! Vous recevrez un email de confirmation.` :
-        language === 'de' ? `Ihre Anmeldung zu \"${selectedConference ? tLocal(selectedConference.title) : ''}\" ist bestätigt! Sie erhalten eine Bestätigungs-E-Mail.` :
-          `Your registration for \"${selectedConference ? tLocal(selectedConference.title) : ''}\" is confirmed! You will receive a confirmation email.`
-    );
+    } else {
+      toast.error(
+        language === 'fr' ? 'Erreur lors de l\'inscription' :
+          language === 'de' ? 'Fehler bei der Anmeldung' :
+            'Error during registration'
+      );
+      return;
+    }
 
     // Add conference ID to registeredConferences
     if (selectedConference) {
@@ -269,20 +303,40 @@ export function ConferencesPage() {
     setSelectedConference(null);
   };
 
-  const handleCancelRegistration = (conferenceId: string, conferenceTitle: string) => {
+  const handleCancelRegistration = async (conferenceId: string, conferenceTitle: string) => {
     // Remove conference from registered list
-    setRegisteredConferences(prev => prev.filter(id => id !== conferenceId));
+    try {
+      const response = await apiClient.delete(`/conferences/${conferenceId}`);
+      if (response.status === 200) {
+        setRegisteredConferences(prev => prev.filter(id => id !== conferenceId));
+        setConferences(prev => prev.map(conf => conf.id === conferenceId ? response.data : conf));
 
-    toast.success(
-      language === 'fr' ? `Inscription annulée pour "${conferenceTitle}"` :
-        language === 'de' ? `Anmeldung für "${conferenceTitle}" storniert` :
-          `Registration cancelled for "${conferenceTitle}"`
-    );
+        toast.success(
+          language === 'fr' ? `Inscription annulée pour "${conferenceTitle}"` :
+            language === 'de' ? `Anmeldung für "${conferenceTitle}" storniert` :
+              `Registration cancelled for "${conferenceTitle}"`
+        );
+      } else {
+        toast.error(
+          language === 'fr' ? 'Erreur lors de l\'annulation' :
+            language === 'de' ? 'Fehler bei der Stornierung' :
+              'Error during cancellation'
+        );
+        return;
+      }
+    } catch (error) {
+      toast.error(
+        language === 'fr' ? 'Erreur lors de l\'annulation' :
+          language === 'de' ? 'Fehler bei der Stornierung' :
+            'Error during cancellation'
+      );
+      return;
+    }
   };
 
   // Calculate statistics
   const totalEvents = conferences ? conferences.length : 0;
-  const uniqueSpeakers = conferences ? new Set(conferences.flatMap(c => c.speakers?.filter(s => s).map(s => s.id) || [])).size : 0;
+  const uniqueSpeakers = conferences ? new Set(conferences.flatMap(c => c.speakers?.filter((s: any) => s).map((s: any) => s.id) || [])).size : 0;
   const totalSeatsReserved = conferences ? conferences.reduce((sum, c) => sum + c.registeredCount, 0) : 0;
   const totalCapacity = conferences ? conferences.reduce((sum, c) => sum + c.capacity, 0) : 0;
   const seatsReservedPercent = totalCapacity > 0
@@ -362,12 +416,12 @@ export function ConferencesPage() {
         {/* Conferences List */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {isLoading && <LoadingSpinner />}
-          {error && <ErrorMessage message="Error loading conferences" />}
+          {error && <ErrorMessage error={error} />}
           {conferences && conferences.map((conference) => {
             const availableSpots = conference.capacity - conference.registeredCount;
             const fillRate = (conference.registeredCount / conference.capacity) * 100;
             const isRegistered = registeredConferences.includes(conference.id);
-            const conferenceDate = new Date(conference.startDate);
+            const conferenceDate = new Date(conference.endDate);
             const today = new Date();
             const canCancel = isRegistered && conferenceDate > today; // Can only cancel if conference hasn't happened yet
 
@@ -437,7 +491,7 @@ export function ConferencesPage() {
                           {language === 'en' && 'Speakers'}
                         </div>
                         <div className="flex flex-wrap gap-2">
-                          {conference.speakers.filter(s => s).slice(0, 3).map((speaker, idx) => {
+                          {conference.speakers.filter((s: any) => s).slice(0, 3).map((speaker: any, idx: number) => {
                             // Speaker is a SpeakerDTO object with firstName, lastName, and id
                             const speakerName = `${speaker.name}`;
                             // Use the actual speaker ID from the DTO

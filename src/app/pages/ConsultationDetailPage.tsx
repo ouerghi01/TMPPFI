@@ -46,7 +46,7 @@ export function ConsultationDetailPage() {
   const navigate = useNavigate();
   const [newComment, setNewComment] = useState('');
   const [comments, setComments] = useState<Comment[]>([]);
-  const [hasParticipated, setHasParticipated] = useState(true);
+  const [hasParticipated, setHasParticipated] = useState(false);
 
   const [authModalOpen, setAuthModalOpen] = useState(false);
 
@@ -59,7 +59,11 @@ export function ConsultationDetailPage() {
   useEffect(() => {
     setConsultation(consultation_v1);
   }, [consultation_v1]);
-  const { data: theme } = useTheme(consultation?.themeId || '');
+  const { data: theme_use } = useTheme(consultation?.themeId || '');
+  const [theme, setTheme] = useState<any | null>(null);
+  useEffect(() => {
+    setTheme(theme_use);
+  }, [theme_use]);
   useEffect(() => {
     const fetchComments = async () => {
       const data = await getCommentsByConsultation(id || '');

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useVote, useTheme } from '../hooks/useApi';
@@ -25,6 +25,9 @@ import {
   Square
 } from 'lucide-react';
 import { toast } from 'sonner';
+import apiClient from '@/client';
+import { useAuth } from '../contexts/AuthContext';
+import { AuthModal } from '../components/AuthModal';
 
 export function VoteDetailPage() {
   const { voteId } = useParams<{ voteId: string }>();
@@ -32,18 +35,53 @@ export function VoteDetailPage() {
   const { language, tLocal } = useLanguage();
 
   // Fetch vote using React Query
-  const { data: vote, isLoading, error } = useVote(voteId || '');
-
+  const { data: vote_use, isLoading, error } = useVote(voteId || '');
+  const labels = {
+    remove: {
+      fr: 'Retirer mon vote',
+      de: 'Stimme zurückziehen',
+      en: 'Remove my vote',
+    },
+    confirme: {
+      fr: 'Confirmer mon vote',
+      de: 'Stimme ändern',
+      en: 'Modify my vote',
+    },
+  };
   // Fetch theme data
-  const { data: theme } = useTheme(vote?.themeId || '');
-
+  //const { data: theme } = useTheme(vote?.themeId || '');
+  const { isLoggedIn } = useAuth();
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [hasVoted, setHasVoted] = useState(false);
   const [previousVote, setPreviousVote] = useState<string | null>(null);
   const [isModifying, setIsModifying] = useState(false);
   const [voteDate, setVoteDate] = useState<Date | null>(null);
   const [visualMode, setVisualMode] = useState(false);
-
+  const [vote, setVote] = useState<any | null>(null);
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+  useEffect(() => {
+    if (vote_use) {
+      setVote(vote_use);
+    }
+  }, [vote_use]);
+  useEffect(() => {
+    if (isLoggedIn) {
+      const fetch_data = async () => {
+        const response = await apiClient.get(`/polls/${voteId}/get_option_selected_by_user`)
+        if (response.status === 200) {
+          if (response.data == '') {
+            setHasVoted(false);
+            return;
+          }
+          const optionId = response.data.id;
+          setPreviousVote(optionId);
+          setSelectedOption(optionId);
+          setHasVoted(true);
+        }
+      }
+      fetch_data();
+    }
+  }, [isLoggedIn])
   // Show loading state
   if (isLoading) {
     return (
@@ -82,12 +120,16 @@ export function VoteDetailPage() {
     );
   }
 
-  const totalVotes = vote.options.reduce((sum, option) => sum + (option.votesCount || 0), 0);
+  const totalVotes = vote.options.reduce((sum: number, option: any) => sum + (option.votesCount || 0), 0);
   const isOpen = vote.status === 'OPEN';
   const isUpcoming = vote.status === 'UPCOMING';
   const isClosed = vote.status === 'CLOSED';
 
-  const handleVote = () => {
+  const handleVote = async () => {
+    if (!isLoggedIn) {
+      setAuthModalOpen(true);
+      return;
+    }
     if (!selectedOption) {
       toast.error(
         language === 'fr' ? 'Veuillez sélectionner une option' :
@@ -96,7 +138,18 @@ export function VoteDetailPage() {
       );
       return;
     }
-
+    const response = await apiClient.post(`/polls/${vote.id}/vote`, { selectedOptionId: selectedOption });
+    if (response.status !== 200) {
+      toast.error(
+        language === 'fr' ? 'Une erreur est survenue lors de la soumission de votre vote' :
+          language === 'de' ? 'Ein Fehler ist aufgetreten, wenn Sie Ihre Stimme abgeben' :
+            'An error occurred while submitting your vote'
+      );
+      return;
+    } else {
+      const vote_updated = response.data;
+      setVote(vote_updated);
+    }
     const now = new Date();
     setPreviousVote(selectedOption);
     setHasVoted(true);
@@ -122,7 +175,7 @@ export function VoteDetailPage() {
 
   const getSelectedOptionText = () => {
     if (!previousVote) return '';
-    const option = vote.options.find(opt => opt.id === previousVote);
+    const option = vote.options.find((opt: any) => opt.id === previousVote);
     return option ? tLocal(option.label) : '';
   };
 
@@ -141,6 +194,7 @@ export function VoteDetailPage() {
     ];
     return visuals[index % visuals.length];
   };
+  const action = selectedOption === previousVote && isLoggedIn ? 'remove' : 'confirme';
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -160,7 +214,7 @@ export function VoteDetailPage() {
       <div className="mb-8">
         <div className="flex items-start justify-between gap-4 mb-4">
           <div className="flex-1">
-            <ThemeTag themeId={vote.themeId} className="mb-3" />
+            <ThemeTag themeId={vote.themeId} />
             <h1 className="text-4xl mb-2 text-gray-900">{tLocal(vote.title)}</h1>
             <p className="text-xl text-gray-600">{tLocal(vote.question)}</p>
           </div>
@@ -315,7 +369,7 @@ export function VoteDetailPage() {
               <CardContent className="pt-6">{!visualMode ? (
                 // Standard Mode
                 <div className="space-y-3">
-                  {vote.options.map((option) => (
+                  {vote.options.map((option: any) => (
                     <button
                       key={option.id}
                       onClick={() => setSelectedOption(option.id)}
@@ -341,7 +395,7 @@ export function VoteDetailPage() {
               ) : (
                 // Visual Mode - Simplified with Pictograms
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {vote.options.map((option, index) => {
+                  {vote.options.map((option: any, index: number) => {
                     const visual = getVisualForOption(index);
                     const VisualIcon = visual.icon;
                     return (
@@ -390,9 +444,7 @@ export function VoteDetailPage() {
                   disabled={!selectedOption}
                 >
                   <CheckCircle2 className="w-5 h-5" />
-                  {language === 'fr' && 'Confirmer mon vote'}
-                  {language === 'de' && 'Stimme bestätigen'}
-                  {language === 'en' && 'Confirm my vote'}
+                  {labels[action][language]}
                 </Button>
               </CardContent>
             </Card>
@@ -509,7 +561,7 @@ export function VoteDetailPage() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {vote.options.map((option, index) => {
+                  {vote.options.map((option: any, index: number) => {
                     const percentage = getOptionPercentage(option.votesCount || 0);
                     const visual = getVisualForOption(index);
                     return (
@@ -517,8 +569,8 @@ export function VoteDetailPage() {
                         <div className="flex justify-between items-center mb-2">
                           <span className="font-medium text-gray-900">{tLocal(option.label)}</span>
                           <div className="text-right">
-                            <span className="font-semibold text-gray-900">{percentage.toFixed(1)}%</span>
-                            <span className="text-sm text-gray-500 ml-2">({option.votes || 0} votes)</span>
+                            <span className="font-semibold text-gray-900">{option.percentage.toFixed(1)}%</span>
+                            <span className="text-sm text-gray-500 ml-2">({option.votesCount || 0} votes)</span>
                           </div>
                         </div>
                         <Progress value={percentage} className="h-3" />
@@ -600,7 +652,10 @@ export function VoteDetailPage() {
             </CardContent>
           </Card>
         </div>
-
+        <AuthModal
+          open={authModalOpen}
+          onOpenChange={setAuthModalOpen}
+        />
         {/* Sidebar */}
         <div className="space-y-6">
           {/* Quick Stats */}

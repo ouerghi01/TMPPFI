@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
 import { PageBanner } from '../components/PageBanner';
@@ -14,12 +14,13 @@ import { Progress } from '../components/ui/progress';
 import { useVotes, useThemes } from '../hooks/useApi';
 import type { VoteDTO } from '../types';
 import { Calendar, Users, Filter, TrendingUp, Vote as VoteIcon, Eye } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
+import apiClient from '@/client';
 
 export function VotesPage() {
   const { t, language, tLocal } = useLanguage();
   const [selectedTheme, setSelectedTheme] = useState<string | null>(null);
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
-
   // Fetch data using React Query hooks
   const { data: votes, isLoading, error } = useVotes();
   const { data: themesData } = useThemes();
@@ -266,13 +267,13 @@ export function VotesPage() {
                               <div className="flex justify-between text-sm mb-1">
                                 <span className="text-gray-700">{tLocal(option.label)}</span>
                                 <span className="font-medium">
-                                  {option.votesCount?.toLocaleString()} ({percentage.toFixed(1)}%)
+                                  {option.votesCount?.toLocaleString()} ({option?.percentage?.toFixed(1)}%)
                                 </span>
                               </div>
                               <div className="w-full bg-gray-200 rounded-full h-2">
                                 <div
                                   className="bg-blue-600 h-2 rounded-full transition-all"
-                                  style={{ width: `${percentage}%` }}
+                                  style={{ width: `${option.percentage}%` }}
                                 />
                               </div>
                             </div>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
 import { PageBanner } from '../components/PageBanner';
@@ -23,8 +23,15 @@ export function ConsultationsPage() {
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
 
   // Fetch data using React Query hooks
-  const { data: consultations, isLoading, error } = useConsultations();
+  const { data: consultations_use, isLoading, error } = useConsultations();
   const { data: themesData } = useThemes();
+  const [consultations, setConsultations] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (consultations_use) {
+      setConsultations(consultations_use);
+    }
+  }, [consultations_use]);
 
   // Show loading state
   if (isLoading) {
@@ -89,7 +96,7 @@ export function ConsultationsPage() {
 
   // Calculate statistics
   const totalConsultations = consultations?.length || 0;
-  const openConsultations = consultations?.filter(c => c.status === 'open').length || 0;
+  const openConsultations = consultations?.filter(c => c.status === 'OPEN').length || 0;
   const totalParticipants = consultations?.reduce((sum, c) => sum + (c.totalParticipants || 0), 0) || 0;
   const totalComments = consultations?.reduce((sum, c) => sum + (c.totalComments || 0), 0) || 0;
   const engagementRate = totalConsultations > 0

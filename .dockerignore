@@ -1,0 +1,11 @@
+node_modules
+.git
+.vscode
+dist
+build
+.env
+npm-debug.log
+yarn-error.log
+.idea
+*.md
+coverage
