@@ -98,13 +98,13 @@ export function Dashboard() {
     },
     {
       label: language === 'fr' ? 'Pétitions ouvertes' : language === 'de' ? 'Offene Petitionen' : 'Open petitions',
-      value: petitions?.length?.toString() || "0",
+      value: (petitions?.filter((petition) => petition.status === 'OPEN')?.length ?? 0).toString() || "0",
       icon: FileText,
       variant: 'green' as const,
     },
     {
       label: language === 'fr' ? 'Votes en cours' : language === 'de' ? 'Laufende Abstimmungen' : 'Ongoing votes',
-      value: votes?.length?.toString() || "0",
+      value: (votes?.filter((vote) => vote.status === 'OPEN')?.length ?? 0).toString() || "0",
       icon: CheckSquare,
       variant: 'purple' as const,
     },

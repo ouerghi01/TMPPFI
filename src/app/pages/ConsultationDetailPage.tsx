@@ -58,7 +58,7 @@ export function ConsultationDetailPage() {
   const [consultation, setConsultation] = useState<any | null>(null);
   useEffect(() => {
     setConsultation(consultation_v1);
-  }, [consultation_v1]);
+  }, [consultation_v1, id]);
   const { data: theme_use } = useTheme(consultation?.themeId || '');
   const [theme, setTheme] = useState<any | null>(null);
   useEffect(() => {
@@ -86,7 +86,7 @@ export function ConsultationDetailPage() {
   const isDebateActive = consultation?.status === 'OPEN' || consultation?.status === 'UPCOMING';
 
   // Show loading state
-  if (isLoading) {
+  if (isLoading || error || !consultation || !theme) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="text-center">
@@ -101,24 +101,7 @@ export function ConsultationDetailPage() {
   }
 
   // Show error or not found state
-  if (error || !consultation || !theme) {
-    return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="text-center">
-          <h1 className="text-2xl mb-4 text-gray-900">
-            {language === 'fr' && 'Concertation non trouvée'}
-            {language === 'de' && 'Konsultation nicht gefunden'}
-            {language === 'en' && 'Consultation not found'}
-          </h1>
-          <Button onClick={() => navigate('/consultations')}>
-            {language === 'fr' && 'Retour aux concertations'}
-            {language === 'de' && 'Zurück zu Konsultationen'}
-            {language === 'en' && 'Back to consultations'}
-          </Button>
-        </div>
-      </div>
-    );
-  }
+
 
   const handleSupport = () => {
     setHasSupported(!hasSupported);

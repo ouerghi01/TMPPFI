@@ -205,7 +205,9 @@ export function SignalementsPage() {
 
           <div className="ml-auto">
             <Link to="/signalements/create">
-              <Button className="w-full sm:w-auto">
+              <Button
+                disabled={true}
+                className="w-full sm:w-auto">
                 <Plus className="w-4 h-4 mr-2" />
                 {language === 'fr' ? 'Créer un signalement' :
                   language === 'de' ? 'Meldung erstellen' :

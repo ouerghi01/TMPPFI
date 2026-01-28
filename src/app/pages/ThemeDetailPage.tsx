@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
-import { useConsultations, usePetitions, useVotes } from '../hooks/useApi';
+import { useConsultations, useLegislativeConsultations, usePetitions, useVotes } from '../hooks/useApi';
 import { StatusBadge } from '../components/StatusBadge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
@@ -11,7 +11,7 @@ import { getThemeById } from '../../api/themes';
 export function ThemeDetailPage() {
   const { themeId } = useParams<{ themeId: string }>();
   const { t, language, tLocal } = useLanguage();
-  const [theme, setTheme] = useState(null);
+  const [theme, setTheme] = useState<any>(null);
   useEffect(() => {
     const fetchTheme = async () => {
       const theme = await getThemeById(themeId!);
@@ -24,6 +24,7 @@ export function ThemeDetailPage() {
   const { data: allConsultations, isLoading: isLoadingConsultations } = useConsultations();
   const { data: allPetitions, isLoading: isLoadingPetitions } = usePetitions();
   const { data: allVotes, isLoading: isLoadingVotes } = useVotes();
+  const { data: legislativeConsultations, isLoading: isLoadingLegislativeConsultations } = useLegislativeConsultations();
 
   if (!theme) {
     return (
@@ -34,10 +35,11 @@ export function ThemeDetailPage() {
   }
 
   // Filter data by themeId
-  const themeConsultations = allConsultations?.filter((c) => c.themeId === themeId) || [];
+  let themeConsultations = allConsultations?.filter((c) => c.themeId === themeId) || [];
   const themePetitions = allPetitions?.filter((p) => p.themeId === themeId) || [];
   const themeVotes = allVotes?.filter((v) => v.themeId === themeId) || [];
-
+  const themeLegislativeConsultations = legislativeConsultations?.filter((c) => c.themeId === themeId) || [];
+  themeConsultations = [...themeConsultations, ...themeLegislativeConsultations];
   // Calculate total processes (for now, just consultations - can add other types later)
   const totalProcesses = themeConsultations.length;
 

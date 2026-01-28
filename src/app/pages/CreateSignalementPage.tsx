@@ -9,12 +9,13 @@ import { Textarea } from '../components/ui/textarea';
 import { Label } from '../components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
-import { useCreateSignalement } from '../hooks/useApi';
+import { useCreateSignalement, useThemes } from '../hooks/useApi';
 import { useQuery } from '@tanstack/react-query';
 import { apiService } from '../services/api';
 import { toast } from 'sonner';
 import { AlertCircle, MapPin, Upload, X, Loader2 } from 'lucide-react';
 import type { CreateSignalementDTO, SignalementCategory } from '../types';
+import apiClient from '@/client';
 
 export function CreateSignalementPage() {
   const { t, language, tLocal } = useLanguage();
@@ -22,26 +23,35 @@ export function CreateSignalementPage() {
   const createMutation = useCreateSignalement();
 
   // Form state
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [category, setCategory] = useState<SignalementCategory | ''>('');
-  const [themeId, setThemeId] = useState('');
-  const [locationName, setLocationName] = useState('');
-  const [address, setAddress] = useState('');
-  const [city, setCity] = useState('');
-  const [postalCode, setPostalCode] = useState('');
-  const [lat, setLat] = useState('');
-  const [lng, setLng] = useState('');
+  const testData = {
+    title: "Pothole on Main Street",
+    description: "There is a large pothole near the intersection that needs repair.",
+    category: "infrastructure",   // must match enum names
+    themeId: "1",                 // example theme ID
+    locationName: "Main Street",
+    address: "123 Main Street",
+    city: "Sampleville",
+    postalCode: "12345",
+    lat: "48.8566",
+    lng: "2.3522",
+    images: [] // optional, will add files separately
+  };
+  const [title, setTitle] = useState(testData.title);
+  const [description, setDescription] = useState(testData.description);
+  const [category, setCategory] = useState<SignalementCategory>();
+  const [themeId, setThemeId] = useState("");
+  const [locationName, setLocationName] = useState(testData.locationName);
+  const [address, setAddress] = useState(testData.address);
+  const [city, setCity] = useState(testData.city);
+  const [postalCode, setPostalCode] = useState(testData.postalCode);
+  const [lat, setLat] = useState(testData.lat);
+  const [lng, setLng] = useState(testData.lng);
   const [images, setImages] = useState<File[]>([]);
 
   // Fetch themes for dropdown
-  const { data: themes } = useQuery({
-    queryKey: ['themes'],
-    queryFn: async () => {
-      const response = await apiService.themes.getThemes({});
-      return response.data;
-    },
-  });
+  const { data: themes } = useThemes();
+
+
 
   const getCategoryLabel = (cat: string) => {
     const labels: Record<string, { fr: string; de: string; en: string }> = {
@@ -75,8 +85,8 @@ export function CreateSignalementPage() {
     if (!title || !description) {
       toast.error(
         language === 'fr' ? 'Le titre et la description sont obligatoires' :
-        language === 'de' ? 'Titel und Beschreibung sind erforderlich' :
-        'Title and description are required'
+          language === 'de' ? 'Titel und Beschreibung sind erforderlich' :
+            'Title and description are required'
       );
       return;
     }
@@ -84,8 +94,8 @@ export function CreateSignalementPage() {
     if (!category) {
       toast.error(
         language === 'fr' ? 'Veuillez sélectionner une catégorie' :
-        language === 'de' ? 'Bitte wählen Sie eine Kategorie' :
-        'Please select a category'
+          language === 'de' ? 'Bitte wählen Sie eine Kategorie' :
+            'Please select a category'
       );
       return;
     }
@@ -93,8 +103,8 @@ export function CreateSignalementPage() {
     if (!themeId) {
       toast.error(
         language === 'fr' ? 'Veuillez sélectionner un thème' :
-        language === 'de' ? 'Bitte wählen Sie ein Thema' :
-        'Please select a theme'
+          language === 'de' ? 'Bitte wählen Sie ein Thema' :
+            'Please select a theme'
       );
       return;
     }
@@ -102,52 +112,47 @@ export function CreateSignalementPage() {
     if (!address || !city || !postalCode || !lat || !lng) {
       toast.error(
         language === 'fr' ? 'Veuillez remplir tous les champs de localisation' :
-        language === 'de' ? 'Bitte füllen Sie alle Standortfelder aus' :
-        'Please fill in all location fields'
+          language === 'de' ? 'Bitte füllen Sie alle Standortfelder aus' :
+            'Please fill in all location fields'
       );
       return;
     }
 
-    const data: CreateSignalementDTO = {
-      title: {
-        fr: title,
-        de: title,
-        en: title,
-      },
-      description: {
-        fr: description,
-        de: description,
-        en: description,
-      },
-      category: category as SignalementCategory,
-      themeId,
-      location: {
-        name: locationName || address,
-        address,
-        city,
-        postalCode,
-        coordinates: {
-          lat: parseFloat(lat),
-          lng: parseFloat(lng),
-        },
-      },
-      images: images.length > 0 ? images : undefined,
-    };
+    const formData = new FormData();
+
+    formData.append("title", title);
+    formData.append("description", description);
+    formData.append("category", category);
+    formData.append("themeId", themeId);
+    formData.append("locationName", locationName);
+    formData.append("address", address);
+    formData.append("city", city);
+    formData.append("postalCode", postalCode);
+    formData.append("lat", lat);
+    formData.append("lng", lng);
+
+
+
+
 
     try {
-      await createMutation.mutateAsync(data);
-      toast.success(
-        language === 'fr' ? 'Signalement créé avec succès !' :
-        language === 'de' ? 'Meldung erfolgreich erstellt!' :
-        'Report created successfully!'
-      );
-      navigate('/signalements');
-    } catch (error) {
+      const reponse = await apiClient.post("/signalements", formData);
+
+      if (reponse.status === 201) {
+        toast.success(
+          language === 'fr' ? 'Signalement créé avec succès !' :
+            language === 'de' ? 'Meldung erfolgreich erstellt!' :
+              'Report created successfully!'
+        );
+        navigate('/signalements');
+      }
+    } catch (error: any) {
       toast.error(
         language === 'fr' ? 'Erreur lors de la création du signalement' :
-        language === 'de' ? 'Fehler beim Erstellen der Meldung' :
-        'Error creating report'
+          language === 'de' ? 'Fehler beim Erstellen der Meldung' :
+            'Error creating report'
       );
+      console.log(error);
     }
   };
 
@@ -156,13 +161,13 @@ export function CreateSignalementPage() {
       <PageBanner
         title={
           language === 'fr' ? 'Créer un signalement' :
-          language === 'de' ? 'Meldung erstellen' :
-          'Create Report'
+            language === 'de' ? 'Meldung erstellen' :
+              'Create Report'
         }
         description={
           language === 'fr' ? 'Signalez un problème dans votre commune pour contribuer à son amélioration' :
-          language === 'de' ? 'Melden Sie ein Problem in Ihrer Gemeinde, um zu ihrer Verbesserung beizutragen' :
-          'Report an issue in your community to help improve it'
+            language === 'de' ? 'Melden Sie ein Problem in Ihrer Gemeinde, um zu ihrer Verbesserung beizutragen' :
+              'Report an issue in your community to help improve it'
         }
         gradient="from-red-600 to-orange-600"
         icon={<AlertCircle className="w-12 h-12 text-white" />}
@@ -174,13 +179,13 @@ export function CreateSignalementPage() {
             <CardHeader>
               <CardTitle>
                 {language === 'fr' ? 'Informations du signalement' :
-                 language === 'de' ? 'Meldungsinformationen' :
-                 'Report Information'}
+                  language === 'de' ? 'Meldungsinformationen' :
+                    'Report Information'}
               </CardTitle>
               <CardDescription>
                 {language === 'fr' ? 'Décrivez le problème que vous souhaitez signaler' :
-                 language === 'de' ? 'Beschreiben Sie das Problem, das Sie melden möchten' :
-                 'Describe the issue you want to report'}
+                  language === 'de' ? 'Beschreiben Sie das Problem, das Sie melden möchten' :
+                    'Describe the issue you want to report'}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -188,8 +193,8 @@ export function CreateSignalementPage() {
               <div className="space-y-4">
                 <h3 className="text-sm font-medium">
                   {language === 'fr' ? 'Titre' :
-                   language === 'de' ? 'Titel' :
-                   'Title'} *
+                    language === 'de' ? 'Titel' :
+                      'Title'} *
                 </h3>
                 <div className="space-y-2">
                   <Input
@@ -206,8 +211,8 @@ export function CreateSignalementPage() {
               <div className="space-y-4">
                 <h3 className="text-sm font-medium">
                   {language === 'fr' ? 'Description' :
-                   language === 'de' ? 'Beschreibung' :
-                   'Description'} *
+                    language === 'de' ? 'Beschreibung' :
+                      'Description'} *
                 </h3>
                 <div className="space-y-2">
                   <Textarea
@@ -226,8 +231,8 @@ export function CreateSignalementPage() {
                 <div className="space-y-2">
                   <Label>
                     {language === 'fr' ? 'Catégorie' :
-                     language === 'de' ? 'Kategorie' :
-                     'Category'} *
+                      language === 'de' ? 'Kategorie' :
+                        'Category'} *
                   </Label>
                   <Select value={category} onValueChange={(v) => setCategory(v as SignalementCategory)}>
                     <SelectTrigger>
@@ -249,8 +254,8 @@ export function CreateSignalementPage() {
                 <div className="space-y-2">
                   <Label>
                     {language === 'fr' ? 'Thème' :
-                     language === 'de' ? 'Thema' :
-                     'Theme'} *
+                      language === 'de' ? 'Thema' :
+                        'Theme'} *
                   </Label>
                   <Select value={themeId} onValueChange={setThemeId}>
                     <SelectTrigger>
@@ -272,14 +277,14 @@ export function CreateSignalementPage() {
                 <h3 className="text-sm font-medium flex items-center gap-2">
                   <MapPin className="w-4 h-4" />
                   {language === 'fr' ? 'Localisation' :
-                   language === 'de' ? 'Standort' :
-                   'Location'} *
+                    language === 'de' ? 'Standort' :
+                      'Location'} *
                 </h3>
                 <div className="space-y-2">
                   <Label htmlFor="location-name">
                     {language === 'fr' ? 'Nom du lieu' :
-                     language === 'de' ? 'Ortsname' :
-                     'Location Name'}
+                      language === 'de' ? 'Ortsname' :
+                        'Location Name'}
                   </Label>
                   <Input
                     id="location-name"
@@ -291,8 +296,8 @@ export function CreateSignalementPage() {
                 <div className="space-y-2">
                   <Label htmlFor="address">
                     {language === 'fr' ? 'Adresse' :
-                     language === 'de' ? 'Adresse' :
-                     'Address'} *
+                      language === 'de' ? 'Adresse' :
+                        'Address'} *
                   </Label>
                   <Input
                     id="address"
@@ -306,8 +311,8 @@ export function CreateSignalementPage() {
                   <div className="space-y-2">
                     <Label htmlFor="city">
                       {language === 'fr' ? 'Ville' :
-                       language === 'de' ? 'Stadt' :
-                       'City'} *
+                        language === 'de' ? 'Stadt' :
+                          'City'} *
                     </Label>
                     <Input
                       id="city"
@@ -320,8 +325,8 @@ export function CreateSignalementPage() {
                   <div className="space-y-2">
                     <Label htmlFor="postal-code">
                       {language === 'fr' ? 'Code postal' :
-                       language === 'de' ? 'Postleitzahl' :
-                       'Postal Code'} *
+                        language === 'de' ? 'Postleitzahl' :
+                          'Postal Code'} *
                     </Label>
                     <Input
                       id="postal-code"
@@ -336,8 +341,8 @@ export function CreateSignalementPage() {
                   <div className="space-y-2">
                     <Label htmlFor="lat">
                       {language === 'fr' ? 'Latitude' :
-                       language === 'de' ? 'Breitengrad' :
-                       'Latitude'} *
+                        language === 'de' ? 'Breitengrad' :
+                          'Latitude'} *
                     </Label>
                     <Input
                       id="lat"
@@ -352,8 +357,8 @@ export function CreateSignalementPage() {
                   <div className="space-y-2">
                     <Label htmlFor="lng">
                       {language === 'fr' ? 'Longitude' :
-                       language === 'de' ? 'Längengrad' :
-                       'Longitude'} *
+                        language === 'de' ? 'Längengrad' :
+                          'Longitude'} *
                     </Label>
                     <Input
                       id="lng"
@@ -373,14 +378,14 @@ export function CreateSignalementPage() {
                 <h3 className="text-sm font-medium flex items-center gap-2">
                   <Upload className="w-4 h-4" />
                   {language === 'fr' ? 'Photos' :
-                   language === 'de' ? 'Fotos' :
-                   'Photos'}
+                    language === 'de' ? 'Fotos' :
+                      'Photos'}
                 </h3>
                 <div className="space-y-2">
                   <Label htmlFor="images">
                     {language === 'fr' ? 'Ajouter des photos (optionnel)' :
-                     language === 'de' ? 'Fotos hinzufügen (optional)' :
-                     'Add photos (optional)'}
+                      language === 'de' ? 'Fotos hinzufügen (optional)' :
+                        'Add photos (optional)'}
                   </Label>
                   <Input
                     id="images"
@@ -421,8 +426,8 @@ export function CreateSignalementPage() {
                   className="flex-1"
                 >
                   {language === 'fr' ? 'Annuler' :
-                   language === 'de' ? 'Abbrechen' :
-                   'Cancel'}
+                    language === 'de' ? 'Abbrechen' :
+                      'Cancel'}
                 </Button>
                 <Button
                   type="submit"
@@ -433,14 +438,14 @@ export function CreateSignalementPage() {
                     <>
                       <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                       {language === 'fr' ? 'Création...' :
-                       language === 'de' ? 'Erstellen...' :
-                       'Creating...'}
+                        language === 'de' ? 'Erstellen...' :
+                          'Creating...'}
                     </>
                   ) : (
                     <>
                       {language === 'fr' ? 'Créer le signalement' :
-                       language === 'de' ? 'Meldung erstellen' :
-                       'Create Report'}
+                        language === 'de' ? 'Meldung erstellen' :
+                          'Create Report'}
                     </>
                   )}
                 </Button>

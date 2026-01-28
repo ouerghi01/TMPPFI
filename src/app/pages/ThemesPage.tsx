@@ -33,13 +33,13 @@ export function ThemesPage() {
         <PageBanner
           title={
             language === 'fr' ? 'Thèmes de participation' :
-            language === 'de' ? 'Beteiligungsthemen' :
-            'Participation Themes'
+              language === 'de' ? 'Beteiligungsthemen' :
+                'Participation Themes'
           }
           description={
             language === 'fr' ? 'Explorez les différentes thématiques de participation citoyenne' :
-            language === 'de' ? 'Erkunden Sie die verschiedenen Themen der Bürgerbeteiligung' :
-            'Explore the different themes of citizen participation'
+              language === 'de' ? 'Erkunden Sie die verschiedenen Themen der Bürgerbeteiligung' :
+                'Explore the different themes of citizen participation'
           }
           gradient="from-indigo-600 to-purple-600"
           icon={<Layers className="w-12 h-12 text-white" />}
@@ -67,8 +67,8 @@ export function ThemesPage() {
       total: stats.consultations + stats.petitions + stats.votes
     };
   });
-  const trendingTheme = themeActivities.reduce((max, current) => 
-    current.total > max.total ? current : max, themeActivities[0] || { theme: { id: '', name: { fr: 'N/A', de: 'N/A', en: 'N/A' }, icon: '', color: '' } as ThemeDTO, total: 0 }
+  const trendingTheme = themeActivities.reduce((max, current) =>
+    current.total > max.total ? current : max, themeActivities[0] || { theme: { id: '', name: { fr: 'N/A', de: 'N/A', en: 'N/A' }, icon: '', color: '' } as unknown as ThemeDTO, total: 0 }
   );
 
   // Total contributions
@@ -82,26 +82,26 @@ export function ThemesPage() {
       <PageBanner
         title={
           language === 'fr' ? 'Thèmes citoyens' :
-          language === 'de' ? 'Bürgerthemen' :
-          'Citizen Themes'
+            language === 'de' ? 'Bürgerthemen' :
+              'Citizen Themes'
         }
         description={
           language === 'fr' ? 'Explorez toutes les activités participatives organisées par thématique' :
-          language === 'de' ? 'Erkunden Sie alle partizipativen Aktivitäten nach Themen organisiert' :
-          'Explore all participatory activities organized by theme'
+            language === 'de' ? 'Erkunden Sie alle partizipativen Aktivitäten nach Themen organisiert' :
+              'Explore all participatory activities organized by theme'
         }
         gradient="from-indigo-600 to-purple-600"
         icon={<Layers className="w-12 h-12 text-white" />}
       />
-      
+
       <PageLayout className="py-8">
         {/* KPI Cards - Standard 4-column grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
           <KPICard
             label={
               language === 'fr' ? 'Thèmes actifs' :
-              language === 'de' ? 'Aktive Themen' :
-              'Active Themes'
+                language === 'de' ? 'Aktive Themen' :
+                  'Active Themes'
             }
             value={activeThemes}
             icon={Layers}
@@ -112,8 +112,8 @@ export function ThemesPage() {
           <KPICard
             label={
               language === 'fr' ? 'Tendance' :
-              language === 'de' ? 'Trend' :
-              'Trending'
+                language === 'de' ? 'Trend' :
+                  'Trending'
             }
             value={tLocal(trendingTheme.theme.name)}
             icon={TrendingUp}
@@ -130,8 +130,8 @@ export function ThemesPage() {
           <KPICard
             label={
               language === 'fr' ? 'Contributions' :
-              language === 'de' ? 'Beiträge' :
-              'Total Contributions'
+                language === 'de' ? 'Beiträge' :
+                  'Total Contributions'
             }
             value={totalContributions.toLocaleString()}
             icon={Heart}
@@ -142,8 +142,8 @@ export function ThemesPage() {
           <KPICard
             label={
               language === 'fr' ? 'Propositions' :
-              language === 'de' ? 'Vorschläge' :
-              'Proposals'
+                language === 'de' ? 'Vorschläge' :
+                  'Proposals'
             }
             value={proposalsByCategory}
             icon={BarChart3}
@@ -153,7 +153,7 @@ export function ThemesPage() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {themes.map((theme) => {
+          {themes && themes.map((theme) => {
             const stats = getThemeStats(theme.id);
             const totalActivities =
               stats.consultations + stats.petitions + stats.votes;

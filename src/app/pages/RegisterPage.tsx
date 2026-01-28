@@ -203,7 +203,6 @@ export function RegisterPage() {
       if (currentStep === 1) {
         // Create account logic simulation and send codes
         setRegisterClicked(true);
-        console.log('Creating account payload:', formData);
         const user = await createUser(formData);
 
       }

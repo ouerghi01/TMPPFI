@@ -24,6 +24,7 @@ import { UserMinus } from 'lucide-react';
 import { CheckCircle } from 'lucide-react';
 import apiClient from '@/client';
 import { useAuth } from '../contexts/AuthContext';
+import { AuthModal } from '../components/AuthModal';
 
 // Speaker profile interface
 interface SpeakerProfile {
@@ -196,6 +197,8 @@ export function ConferencesPage() {
   const [selectedSpeaker, setSelectedSpeaker] = useState<SpeakerProfile | null>(null);
   const [registeredConferences, setRegisteredConferences] = useState<string[]>([]); // Track registered conferences by ID
   const { isLoggedIn } = useAuth();
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+
   const [registrationData, setRegistrationData] = useState({
     firstName: '',
     lastName: '',
@@ -543,7 +546,13 @@ export function ConferencesPage() {
                     {!isRegistered ? (
                       availableSpots > 0 ? (
                         <Button
-                          onClick={() => setSelectedConference(conference)}
+                          onClick={() => {
+                            if (!isLoggedIn) {
+                              setAuthModalOpen(true);
+                              return;
+                            }
+                            setSelectedConference(conference)
+                          }}
                           className="w-full gap-2"
                         >
                           <UserPlus className="w-4 h-4" />
@@ -601,7 +610,7 @@ export function ConferencesPage() {
             );
           })}
         </div>
-
+        <AuthModal open={authModalOpen} onOpenChange={setAuthModalOpen} />
         {/* Speaker Profile Dialog */}
         <Dialog open={!!selectedSpeaker} onOpenChange={(open) => !open && setSelectedSpeaker(null)}>
           <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
