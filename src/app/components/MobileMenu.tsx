@@ -47,61 +47,61 @@ export function MobileMenu({ open, onOpenChange }: MobileMenuProps) {
   const { isLoggedIn, user, logout } = useAuth();
 
   const mainNavItems = [
-    { 
-      key: 'home', 
-      path: '/', 
+    {
+      key: 'home',
+      path: '/',
       icon: Home,
       label: t('nav.home')
     },
-    { 
-      key: 'consultations', 
-      path: '/consultations', 
+    {
+      key: 'consultations',
+      path: '/consultations',
       icon: MessageSquare,
       label: t('nav.consultations'),
       badge: '8'
     },
-    { 
-      key: 'assemblies', 
-      path: '/assemblies', 
+    {
+      key: 'assemblies',
+      path: '/assemblies',
       icon: Users,
       label: t('nav.assemblies')
     },
-    { 
-      key: 'petitions', 
-      path: '/petitions', 
+    {
+      key: 'petitions',
+      path: '/petitions',
       icon: FileText,
       label: t('nav.petitions'),
       badge: '10'
     },
-    { 
-      key: 'conferences', 
-      path: '/conferences', 
+    {
+      key: 'conferences',
+      path: '/conferences',
       icon: Mic,
       label: t('nav.conferences')
     },
-    { 
-      key: 'votes', 
-      path: '/votes', 
+    {
+      key: 'votes',
+      path: '/votes',
       icon: Vote,
       label: language === 'fr' ? 'Votes & Référendums' : language === 'de' ? 'Abstimmungen & Referenden' : 'Votes & Referendums',
       badge: '5'
     },
-    { 
-      key: 'signalements', 
-      path: '/signalements', 
+    {
+      key: 'signalements',
+      path: '/signalements',
       icon: AlertCircle,
       label: language === 'fr' ? 'Signalements citoyens' : language === 'de' ? 'Bürgermeldungen' : 'Citizen Reports'
     },
-    { 
-      key: 'youth-space', 
-      path: '/youth-space', 
+    {
+      key: 'youth-space',
+      path: '/youth-space',
       icon: Sparkles,
       label: language === 'fr' ? '🌟 Espace Jeunesse' : language === 'de' ? '🌟 Jugendraum' : '🌟 Youth Space',
       badge: '3'
     },
-    { 
-      key: 'themes', 
-      path: '/themes', 
+    {
+      key: 'themes',
+      path: '/themes',
       icon: Layers,
       label: t('nav.themes')
     },
@@ -158,7 +158,7 @@ export function MobileMenu({ open, onOpenChange }: MobileMenuProps) {
             <div className="mb-4 p-3 bg-blue-50 rounded-lg">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-semibold">
-                  {user.firstName.charAt(0)}{user.lastName.charAt(0)}
+                  {user.firstName?.charAt(0)}{user.lastName?.charAt(0)}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="font-medium text-gray-900 truncate">
@@ -172,7 +172,7 @@ export function MobileMenu({ open, onOpenChange }: MobileMenuProps) {
             </div>
           ) : (
             <div className="mb-4">
-              <Button 
+              <Button
                 onClick={handleNavClick}
                 asChild
                 className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"

@@ -1,12 +1,24 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
-import { useConsultations, useLegislativeConsultations, usePetitions, useVotes } from '../hooks/useApi';
+import { useConsultations, useLegislativeConsultations, usePetitions, useSignalements, useVotes, useYouthPolls } from '../hooks/useApi';
 import { StatusBadge } from '../components/StatusBadge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { ArrowRight, Users } from 'lucide-react';
 import { getThemeById } from '../../api/themes';
+import { YouthPollCard } from '../components/cards/YouthPollCard';
+
+function calculateAge(birthdate: Date | string): number {
+  if (!birthdate) return 0;
+  if (typeof birthdate === 'string') {
+    birthdate = new Date(birthdate);
+  }
+  const today = new Date();
+  const diff = today.getTime() - birthdate.getTime();
+  const ageDate = new Date(diff);
+  return Math.abs(ageDate.getUTCFullYear() - 1970);
+}
 
 export function ThemeDetailPage() {
   const { themeId } = useParams<{ themeId: string }>();
@@ -25,6 +37,16 @@ export function ThemeDetailPage() {
   const { data: allPetitions, isLoading: isLoadingPetitions } = usePetitions();
   const { data: allVotes, isLoading: isLoadingVotes } = useVotes();
   const { data: legislativeConsultations, isLoading: isLoadingLegislativeConsultations } = useLegislativeConsultations();
+  const { data: allSignalements, isLoading: isLoadingSignalements } = useSignalements();
+  const { data: allYouthPolls, isLoading: isLoadingYouthPolls } = useYouthPolls({});
+
+  const savedProfile = localStorage.getItem('userProfile');
+  let userProfile: any;
+  let age: number = 0;
+  if (savedProfile) {
+    userProfile = JSON.parse(savedProfile);
+    age = calculateAge(userProfile.birthdate);
+  }
 
   if (!theme) {
     return (
@@ -40,13 +62,14 @@ export function ThemeDetailPage() {
   const themeVotes = allVotes?.filter((v) => v.themeId === themeId) || [];
   const themeLegislativeConsultations = legislativeConsultations?.filter((c) => c.themeId === themeId) || [];
   themeConsultations = [...themeConsultations, ...themeLegislativeConsultations];
-  // Calculate total processes (for now, just consultations - can add other types later)
-  const totalProcesses = themeConsultations.length;
+  const themeSignalements = allSignalements?.filter((s) => s.themeId === themeId) || [];
+  const themeYouthPolls = allYouthPolls?.filter((p) => p.themeId === themeId) || [];
+  const totalProcesses = themeConsultations.length + themeSignalements.length + themePetitions.length + themeVotes.length + themeYouthPolls.length;
 
   // Get localized theme name from legacy format
   const themeName = tLocal(theme.name)
 
-  const isLoading = isLoadingConsultations || isLoadingPetitions || isLoadingVotes;
+  const isLoading = isLoadingConsultations || isLoadingPetitions || isLoadingVotes || isLoadingSignalements || isLoadingYouthPolls;
 
   if (isLoading) {
     return (
@@ -79,7 +102,7 @@ export function ThemeDetailPage() {
 
       {/* Tabs */}
       <Tabs defaultValue="all" className="w-full">
-        <TabsList className="mb-6">
+        <TabsList className="mb-6 flex-wrap h-auto gap-2">
           <TabsTrigger value="all">
             {language === 'fr' && 'Tout voir'}
             {language === 'de' && 'Alles anzeigen'}
@@ -105,6 +128,17 @@ export function ThemeDetailPage() {
             {language === 'de' && `Abstimmungen (${themeVotes.length})`}
             {language === 'en' && `Votes (${themeVotes.length})`}
           </TabsTrigger>
+          <TabsTrigger value="youth-polls">
+            {language === 'fr' && `Espace Jeunesse (${themeYouthPolls.length})`}
+            {language === 'de' && `Jugendbereich (${themeYouthPolls.length})`}
+            {language === 'en' && `Youth Space (${themeYouthPolls.length})`}
+          </TabsTrigger>
+          <TabsTrigger value="signalements">
+            {language === 'fr' && `Signalements (${themeSignalements.length})`}
+            {language === 'de' && `Meldungen (${themeSignalements.length})`}
+            {language === 'en' && `Reports (${themeSignalements.length})`}
+          </TabsTrigger>
+
         </TabsList>
 
         {/* All */}
@@ -118,7 +152,7 @@ export function ThemeDetailPage() {
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {themeConsultations.map((consultation) => (
-                  <Link key={consultation.id} to={`/consultations/${consultation.slug}`}>
+                  <Link key={consultation.id} to={`/consultations/${consultation.id}`}>
                     <Card className="h-full hover:shadow-lg transition-shadow">
                       <CardHeader>
                         <div className="flex items-start justify-between mb-2">
@@ -217,7 +251,52 @@ export function ThemeDetailPage() {
             </div>
           )}
 
-          {themeConsultations.length === 0 && themePetitions.length === 0 && themeVotes.length === 0 && (
+          {themeYouthPolls.length > 0 && (
+            <div>
+              <h2 className="text-2xl mb-4">
+                {language === 'fr' && 'Espace Jeunesse'}
+                {language === 'de' && 'Jugendbereich'}
+                {language === 'en' && 'Youth Space'}
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {themeYouthPolls.map((poll) => (
+                  <YouthPollCard key={poll.id} poll={poll} age={age} />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {themeSignalements.length > 0 && (
+            <div>
+              <h2 className="text-2xl mb-4">
+                {language === 'fr' && 'Signalements'}
+                {language === 'de' && 'Meldungen'}
+                {language === 'en' && 'Reports'}
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {themeSignalements.map((signalement) => (
+                  <Link key={signalement.id} to={`/signalements/${signalement.id}`}>
+                    <Card className="h-full hover:shadow-lg transition-shadow">
+                      <CardHeader>
+                        <div className="flex items-start justify-between mb-2">
+                          <StatusBadge status={signalement.status} />
+                        </div>
+                        <CardTitle>{tLocal(signalement.title)}</CardTitle>
+                        <CardDescription>{tLocal(signalement.description)}</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-sm text-gray-600">
+                          {new Date(signalement.createdAt).toLocaleDateString(language === 'fr' ? 'fr-FR' : language === 'de' ? 'de-DE' : 'en-US')}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {themeConsultations.length === 0 && themePetitions.length === 0 && themeVotes.length === 0 && themeSignalements.length === 0 && themeYouthPolls.length === 0 && (
             <div className="text-center py-12">
               <p className="text-gray-500">
                 {language === 'fr' && 'Aucune activité pour ce thème pour le moment'}
@@ -232,7 +311,7 @@ export function ThemeDetailPage() {
         <TabsContent value="processes">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {themeConsultations.map((consultation) => (
-              <Link key={consultation.id} to={`/consultations/${consultation.slug}`}>
+              <Link key={consultation.id} to={`/consultations/${consultation.id}`}>
                 <Card className="h-full hover:shadow-lg transition-shadow">
                   <CardHeader>
                     <div className="flex items-start justify-between mb-2">
@@ -259,7 +338,7 @@ export function ThemeDetailPage() {
         <TabsContent value="consultations">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {themeConsultations.map((consultation) => (
-              <Link key={consultation.id} to={`/consultations/${consultation.slug}`}>
+              <Link key={consultation.id} to={`/consultations/${consultation.id}`}>
                 <Card className="h-full hover:shadow-lg transition-shadow">
                   <CardHeader>
                     <StatusBadge status={consultation.status} />
@@ -277,7 +356,7 @@ export function ThemeDetailPage() {
             {themePetitions.map((petition) => {
               const percentage = (petition.currentSignatures / petition.targetSignatures) * 100;
               return (
-                <Link key={petition.id} to={`/petitions/${petition.slug}`}>
+                <Link key={petition.id} to={`/petitions/${petition.id}`}>
                   <Card className="h-full hover:shadow-lg transition-shadow">
                     <CardHeader>
                       <StatusBadge status={petition.status} />
@@ -305,13 +384,42 @@ export function ThemeDetailPage() {
         <TabsContent value="votes">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {themeVotes.map((vote) => (
-              <Link key={vote.id} to={`/votes/${vote.slug}`}>
+              <Link key={vote.id} to={`/votes/${vote.id}`}>
                 <Card className="h-full hover:shadow-lg transition-shadow">
                   <CardHeader>
                     <StatusBadge status={vote.status} />
                     <CardTitle>{tLocal(vote.title)}</CardTitle>
                     <CardDescription>{tLocal(vote.question)}</CardDescription>
                   </CardHeader>
+                </Card>
+              </Link>
+            ))}
+          </div>
+        </TabsContent>
+
+        <TabsContent value="youth-polls">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {themeYouthPolls.map((poll) => (
+              <YouthPollCard key={poll.id} poll={poll} age={age} />
+            ))}
+          </div>
+        </TabsContent>
+
+        <TabsContent value="signalements">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {themeSignalements.map((signalement) => (
+              <Link key={signalement.id} to={`/signalements/${signalement.id}`}>
+                <Card className="h-full hover:shadow-lg transition-shadow">
+                  <CardHeader>
+                    <StatusBadge status={signalement.status} />
+                    <CardTitle>{tLocal(signalement.title)}</CardTitle>
+                    <CardDescription>{tLocal(signalement.description)}</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-sm text-gray-600">
+                      {new Date(signalement.createdAt).toLocaleDateString(language === 'fr' ? 'fr-FR' : language === 'de' ? 'de-DE' : 'en-US')}
+                    </div>
+                  </CardContent>
                 </Card>
               </Link>
             ))}

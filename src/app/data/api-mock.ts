@@ -5852,7 +5852,7 @@ export const mockYouthSpaceStats: YouthSpaceStatsDTO = {
   totalPolls: 6,
   activePolls: 6,
   totalParticipants: 2847,
-  userPoints: 105,
+  totalPointsDistributed: 105,
   completedPolls: 1,
   upcomingPolls: 2,
 };

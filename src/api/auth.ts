@@ -1,13 +1,10 @@
 import apiClient from '../client';
 
-export interface LoginResponse {
-    userId: any;
-    token: string;
-}
+
 
 export const authApi = {
-    login: async (email: string, password: string): Promise<LoginResponse> => {
-        const response = await apiClient.post<LoginResponse>('/auth/login', {
+    login: async (email: string, password: string): Promise<any> => {
+        const response = await apiClient.post<any>('/auth/login', {
             email,
             password,
         });

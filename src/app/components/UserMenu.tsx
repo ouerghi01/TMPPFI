@@ -9,7 +9,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from './ui/dropdown-menu';
-import { User, Settings, LogOut, UserCircle2 } from 'lucide-react';
+import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
+import { User, Settings, LogOut } from 'lucide-react';
 import { motion } from 'motion/react';
 
 interface UserMenuProps {
@@ -20,6 +21,8 @@ interface UserMenuProps {
 
 export function UserMenu({ userName, userEmail, onLogout }: UserMenuProps) {
   const { language } = useLanguage();
+  const profile = localStorage.getItem('userProfile');
+  const user = profile ? JSON.parse(profile) : null;
 
   // Generate initials from name
   const getInitials = (name: string) => {
@@ -35,32 +38,49 @@ export function UserMenu({ userName, userEmail, onLogout }: UserMenuProps) {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <motion.button
-          className="flex items-center gap-3 p-1 rounded-full hover:bg-blue-50/50 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          className="flex items-center gap-3 rounded-full hover:bg-blue-50/50 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
         >
-          {/* Avatar with initials */}
-          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold shadow-md">
-            {getInitials(userName)}
-          </div>
+          <Avatar className="h-10 w-10 border-2 border-white shadow-sm">
+            <AvatarImage
+              src={user?.avatar}
+              alt={userName}
+              className="object-cover"
+            />
+            <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white font-semibold text-sm">
+              {getInitials(userName)}
+            </AvatarFallback>
+          </Avatar>
         </motion.button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-64">
         {/* User info section */}
         <DropdownMenuLabel className="font-normal">
           <div className="flex items-center gap-3 p-2">
-            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold text-lg shadow-md">
-              {getInitials(userName)}
-            </div>
+            <Avatar className="h-12 w-12 border-2 border-white shadow-md">
+              <AvatarImage
+                src={user?.avatar}
+                alt={userName}
+                className="object-cover"
+              />
+              <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white font-semibold text-lg">
+                {getInitials(userName)}
+              </AvatarFallback>
+            </Avatar>
             <div className="flex flex-col space-y-1">
-              <p className="text-sm font-semibold text-gray-900 leading-none">{userName}</p>
-              <p className="text-xs text-gray-500 leading-none">{userEmail}</p>
+              <p className="text-sm font-semibold text-gray-900 leading-none truncate max-w-[140px]" title={userName}>
+                {userName}
+              </p>
+              <p className="text-xs text-gray-500 leading-none truncate max-w-[140px]" title={userEmail}>
+                {userEmail}
+              </p>
             </div>
           </div>
         </DropdownMenuLabel>
-        
+
         <DropdownMenuSeparator />
-        
+
         {/* Menu items */}
         <Link to="/profile">
           <DropdownMenuItem className="cursor-pointer">
@@ -72,7 +92,7 @@ export function UserMenu({ userName, userEmail, onLogout }: UserMenuProps) {
             </span>
           </DropdownMenuItem>
         </Link>
-        
+
         <Link to="/settings">
           <DropdownMenuItem className="cursor-pointer">
             <Settings className="mr-2 h-4 w-4" />
@@ -83,9 +103,9 @@ export function UserMenu({ userName, userEmail, onLogout }: UserMenuProps) {
             </span>
           </DropdownMenuItem>
         </Link>
-        
+
         <DropdownMenuSeparator />
-        
+
         <DropdownMenuItem
           className="cursor-pointer text-red-600 focus:text-red-600 focus:bg-red-50"
           onClick={onLogout}

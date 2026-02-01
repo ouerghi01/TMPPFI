@@ -23,19 +23,21 @@ export function CreateSignalementPage() {
   const createMutation = useCreateSignalement();
 
   // Form state
+
   const testData = {
-    title: "Pothole on Main Street",
-    description: "There is a large pothole near the intersection that needs repair.",
-    category: "infrastructure",   // must match enum names
-    themeId: "1",                 // example theme ID
-    locationName: "Main Street",
-    address: "123 Main Street",
+    title: "Leaking Fire Hydrant",
+    description: "Water is continuously leaking from the fire hydrant and flooding the sidewalk.",
+    category: "utilities",       // must match enum names
+    themeId: "5",                // example theme ID
+    locationName: "Elm Street Corner",
+    address: "310 Elm Street",
     city: "Sampleville",
     postalCode: "12345",
-    lat: "48.8566",
-    lng: "2.3522",
-    images: [] // optional, will add files separately
+    lat: "48.8515",
+    lng: "2.3601",
   };
+
+
   const [title, setTitle] = useState(testData.title);
   const [description, setDescription] = useState(testData.description);
   const [category, setCategory] = useState<SignalementCategory>();
@@ -131,9 +133,16 @@ export function CreateSignalementPage() {
     formData.append("lat", lat);
     formData.append("lng", lng);
 
+    if (images.length > 0) {
+      images.forEach((image, index) => {
+        // formData.append(`images[${index}]`, image);
+      });
+    }
 
-
-
+    // Debug
+    for (const [key, value] of formData.entries()) {
+      console.log(key, value);
+    }
 
     try {
       const reponse = await apiClient.post("/signalements", formData);
@@ -144,6 +153,29 @@ export function CreateSignalementPage() {
             language === 'de' ? 'Meldung erfolgreich erstellt!' :
               'Report created successfully!'
         );
+        if (images && images.length > 0) {
+          const formData = new FormData();
+          images.forEach((image) => {
+            formData.append("images", image);
+          });
+          const sig = reponse.data;
+          try {
+            const response = await apiClient.put(
+              `/signalements/${sig.id}`,
+              formData,
+              {
+                headers: {
+                  "Content-Type": "multipart/form-data",
+                },
+              }
+            );
+            console.log("Images uploaded successfully:", response.data);
+          } catch (error) {
+            console.error("Error uploading images:", error);
+          }
+        }
+
+
         navigate('/signalements');
       }
     } catch (error: any) {

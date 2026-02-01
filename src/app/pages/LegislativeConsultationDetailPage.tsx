@@ -169,7 +169,7 @@ export function LegislativeConsultationDetailPage() {
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="mb-4">
-            <Link to="/legislative-consultations">
+            <Link to="/consultations">
               <Button variant="ghost" size="sm">
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 {language === 'fr' && 'Toutes les consultations'}

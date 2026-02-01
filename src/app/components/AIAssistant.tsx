@@ -14,7 +14,7 @@ export function AIAssistant() {
   const [messages, setMessages] = useState<AIMessageDTO[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [conversationId, setConversationId] = useState<string | undefined>();
-  
+
   const { language, tLocal, t } = useLanguage();
   const askAI = useAskAI();
   const { data: suggestions } = useAISuggestions();
@@ -181,13 +181,12 @@ export function AIAssistant() {
                           onClick={() => handleSuggestionClick(suggestion)}
                         >
                           <div className="flex items-start gap-3">
-                            <Badge 
-                              variant="secondary" 
-                              className={`text-xs shrink-0 ${
-                                suggestion.type === 'process' ? 'bg-blue-100 text-blue-700' :
-                                suggestion.type === 'action' ? 'bg-purple-100 text-purple-700' :
-                                'bg-green-100 text-green-700'
-                              }`}
+                            <Badge
+                              variant="secondary"
+                              className={`text-xs shrink-0 ${suggestion.type === 'process' ? 'bg-blue-100 text-blue-700' :
+                                  suggestion.type === 'action' ? 'bg-purple-100 text-purple-700' :
+                                    'bg-green-100 text-green-700'
+                                }`}
                             >
                               {suggestion.type === 'process' && (language === 'fr' ? 'Processus' : language === 'de' ? 'Prozess' : 'Process')}
                               {suggestion.type === 'action' && (language === 'fr' ? 'Vote' : language === 'de' ? 'Abstimmung' : 'Vote')}
@@ -211,11 +210,10 @@ export function AIAssistant() {
                     className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
                   >
                     <div
-                      className={`max-w-[85%] rounded-lg p-3 ${
-                        message.role === 'user'
+                      className={`max-w-[85%] rounded-lg p-3 ${message.role === 'user'
                           ? 'bg-blue-600 text-white'
                           : 'bg-gray-100 text-gray-900'
-                      }`}
+                        }`}
                     >
                       <p className="text-sm whitespace-pre-wrap">{tLocal(message.content)}</p>
                     </div>
@@ -242,8 +240,8 @@ export function AIAssistant() {
                   language === 'fr'
                     ? 'Posez votre question...'
                     : language === 'de'
-                    ? 'Stellen Sie Ihre Frage...'
-                    : 'Ask your question...'
+                      ? 'Stellen Sie Ihre Frage...'
+                      : 'Ask your question...'
                 }
                 disabled={askAI.isPending}
                 className="flex-1"

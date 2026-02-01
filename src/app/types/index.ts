@@ -717,10 +717,11 @@ export interface NotificationPreferencesDTO {
 // ==================== Youth Engagement DTOs ====================
 
 export type YouthPollQuestionType = 'single_choice' | 'multiple_choice' | 'rating' | 'emoji' | 'yes_no';
-export type YouthPollStatus = 'draft' | 'active' | 'closed' | 'archived' | 'OPEN';
+export type YouthPollStatus = 'draft' | 'active' | 'closed' | 'archived' | 'OPEN' | 'CLOSED';
 export type YouthPollTargetAge = 'all' | 'ALL' | 'AGE_12_15' | 'AGE_16_18' | 'AGE_19_25' | 'AGE_14_18' | 'AGE_15_20' | 'AGE_16_21' | 'AGE_14_19';
 
 export interface YouthPollOptionDTO {
+  rating: any;
   id: string;
   text: LocalizedString;
   emoji?: string;
@@ -778,9 +779,9 @@ export interface YouthSpaceStatsDTO {
   totalPolls: number;
   activePolls: number;
   totalParticipants: number;
-  userPoints: number;
   completedPolls: number;
   upcomingPolls: number;
+  totalPointsDistributed: number;
 }
 
 export interface CreateYouthPollResponseDTO {

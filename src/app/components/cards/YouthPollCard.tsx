@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Clock, Users, Sparkles, CheckCircle } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
@@ -8,11 +8,16 @@ import { ThemeTag } from '../ThemeTag';
 import { AGE_LABELS, TargetAgeRange } from '../../types/age';
 import { YouthPollDTO } from '../../types';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { useAuth } from '@/app/contexts/AuthContext';
+import { AuthModal } from '../AuthModal';
+import apiClient from '@/client';
+import { toast } from 'sonner';
 
 
 interface YouthPollCardProps {
   poll: YouthPollDTO;
   compact?: boolean;
+  age: number;
 }
 
 
@@ -25,9 +30,10 @@ interface YouthPollCardProps {
  * - Indicateurs de gamification
  * - CTA distinctif selon l'état (complété ou non)
  */
-export function YouthPollCard({ poll, compact = false }: YouthPollCardProps) {
+export function YouthPollCard({ poll, compact = false, age }: YouthPollCardProps) {
+  const navigate = useNavigate();
   const { t, language, tLocal } = useLanguage();
-
+  const { isLoggedIn } = useAuth();
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'active':
@@ -40,7 +46,7 @@ export function YouthPollCard({ poll, compact = false }: YouthPollCardProps) {
         return 'bg-blue-100 text-blue-800 border-blue-200';
     }
   };
-
+  const [authModalOpen, setAuthModalOpen] = React.useState(false);
   const getStatusLabel = (status: string) => {
     const labels: Record<string, Record<string, string>> = {
       active: { fr: 'Actif', de: 'Aktiv', en: 'Active' },
@@ -55,7 +61,7 @@ export function YouthPollCard({ poll, compact = false }: YouthPollCardProps) {
     targetAge: TargetAgeRange,
     language: 'fr' | 'en' | 'de'
   ): string => {
-    return AGE_LABELS[targetAge]?.[language] ?? AGE_LABELS[TargetAgeRange.ALL][language];
+    return targetAge + (language == 'fr' ? " ans" : language == 'en' ? " years" : " Jahre");
   };
 
 
@@ -105,7 +111,7 @@ export function YouthPollCard({ poll, compact = false }: YouthPollCardProps) {
   }
 
   return (
-    <Link to={`/youth-space/${poll.id}`} className="block group">
+    <>
       <Card className="h-full transition-all duration-300 hover:shadow-lg border-gray-200 overflow-hidden">
         {/* Image */}
         {poll.imageUrl && (
@@ -113,8 +119,7 @@ export function YouthPollCard({ poll, compact = false }: YouthPollCardProps) {
             <img
               src={poll.imageUrl}
               alt={tLocal(poll.title)}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-            />
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
             {poll.hasUserResponded && (
               <div className="absolute top-3 right-3 bg-green-600 text-white rounded-full p-1.5">
                 <CheckCircle className="w-4 h-4" />
@@ -144,12 +149,12 @@ export function YouthPollCard({ poll, compact = false }: YouthPollCardProps) {
           </CardDescription>
         </CardHeader>
 
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-4 flex flex-col flex-1">
           {/* Tags et thème */}
           <div className="flex flex-wrap gap-2">
             {poll.themeId && <ThemeTag themeId={poll.themeId} size="sm" />}
             <Badge variant="secondary" className="text-xs">
-              {getAgeLabel(poll.targetAge, language)}
+              {getAgeLabel(poll.targetAge as TargetAgeRange, language)}
             </Badge>
           </div>
 
@@ -172,13 +177,34 @@ export function YouthPollCard({ poll, compact = false }: YouthPollCardProps) {
           </div>
 
           {/* CTA */}
-          <div className="pt-2">
+          <div className="pt-2 mt-auto">
             <Button
+              onClick={async () => {
+                const allow_ages = poll.targetAge.split('-');
+                if (poll.status === 'CLOSED') {
+                  toast.error(language === 'fr' ? 'Cette consultation est terminée' :
+                    language === 'de' ? 'Diese Umfrage ist abgeschlossen' :
+                      'This poll is closed');
+                  return;
+                }
+                if (!isLoggedIn) {
+                  setAuthModalOpen(true);
+                  return;
+                } else {
+                  if (age < parseInt(allow_ages[0]) || age > parseInt(allow_ages[1])) {
+                    toast.error(language === 'fr' ? 'Vous devez avoir entre ' + allow_ages[0] + ' et ' + allow_ages[1] + ' ans pour participer' :
+                      language === 'de' ? 'Sie müssen zwischen ' + allow_ages[0] + ' und ' + allow_ages[1] + ' Jahre alt sein, um teilzunehmen' :
+                        'You must be between ' + allow_ages[0] + ' and ' + allow_ages[1] + ' years old to participate');
+                    return;
+                  }
+
+                  navigate(`/youth-space/${poll.id}`);
+                }
+              }}
               variant={poll.hasUserResponded ? 'outline' : 'default'}
               className={poll.hasUserResponded
                 ? 'w-full'
-                : 'w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white'
-              }
+                : 'w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white'}
             >
               {poll.hasUserResponded
                 ? (language === 'fr' ? 'Voir les résultats' :
@@ -186,12 +212,12 @@ export function YouthPollCard({ poll, compact = false }: YouthPollCardProps) {
                     'View results')
                 : (language === 'fr' ? 'Participer maintenant' :
                   language === 'de' ? 'Jetzt teilnehmen' :
-                    'Participate now')
-              }
+                    'Participate now')}
             </Button>
           </div>
         </CardContent>
       </Card>
-    </Link>
+      <AuthModal open={authModalOpen} onOpenChange={setAuthModalOpen} />
+    </>
   );
 }

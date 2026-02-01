@@ -99,6 +99,7 @@ import { getSignalementsApi, getSignalementsGeoApi, getSignalementStatsApi } fro
 import { getSpeakerById } from '../../api/speaker';
 import { Await } from 'react-router-dom';
 import { getUserCount } from '@/api/user';
+import apiClient from '@/client';
 
 // Simulated API delay (remove in production)
 const simulateDelay = (ms: number = 500) => new Promise(resolve => setTimeout(resolve, ms));
@@ -862,6 +863,10 @@ export const youthPollsApi = {
       polls = polls.filter(p => p.targetAge === params.targetAge || p.targetAge === 'all');
     }
 
+    if (params?.featured) {
+      polls = polls.filter(p => p.featured === params.featured);
+    }
+
 
 
     return {
@@ -894,11 +899,11 @@ export const youthPollsApi = {
    * Get youth space statistics
    * GET /api/youth-polls/stats
    */
-  async getYouthSpaceStats(): Promise<ApiResponse<YouthSpaceStatsDTO>> {
+  async getYouthSpaceStats(): Promise<ApiResponse<any>> {
     await simulateDelay();
-
+    const stats = await apiClient.get("/public/polls/stats")
     return {
-      data: mockYouthSpaceStats,
+      data: stats.data,
       timestamp: new Date().toISOString(),
       success: true,
     };

@@ -4,7 +4,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { PageBanner } from '../components/PageBanner';
 import { PageLayout } from '../components/layout/PageLayout';
 import { KPICard } from '../components/layout/KPICard';
-import { useThemes, useConsultations, usePetitions, useVotes } from '../hooks/useApi';
+import { useThemes, useConsultations, usePetitions, useVotes, useSignalements, useYouthPolls } from '../hooks/useApi';
 import type { ThemeDTO } from '../types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { ArrowRight, Layers, TrendingUp, FileText, Heart, BarChart3 } from 'lucide-react';
@@ -17,12 +17,16 @@ export function ThemesPage() {
   const { data: consultations } = useConsultations();
   const { data: petitions } = usePetitions();
   const { data: votes } = useVotes();
+  const { data: signalements } = useSignalements();
+  const { data: youthPolls } = useYouthPolls({});
 
   const getThemeStats = (themeId: string) => {
     return {
       consultations: consultations?.filter((c) => c.themeId === themeId).length || 0,
       petitions: petitions?.filter((p) => p.themeId === themeId).length || 0,
       votes: votes?.filter((v) => v.themeId === themeId).length || 0,
+      signalements: signalements?.filter((s) => s.themeId === themeId).length || 0,
+      youthPolls: youthPolls?.filter((y) => y.themeId === themeId).length || 0,
     };
   };
 
@@ -56,7 +60,7 @@ export function ThemesPage() {
   // Calculate overall statistics
   const activeThemes = themes?.filter(theme => {
     const stats = getThemeStats(theme.id);
-    return (stats.consultations + stats.petitions + stats.votes) > 0;
+    return (stats.consultations + stats.petitions + stats.votes + stats.signalements + stats.youthPolls) > 0;
   }).length || 0;
 
   // Find trending topic (theme with most activities)
@@ -64,7 +68,7 @@ export function ThemesPage() {
     const stats = getThemeStats(theme.id);
     return {
       theme,
-      total: stats.consultations + stats.petitions + stats.votes
+      total: stats.consultations + stats.petitions + stats.votes + stats.signalements + stats.youthPolls
     };
   });
   const trendingTheme = themeActivities.reduce((max, current) =>
@@ -76,6 +80,12 @@ export function ThemesPage() {
 
   // Proposals by category (consultations of type 'citizen_proposal')
   const proposalsByCategory = consultations?.filter(c => c.type === 'citizen_proposal').length || 0;
+
+  const [searchTerm, setSearchTerm] = React.useState('');
+
+  const filteredThemes = themes?.filter(theme =>
+    tLocal(theme.name).toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <div>
@@ -118,13 +128,8 @@ export function ThemesPage() {
             value={tLocal(trendingTheme.theme.name)}
             icon={TrendingUp}
             variant="emerald"
-            type="insight"
-            subtitle={
-              <span className="flex items-center gap-1 animate-fade-in">
-                <span>{trendingTheme.theme.icon}</span>
-                <span>{trendingTheme.total} {language === 'fr' ? 'activités' : language === 'de' ? 'Aktivitäten' : 'activities'}</span>
-              </span>
-            }
+            type="primary"
+            subtitle={`${trendingTheme.total} ${language === 'fr' ? 'activités' : language === 'de' ? 'Aktivitäten' : 'activities'}`}
           />
 
           <KPICard
@@ -152,11 +157,29 @@ export function ThemesPage() {
           />
         </div>
 
+        {/* Search Bar */}
+        <div className="mb-8 relative max-w-md mx-auto md:mx-0">
+          <div className="relative">
+            <input
+              type="text"
+              placeholder={
+                language === 'fr' ? 'Rechercher un thème...' :
+                  language === 'de' ? 'Thema suchen...' :
+                    'Search for a theme...'
+              }
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+            />
+            <Layers className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+          </div>
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {themes && themes.map((theme) => {
+          {filteredThemes && filteredThemes.map((theme) => {
             const stats = getThemeStats(theme.id);
             const totalActivities =
-              stats.consultations + stats.petitions + stats.votes;
+              stats.consultations + stats.petitions + stats.votes + stats.signalements + stats.youthPolls;
 
             return (
               <Link key={theme.id} to={`/themes/${theme.id}`}>
@@ -210,6 +233,26 @@ export function ThemesPage() {
                             {language === 'en' && 'Votes'}
                           </span>
                           <span className="font-medium">{stats.votes}</span>
+                        </div>
+                      )}
+                      {stats.signalements > 0 && (
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-600">
+                            {language === 'fr' && 'Signalements'}
+                            {language === 'de' && 'Meldungen'}
+                            {language === 'en' && 'Reports'}
+                          </span>
+                          <span className="font-medium">{stats.signalements}</span>
+                        </div>
+                      )}
+                      {stats.youthPolls > 0 && (
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-600">
+                            {language === 'fr' && 'Espace Jeunesse'}
+                            {language === 'de' && 'Jugendbereich'}
+                            {language === 'en' && 'Youth Space'}
+                          </span>
+                          <span className="font-medium">{stats.youthPolls}</span>
                         </div>
                       )}
                     </div>

@@ -12,15 +12,17 @@ import { Tabs, TabsList, TabsTrigger } from '@/app/components/ui/tabs';
 import { Star, Users, TrendingUp, Clock, Heart } from 'lucide-react';
 import { useThemes, useYouthPolls, useYouthSpaceStats } from '../hooks/useApi';
 
-/**
- * YouthSpacePage - Page dédiée aux espaces jeunesse
- * 
- * Fonctionnalités:
- * - Affichage des micro-sondages
- * - Filtres par âge et statut
- * - Statistiques de gamification
- * - Design engageant pour les jeunes
- */
+function calculateAge(birthdate: Date | string): number {
+  if (!birthdate) return 0;
+  if (typeof birthdate === 'string') {
+    birthdate = new Date(birthdate);
+  }
+  const today = new Date();
+  const diff = today.getTime() - birthdate.getTime();
+  const ageDate = new Date(diff);
+  return Math.abs(ageDate.getUTCFullYear() - 1970);
+}
+
 export default function YouthSpacePage() {
   const { t, language, tLocal } = useLanguage();
   const [filters, setFilters] = useState({
@@ -32,7 +34,13 @@ export default function YouthSpacePage() {
 
   const { data: themes } = useThemes();
   const { data: stats, isLoading: isLoadingStats } = useYouthSpaceStats();
-
+  const savedProfile = localStorage.getItem('userProfile');
+  let userProfile: any;
+  let age: number;
+  if (savedProfile) {
+    userProfile = JSON.parse(savedProfile);
+    age = calculateAge(userProfile.birthdate);
+  }
   // Build filters based on active tab
   const pollFilters = {
     ...filters,
@@ -44,37 +52,64 @@ export default function YouthSpacePage() {
 
   const kpiStats = [
     {
-      label: language === 'fr' ? 'Sondages actifs' : language === 'de' ? 'Aktive Umfragen' : 'Active polls',
-      value: stats?.activePolls?.toString() || '0',
+      label:
+        language === 'fr'
+          ? 'Sondages actifs'
+          : language === 'de'
+            ? 'Aktive Umfragen'
+            : 'Active polls',
+      value: stats?.activePolls?.toString() ?? '0',
       icon: Heart,
       variant: 'blue' as const,
     },
     {
-      label: language === 'fr' ? 'Participants' : language === 'de' ? 'Teilnehmer' : 'Participants',
-      value: stats?.totalParticipants?.toLocaleString() || '0',
+      label:
+        language === 'fr'
+          ? 'Participants'
+          : language === 'de'
+            ? 'Teilnehmer'
+            : 'Participants',
+      value: stats?.totalParticipants?.toLocaleString() ?? '0',
       icon: Users,
       variant: 'green' as const,
     },
     {
-      label: language === 'fr' ? 'Vos points' : language === 'de' ? 'Ihre Punkte' : 'Your points',
-      value: stats?.userPoints?.toString() || '0',
-      icon: Star,
-      variant: 'orange' as const,
-    },
-    {
-      label: language === 'fr' ? 'Complétés' : language === 'de' ? 'Abgeschlossen' : 'Completed',
-      value: stats?.completedPolls?.toString() || '0',
+      label:
+        language === 'fr'
+          ? 'Sondages terminés'
+          : language === 'de'
+            ? 'Abgeschlossene Umfragen'
+            : 'Completed polls',
+      value: stats?.closedPolls?.toString() ?? '0',
       icon: TrendingUp,
       variant: 'purple' as const,
     },
+    {
+      label:
+        language === 'fr'
+          ? 'Points distribués'
+          : language === 'de'
+            ? 'Verteilte Punkte'
+            : 'Points distributed',
+      value: stats?.totalPointsDistributed?.toLocaleString() ?? '0',
+      icon: Star,
+      variant: 'orange' as const,
+    },
   ];
+
+
+
+  const { data: allPollsData } = useYouthPolls({});
+
+  // Extract unique age ranges from all polls
+  const availableAgeRanges = Array.from(new Set(allPollsData?.map((p: any) => p.targetAge) || [])).filter(Boolean).sort();
 
   const ageGroupOptions = [
     { value: '', label: language === 'fr' ? 'Tous les âges' : language === 'de' ? 'Alle Altersgruppen' : 'All ages' },
-    { value: '12-15', label: '12-15 ans' },
-    { value: '16-18', label: '16-18 ans' },
-    { value: '19-25', label: '19-25 ans' },
-    { value: 'all', label: language === 'fr' ? 'Tous' : language === 'de' ? 'Alle' : 'All' },
+    ...availableAgeRanges.map(age => ({
+      value: age as string,
+      label: (age as string) + (language === 'fr' ? ' ans' : language === 'de' ? ' Jahre' : ' years')
+    }))
   ];
 
   const themeOptions = themes ? [
@@ -192,7 +227,7 @@ export default function YouthSpacePage() {
         ) : (
           <ContentGrid>
             {polls.map((poll: any) => (
-              <YouthPollCard key={poll.id} poll={poll} />
+              <YouthPollCard key={poll.id} poll={poll} age={age} />
             ))}
           </ContentGrid>
         )}

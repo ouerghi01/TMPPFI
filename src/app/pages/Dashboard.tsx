@@ -332,7 +332,7 @@ export function Dashboard() {
                       <FileText className="w-6 h-6 text-green-600" />
                     </div>
                     <Badge className="bg-emerald-50 text-emerald-600 border border-emerald-200 hover:bg-emerald-100 transition-colors">
-                      {petitions?.length || 0} {language === "fr" && "ouvertes"}
+                      {petitions?.filter((petition) => petition.status === 'OPEN')?.length || 0} {language === "fr" && "ouvertes"}
                       {language === "de" && "offen"}
                       {language === "en" && "open"}
                     </Badge>
@@ -689,7 +689,7 @@ export function Dashboard() {
             </Link>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {petitions?.slice(0, 3).map((petition) => (
+            {petitions?.filter((petition) => petition.status === 'OPEN')?.slice(0, 3).map((petition) => (
               <Link key={petition.id} to={`/petitions/${petition.id}`}>
                 <Card className="h-full hover:shadow-lg transition-shadow">
                   <CardContent className="p-6">

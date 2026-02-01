@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { authApi } from '../../api/auth';
-import { setAuthToken, clearAuthToken, getAuthToken } from '../../client';
+import apiClient, { setAuthToken, clearAuthToken, getAuthToken } from '../../client';
 
 interface UserProfile {
   firstName: string;
@@ -11,6 +11,7 @@ interface UserProfile {
   address: string;
   city: string;
   postalCode: string;
+  birthdate: Date;
   bio: string;
   avatar: string;
   preferences: {
@@ -52,12 +53,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const response = await authApi.login(email, password);
       // Persist token
-      setAuthToken(response.token);
+      setAuthToken(response.jwtToken);
       const userId = response.userId;
       const nameParts = email.split('@')[0];
       const firstName = nameParts.charAt(0).toUpperCase() + nameParts.slice(1);
       const lastName = 'User';
-
+      const profile = response.profile;
+      if (profile) {
+        setUser(profile);
+        localStorage.setItem('userProfile', JSON.stringify(profile));
+      }
       const savedProfile = localStorage.getItem('userProfile');
       let userProfile: UserProfile;
 
@@ -74,6 +79,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           address: '',
           city: '',
           postalCode: '',
+          birthdate: new Date(),
           bio: '',
           avatar: '',
           preferences: {
@@ -94,16 +100,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const logout = () => {
+  const logout = async () => {
     setIsLoggedIn(false);
     setUser(null);
     clearAuthToken();
     localStorage.removeItem('userProfile');
-    // We might want to keep userProfile if we want to remember the user (e.g. email in login form), 
-    // but typically logout clears session data. 
-    // The previous implementation kept it: "Keep userProfile in localStorage so data persists". 
-    // I'll stick to removing it to be "clean", or keep it if that was the intent. 
-    // The prompt says "Clear cached auth state".
+
   };
 
   const updateProfile = (profile: UserProfile) => {

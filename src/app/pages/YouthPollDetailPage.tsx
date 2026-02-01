@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 
 import { Sparkles, Clock, Users, CheckCircle, ArrowLeft, Eye, Check, X, Circle, Square, Badge } from 'lucide-react';
@@ -16,6 +16,7 @@ import { LoadingSpinner } from '../components/LoadingSpinner';
 import { PageBanner } from '../components/PageBanner';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
+import apiClient from '@/client';
 
 /**
  * YouthPollDetailPage - Page de détail d'un micro-sondage
@@ -33,11 +34,10 @@ export default function YouthPollDetailPage() {
 
   const { data: poll, isLoading, error } = useYouthPoll(id || '');
   const respondMutation = useRespondToYouthPoll();
-
+  const [isEntered, setIsEntered] = useState(false);
+  const [isResponded, setIsResponded] = useState(false);
   const [responses, setResponses] = useState<Record<string, string[]>>({});
   const [visualMode, setVisualMode] = useState(false);
-
-  // Visual mode icons and colors for options
   const getVisualForOption = (index: number) => {
     const visuals = [
       { icon: Check, color: 'bg-green-500', borderColor: 'border-green-500', textColor: 'text-green-500', emoji: '✓' },
@@ -51,13 +51,8 @@ export default function YouthPollDetailPage() {
 
   const handleOptionSelect = (questionId: string, optionId: string, isMultiple: boolean) => {
     if (isMultiple) {
-      setResponses(prev => {
-        const current = prev[questionId] || [];
-        const newSelection = current.includes(optionId)
-          ? current.filter(id => id !== optionId)
-          : [...current, optionId];
-        return { ...prev, [questionId]: newSelection };
-      });
+      setResponses(prev => ({ ...prev, [questionId]: [optionId] }));
+
     } else {
       setResponses(prev => ({ ...prev, [questionId]: [optionId] }));
     }
@@ -78,22 +73,30 @@ export default function YouthPollDetailPage() {
       );
       return;
     }
-
-    const responseData: CreateYouthPollResponseDTO = {
+    const responseData = {
       pollId: poll.id,
       responses: Object.entries(responses).map(([questionId, selectedOptions]) => ({
         questionId,
-        selectedOptions,
-      })),
+        selectedOptions
+      }))
     };
 
     try {
-      await respondMutation.mutateAsync(responseData);
-      toast.success(
-        language === 'fr' ? `🎉 Merci ! Tu as gagné ${poll.gamificationPoints} points` :
-          language === 'de' ? `🎉 Danke! Du hast ${poll.gamificationPoints} Punkte gewonnen` :
-            `🎉 Thanks! You earned ${poll.gamificationPoints} points`
+      const response = await apiClient.post(`/polls/votes_youth_poll`, responseData,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
       );
+      if (response.status === 200) {
+        toast.success(
+          language === 'fr' ? `🎉 Merci ! Tu as gagné ${poll.gamificationPoints} points` :
+            language === 'de' ? `🎉 Danke! Du hast ${poll.gamificationPoints} Punkte gewonnen` :
+              `🎉 Thanks! You earned ${poll.gamificationPoints} points`
+        );
+        navigate('/youth-space');
+      }
     } catch (error) {
       toast.error(
         language === 'fr' ? 'Erreur lors de la soumission' :
@@ -102,7 +105,19 @@ export default function YouthPollDetailPage() {
       );
     }
   };
-
+  useEffect(() => {
+    const fetchPoll = async () => {
+      const response_enter = await apiClient.post(`polls/youth-space/${id}/enter`);
+      if (response_enter.status === 200) {
+        setIsEntered(response_enter.data);
+      }
+      const response_respond = await apiClient.get(`polls/youth-space/${id}/completed`);
+      if (response_respond.status === 200) {
+        setIsResponded(response_respond.data);
+      }
+    };
+    fetchPoll();
+  }, [id]);
   if (isLoading) {
     return (
       <div>
@@ -141,7 +156,7 @@ export default function YouthPollDetailPage() {
     );
   }
 
-  const hasResponded = poll.hasUserResponded;
+  const hasResponded = poll.hasUserResponded || isResponded;
 
   return (
     <div>
@@ -164,6 +179,32 @@ export default function YouthPollDetailPage() {
             language === 'de' ? 'Zurück zu Umfragen' :
               'Back to polls'}
         </Button>
+
+        {/* Status Messages */}
+        {isResponded && (
+          <Card className="mb-6 bg-green-50 border-green-200">
+            <CardContent className="p-4 flex items-center gap-3 text-green-800">
+              <CheckCircle className="w-5 h-5 flex-shrink-0" />
+              <p className="font-medium">
+                {language === 'fr' ? 'Vous avez déjà répondu à ce sondage.' :
+                  language === 'de' ? 'Sie haben diese Umfrage bereits beantwortet.' :
+                    'You have already responded to this poll.'}
+              </p>
+            </CardContent>
+          </Card>
+        )}
+        {!isResponded && isEntered && (
+          <Card className="mb-6 bg-blue-50 border-blue-200">
+            <CardContent className="p-4 flex items-center gap-3 text-blue-800">
+              <Eye className="w-5 h-5 flex-shrink-0" />
+              <p className="font-medium">
+                {language === 'fr' ? 'Vous avez déjà consulté ce sondage.' :
+                  language === 'de' ? 'Sie haben diese Umfrage bereits angesehen.' :
+                    'You have already viewed this poll.'}
+              </p>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Info Card */}
         <Card className="mb-8">
@@ -581,16 +622,13 @@ export default function YouthPollDetailPage() {
                 {question.type === 'rating' && (
                   <div className="space-y-4">
                     <div className="flex justify-center gap-3">
-                      {Array.from(
-                        { length: (question.maxRating || 5) - (question.minRating || 1) + 1 },
-                        (_, i) => (question.minRating || 1) + i
-                      ).map((rating) => {
-                        const ratingId = `rating_${rating}`;
+                      {question.options.map((option) => {
+                        const ratingId = `${option.id}`;
                         const isSelected = responses[question.id]?.[0] === ratingId;
 
                         return (
                           <button
-                            key={rating}
+                            key={option.id}
                             type="button"
                             onClick={() => handleOptionSelect(question.id, ratingId, false)}
                             disabled={hasResponded}
@@ -599,7 +637,7 @@ export default function YouthPollDetailPage() {
                               : 'bg-gray-100 text-gray-600 hover:bg-gray-200 hover:scale-105'
                               } ${hasResponded ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}
                           >
-                            {rating}
+                            {option.emoji}
                           </button>
                         );
                       })}

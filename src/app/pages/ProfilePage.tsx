@@ -16,6 +16,7 @@ import { Separator } from '../components/ui/separator';
 import { User, Mail, Phone, MapPin, Bell, Globe, Heart, Edit2, Save, X, Camera, Calendar } from 'lucide-react';
 import { toast } from 'sonner';
 import { themes } from '../data/themes';
+import apiClient from '@/client';
 
 interface UserProfile {
   firstName: string;
@@ -91,11 +92,11 @@ const defaultProfile: UserProfile = {
 
 export function ProfilePage() {
   const { t, language, setLanguage, tLocal } = useLanguage();
-  const { user } = useAuth();
+  const { user, isLoggedIn } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [profile, setProfile] = useState<UserProfile>(defaultProfile);
   const [avatarUrl, setAvatarUrl] = useState<string>('');
-
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const { register, handleSubmit, reset, setValue, watch, formState: { errors } } = useForm<UserProfile>({
     defaultValues: profile
   });
@@ -111,18 +112,105 @@ export function ProfilePage() {
     }
   }, [reset]);
 
-  const onSubmit = (data: UserProfile) => {
-    const updatedProfile = { ...data, avatar: avatarUrl };
-    setProfile(updatedProfile);
-    localStorage.setItem('userProfile', JSON.stringify(updatedProfile));
-    setIsEditing(false);
-    
-    if (language === 'fr') {
-      toast.success('Profil mis à jour avec succès');
-    } else if (language === 'de') {
-      toast.success('Profil erfolgreich aktualisiert');
-    } else {
-      toast.success('Profile updated successfully');
+
+  const onSubmit = async (data: UserProfile) => {
+    try {
+      let updatedProfile = { ...data, id: user?.userId, birthDate: null };
+      const response = await apiClient.post('/users/profile', updatedProfile);
+
+      if (avatarFile) {
+        const formData = new FormData();
+        formData.append('file', avatarFile);
+
+        await apiClient.post(
+          `/users/${response.data}/avatar`,
+          formData,
+          {
+            headers: { 'Content-Type': 'multipart/form-data' },
+          }
+        );
+        updatedProfile = {
+          ...updatedProfile,
+          avatar: avatarUrl,
+        };
+      }
+      setProfile(updatedProfile);
+      localStorage.setItem('userProfile', JSON.stringify(updatedProfile));
+      setIsEditing(false);
+      setAvatarFile(null);
+
+      toast.success(
+        language === 'fr'
+          ? 'Profil mis à jour avec succès'
+          : language === 'de'
+            ? 'Profil erfolgreich aktualisiert'
+            : 'Profile updated successfully'
+      );
+
+    } catch (error: any) {
+      // 5️⃣ Handle backend errors
+      if (error.response) {
+        const status = error.response.status;
+        const message = error.response.data;
+
+        switch (status) {
+          case 400:
+            toast.error(
+              language === 'fr'
+                ? 'Données invalides'
+                : language === 'de'
+                  ? 'Ungültige Daten'
+                  : 'Invalid data'
+            );
+            break;
+
+          case 401:
+            toast.error(
+              language === 'fr'
+                ? 'Session expirée, veuillez vous reconnecter'
+                : language === 'de'
+                  ? 'Sitzung abgelaufen'
+                  : 'Session expired, please login again'
+            );
+            break;
+
+          case 403:
+            toast.error(
+              language === 'fr'
+                ? 'Accès refusé'
+                : language === 'de'
+                  ? 'Zugriff verweigert'
+                  : 'Access denied'
+            );
+            break;
+
+          case 500:
+            toast.error(
+              language === 'fr'
+                ? 'Erreur serveur, veuillez réessayer'
+                : language === 'de'
+                  ? 'Serverfehler'
+                  : 'Server error, try again'
+            );
+            break;
+
+          default:
+            toast.error(
+              typeof message === 'string'
+                ? message
+                : 'Unexpected error occurred'
+            );
+        }
+      } else {
+        // Network / CORS / timeout
+        toast.error(
+          language === 'fr'
+            ? 'Erreur réseau'
+            : language === 'de'
+              ? 'Netzwerkfehler'
+              : 'Network error'
+        );
+      }
     }
   };
 
@@ -130,11 +218,13 @@ export function ProfilePage() {
     reset(profile);
     setAvatarUrl(profile.avatar);
     setIsEditing(false);
+    setAvatarFile(null);
   };
 
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      setAvatarFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
         setAvatarUrl(reader.result as string);
@@ -152,7 +242,7 @@ export function ProfilePage() {
   };
 
   const getInitials = () => {
-    return `${profile.firstName.charAt(0)}${profile.lastName.charAt(0)}`.toUpperCase();
+    return `${profile.firstName?.charAt(0)}${profile.lastName?.charAt(0)}`.toUpperCase();
   };
 
   const getParticipationTypeLabel = (type: string) => {
@@ -429,8 +519,8 @@ export function ProfilePage() {
                     rows={4}
                     placeholder={
                       language === 'fr' ? 'Parlez-nous de vous et de vos centres d\'intérêt...' :
-                      language === 'de' ? 'Erzählen Sie uns von sich und Ihren Interessen...' :
-                      'Tell us about yourself and your interests...'
+                        language === 'de' ? 'Erzählen Sie uns von sich und Ihren Interessen...' :
+                          'Tell us about yourself and your interests...'
                     }
                   />
                 </div>
@@ -446,7 +536,7 @@ export function ProfilePage() {
                 {language === 'de' && 'Einstellungen'}
                 {language === 'en' && 'Preferences'}
               </h3>
-              
+
               <div className="space-y-6">
                 {/* Language Preference */}
                 <div>
@@ -456,8 +546,8 @@ export function ProfilePage() {
                     {language === 'de' && 'Bevorzugte Sprache'}
                     {language === 'en' && 'Preferred language'}
                   </Label>
-                  <Select 
-                    value={watch('preferences.language')} 
+                  <Select
+                    value={watch('preferences.language')}
                     onValueChange={(value) => {
                       setValue('preferences.language', value as 'fr' | 'de' | 'en');
                       setLanguage(value as 'fr' | 'de' | 'en');
@@ -551,18 +641,17 @@ export function ProfilePage() {
                           type="button"
                           onClick={() => isEditing && toggleFavoriteTheme(theme.id)}
                           disabled={!isEditing}
-                          className={`p-4 rounded-lg border-2 transition-all text-left ${
-                            isFavorite
-                              ? 'border-current shadow-sm'
-                              : 'border-gray-200 hover:border-gray-300'
-                          } ${!isEditing ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer hover:shadow-md'}`}
-                          style={isFavorite ? { 
+                          className={`p-4 rounded-lg border-2 transition-all text-left ${isFavorite
+                            ? 'border-current shadow-sm'
+                            : 'border-gray-200 hover:border-gray-300'
+                            } ${!isEditing ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer hover:shadow-md'}`}
+                          style={isFavorite ? {
                             backgroundColor: `${theme.color}15`,
                             borderColor: theme.color
                           } : {}}
                         >
                           <div className="flex items-center gap-3">
-                            <div 
+                            <div
                               className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
                               style={{ backgroundColor: isFavorite ? `${theme.color}25` : '#f3f4f6' }}
                             >
@@ -579,8 +668,8 @@ export function ProfilePage() {
                               </p>
                             </div>
                             {isFavorite && (
-                              <Heart 
-                                className="w-5 h-5 flex-shrink-0 fill-current" 
+                              <Heart
+                                className="w-5 h-5 flex-shrink-0 fill-current"
                                 style={{ color: theme.color }}
                               />
                             )}
@@ -611,7 +700,7 @@ export function ProfilePage() {
                       className="flex items-start gap-4 p-4 rounded-lg border border-gray-200 hover:border-gray-300 transition-colors"
                     >
                       {theme && (
-                        <div 
+                        <div
                           className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
                           style={{ backgroundColor: `${theme.color}20` }}
                         >
@@ -634,12 +723,12 @@ export function ProfilePage() {
                           </Badge>
                         </div>
                         {theme && (
-                          <Badge 
-                            variant="outline" 
-                            style={{ 
-                              color: theme.color, 
-                              borderColor: theme.color, 
-                              backgroundColor: `${theme.color}10` 
+                          <Badge
+                            variant="outline"
+                            style={{
+                              color: theme.color,
+                              borderColor: theme.color,
+                              backgroundColor: `${theme.color}10`
                             }}
                           >
                             {language === 'fr' ? theme.name : language === 'de' ? (theme.nameDE || theme.name) : (theme.nameEN || theme.name)}

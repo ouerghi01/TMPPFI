@@ -18,12 +18,12 @@ export const AGE_LABELS: Record<
         de: 'Alle Altersgruppen'
     },
     [TargetAgeRange.AGE_12_15]: {
-        fr: '12–15 ans',
-        en: '12–15 years',
-        de: '12–15 Jahre'
+        fr: '12-15 ans',
+        en: '12-15 years',
+        de: '12-15 Jahre'
     },
     [TargetAgeRange.AGE_14_18]: {
-        fr: '14–18 ans',
+        fr: '14-18 ans',
         en: '14–18 years',
         de: '14–18 Jahre'
     },

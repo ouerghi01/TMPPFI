@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
-import { useLanguage } from '../contexts/LanguageContext';
+import React, { useState, useEffect } from 'react';
+import { useAuth } from '../contexts/AuthContext';
+import { useForm } from 'react-hook-form';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
@@ -8,12 +9,12 @@ import { Textarea } from '../components/ui/textarea';
 import { Switch } from '../components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { Separator } from '../components/ui/separator';
-import { 
-  User, 
-  Mail, 
-  Shield, 
-  Settings as SettingsIcon, 
-  Camera, 
+import {
+  User,
+  Mail,
+  Shield,
+  Settings as SettingsIcon,
+  Camera,
   Lock,
   Globe,
   Clock,
@@ -30,44 +31,89 @@ import {
   Vote,
   Calendar,
   FileText,
-  Trash2
+  Trash2,
+  Heart
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { toast } from 'sonner';
+import apiClient from '@/client';
+import { themes } from '../data/themes';
+import { useLanguage } from '../contexts/LanguageContext';
 
 type Section = 'profile' | 'account' | 'security' | 'preferences' | 'notifications' | 'administration';
 
+interface UserProfile {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  address: string;
+  city: string;
+  postalCode: string;
+  bio: string;
+  avatar: string;
+  preferences: {
+    language: 'fr' | 'de' | 'en';
+    emailNotifications: boolean;
+    smsNotifications: boolean;
+    favoriteThemes: string[];
+  };
+}
+
+const defaultProfile: UserProfile = {
+  firstName: '',
+  lastName: '',
+  email: '',
+  phone: '',
+  address: '',
+  city: '',
+  postalCode: '',
+  bio: '',
+  avatar: '',
+  preferences: {
+    language: 'fr',
+    emailNotifications: true,
+    smsNotifications: false,
+    favoriteThemes: []
+  }
+};
+
 export function SettingsPage() {
-  const { language } = useLanguage();
+  const { language, setLanguage } = useLanguage();
+  const { user } = useAuth();
   const [activeSection, setActiveSection] = useState<Section>('profile');
-  const [hasChanges, setHasChanges] = useState(false);
+  const [profile, setProfile] = useState<UserProfile>(defaultProfile);
+  const [avatarUrl, setAvatarUrl] = useState<string>('');
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
 
-  // Profile form state
-  const [fullName, setFullName] = useState('Jean Dupont');
+  const { register, handleSubmit, reset, setValue, watch, formState: { isDirty } } = useForm<UserProfile>({
+    defaultValues: profile
+  });
+
+  // Load profile from localStorage on mount (matching ProfilePage logic)
+  useEffect(() => {
+    const savedProfile = localStorage.getItem('userProfile');
+    if (savedProfile) {
+      const parsed = JSON.parse(savedProfile);
+      setProfile(parsed);
+      reset(parsed);
+      setAvatarUrl(parsed.avatar || '');
+    }
+  }, [reset]);
+
+  // Sync state variables for static UI elements that aren't yet in the main profile object
+  // (We'll keep these for sections not yet fully dynamic in the backend)
   const [username, setUsername] = useState('jdupont');
-  const [bio, setBio] = useState('Citoyen engagé pour ma commune');
-  const [phone, setPhone] = useState('+41 79 123 45 67');
-  const [address, setAddress] = useState('Rue de la Commune 12, 1000 Lausanne');
-
-  // Account form state
-  const [email, setEmail] = useState('jean.dupont@example.com');
-  const [accountLanguage, setAccountLanguage] = useState('fr');
   const [timezone, setTimezone] = useState('Europe/Zurich');
-
-  // Security form state
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
   const [loginAlerts, setLoginAlerts] = useState(true);
-
-  // Preferences state
   const [darkMode, setDarkMode] = useState(false);
-  const [emailNotifications, setEmailNotifications] = useState(true);
-  const [appLanguage, setAppLanguage] = useState('fr');
   const [compactView, setCompactView] = useState(false);
 
-  // Notifications state
+  // Notifications state (these are not yet in UserProfile interface)
   const [notifyConcertations, setNotifyConcertations] = useState(true);
   const [notifyAssemblies, setNotifyAssemblies] = useState(true);
   const [notifyPetitions, setNotifyPetitions] = useState(true);
@@ -76,43 +122,66 @@ export function SettingsPage() {
   const [notifyComments, setNotifyComments] = useState(false);
   const [notifyDigest, setNotifyDigest] = useState('weekly');
 
-  // Administration state (for admin users)
+  // Administration state
   const [platformName, setPlatformName] = useState('CiviAgora');
   const [adminEmail, setAdminEmail] = useState('admin@civiagora.ch');
   const [maintenanceMode, setMaintenanceMode] = useState(false);
   const [allowRegistrations, setAllowRegistrations] = useState(true);
   const [moderationRequired, setModerationRequired] = useState(true);
 
-  const handleSaveChanges = () => {
-    setHasChanges(false);
-    toast.success(
-      language === 'fr' ? '✓ Modifications enregistrées avec succès' :
-      language === 'de' ? '✓ Änderungen erfolgreich gespeichert' :
-      '✓ Changes saved successfully'
-    );
+  const handleSaveChanges = async (data: UserProfile) => {
+    try {
+      let updatedProfile = { ...data, id: user?.userId, birthDate: null };
+
+      // Call same API as ProfilePage
+      const response = await apiClient.post('/users/profile', updatedProfile);
+
+      if (avatarFile) {
+        const formData = new FormData();
+        formData.append('file', avatarFile);
+        await apiClient.post(`/users/${response.data}/avatar`, formData, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        });
+        updatedProfile.avatar = avatarUrl;
+      }
+
+      setProfile(updatedProfile);
+      localStorage.setItem('userProfile', JSON.stringify(updatedProfile));
+      reset(updatedProfile);
+      setAvatarFile(null);
+
+      toast.success(
+        language === 'fr' ? '✓ Modifications enregistrées avec succès' :
+          language === 'de' ? '✓ Änderungen erfolgreich gespeichert' :
+            '✓ Changes saved successfully'
+      );
+      return 0
+    } catch (error: any) {
+      toast.error(language === 'fr' ? 'Erreur lors de la sauvegarde' : 'Error saving changes');
+    }
   };
 
   const handleUpdatePassword = () => {
     if (!currentPassword || !newPassword || !confirmPassword) {
       toast.error(
         language === 'fr' ? 'Veuillez remplir tous les champs' :
-        language === 'de' ? 'Bitte füllen Sie alle Felder aus' :
-        'Please fill in all fields'
+          language === 'de' ? 'Bitte füllen Sie alle Felder aus' :
+            'Please fill in all fields'
       );
       return;
     }
     if (newPassword !== confirmPassword) {
       toast.error(
         language === 'fr' ? 'Les mots de passe ne correspondent pas' :
-        language === 'de' ? 'Passwörter stimmen nicht überein' :
-        'Passwords do not match'
+          language === 'de' ? 'Passwörter stimmen nicht überein' :
+            'Passwords do not match'
       );
       return;
     }
     toast.success(
       language === 'fr' ? '✓ Mot de passe mis à jour avec succès' :
-      language === 'de' ? '✓ Passwort erfolgreich aktualisiert' :
-      '✓ Password updated successfully'
+        language === 'de' ? '✓ Passwort erfolgreich aktualisiert' :
+          '✓ Password updated successfully'
     );
     setCurrentPassword('');
     setNewPassword('');
@@ -174,14 +243,16 @@ export function SettingsPage() {
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex items-center gap-4">
-            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-2xl font-semibold shadow-lg">
-              {getInitials(fullName)}
+            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-2xl font-semibold shadow-lg overflow-hidden border-2 border-white">
+              {avatarUrl ? (
+                <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+              ) : (
+                getInitials(`${profile.firstName} ${profile.lastName}`)
+              )}
             </div>
             <div>
               <h1 className="text-3xl text-gray-900">
-                {language === 'fr' && 'Paramètres du compte'}
-                {language === 'de' && 'Kontoeinstellungen'}
-                {language === 'en' && 'Account Settings'}
+                {profile.firstName} {profile.lastName}
               </h1>
               <p className="text-gray-600 mt-1">
                 {language === 'fr' && 'Gérez vos préférences et vos informations'}
@@ -203,16 +274,15 @@ export function SettingsPage() {
                   {sections.map((section) => {
                     const Icon = section.icon;
                     const isActive = activeSection === section.id;
-                    
+
                     return (
                       <motion.button
                         key={section.id}
                         onClick={() => setActiveSection(section.id)}
-                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
-                          isActive
-                            ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-md'
-                            : 'text-gray-700 hover:bg-blue-50/50'
-                        }`}
+                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${isActive
+                          ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-md'
+                          : 'text-gray-700 hover:bg-blue-50/50'
+                          }`}
                         whileHover={{ scale: isActive ? 1 : 1.02 }}
                         whileTap={{ scale: 0.98 }}
                       >
@@ -258,16 +328,36 @@ export function SettingsPage() {
                         {language === 'en' && 'Profile Picture'}
                       </Label>
                       <div className="flex items-center gap-6">
-                        <div className="w-24 h-24 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-3xl font-semibold shadow-lg">
-                          {getInitials(fullName)}
+                        <div className="w-24 h-24 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-3xl font-semibold shadow-lg overflow-hidden border-4 border-white">
+                          {avatarUrl ? (
+                            <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+                          ) : (
+                            getInitials(`${profile.firstName} ${profile.lastName}`)
+                          )}
                         </div>
                         <div className="flex flex-col gap-2">
-                          <Button variant="outline" className="gap-2">
-                            <Camera className="w-4 h-4" />
-                            {language === 'fr' && 'Changer la photo'}
-                            {language === 'de' && 'Foto ändern'}
-                            {language === 'en' && 'Change photo'}
-                          </Button>
+                          <label className="cursor-pointer">
+                            <Button variant="outline" className="gap-2 pointer-events-none">
+                              <Camera className="w-4 h-4" />
+                              {language === 'fr' && 'Changer la photo'}
+                              {language === 'de' && 'Foto ändern'}
+                              {language === 'en' && 'Change photo'}
+                            </Button>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) {
+                                  setAvatarFile(file);
+                                  const reader = new FileReader();
+                                  reader.onloadend = () => setAvatarUrl(reader.result as string);
+                                  reader.readAsDataURL(file);
+                                }
+                              }}
+                            />
+                          </label>
                           <p className="text-xs text-gray-500">
                             {language === 'fr' && 'JPG, PNG ou GIF. Max 2MB.'}
                             {language === 'de' && 'JPG, PNG oder GIF. Max 2MB.'}
@@ -279,29 +369,30 @@ export function SettingsPage() {
 
                     <Separator />
 
-                    {/* Profile Form */}
                     <div className="space-y-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="fullName">
-                          {language === 'fr' && 'Nom complet'}
-                          {language === 'de' && 'Vollständiger Name'}
-                          {language === 'en' && 'Full Name'}
-                        </Label>
-                        <Input
-                          id="fullName"
-                          value={fullName}
-                          onChange={(e) => {
-                            setFullName(e.target.value);
-                            setHasChanges(true);
-                          }}
-                          placeholder="Jean Dupont"
-                          className="h-11"
-                        />
-                        <p className="text-xs text-gray-500">
-                          {language === 'fr' && 'Ce nom sera affiché publiquement'}
-                          {language === 'de' && 'Dieser Name wird öffentlich angezeigt'}
-                          {language === 'en' && 'This name will be displayed publicly'}
-                        </p>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="firstName">
+                            {language === 'fr' ? 'Prénom' : language === 'de' ? 'Vorname' : 'First Name'}
+                          </Label>
+                          <Input
+                            id="firstName"
+                            {...register('firstName')}
+                            placeholder="Jean"
+                            className="h-11"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="lastName">
+                            {language === 'fr' ? 'Nom' : language === 'de' ? 'Nachname' : 'Last Name'}
+                          </Label>
+                          <Input
+                            id="lastName"
+                            {...register('lastName')}
+                            placeholder="Dupont"
+                            className="h-11"
+                          />
+                        </div>
                       </div>
 
                       <div className="space-y-2">
@@ -313,10 +404,7 @@ export function SettingsPage() {
                         <Input
                           id="username"
                           value={username}
-                          onChange={(e) => {
-                            setUsername(e.target.value);
-                            setHasChanges(true);
-                          }}
+                          onChange={(e) => setUsername(e.target.value)}
                           placeholder="jdupont"
                           className="h-11"
                         />
@@ -336,20 +424,16 @@ export function SettingsPage() {
                         </Label>
                         <Textarea
                           id="bio"
-                          value={bio}
-                          onChange={(e) => {
-                            setBio(e.target.value);
-                            setHasChanges(true);
-                          }}
+                          {...register('bio')}
                           placeholder={
                             language === 'fr' ? 'Parlez-nous de vous...' :
-                            language === 'de' ? 'Erzählen Sie uns über sich...' :
-                            'Tell us about yourself...'
+                              language === 'de' ? 'Erzählen Sie uns über sich...' :
+                                'Tell us about yourself...'
                           }
                           rows={4}
                         />
                         <p className="text-xs text-gray-500">
-                          {bio.length} / 500 caractères
+                          {watch('bio')?.length || 0} / 500 caractères
                         </p>
                       </div>
 
@@ -361,11 +445,7 @@ export function SettingsPage() {
                         </Label>
                         <Input
                           id="phone"
-                          value={phone}
-                          onChange={(e) => {
-                            setPhone(e.target.value);
-                            setHasChanges(true);
-                          }}
+                          {...register('phone')}
                           placeholder="+41 79 123 45 67"
                           className="h-11"
                         />
@@ -384,11 +464,7 @@ export function SettingsPage() {
                         </Label>
                         <Input
                           id="address"
-                          value={address}
-                          onChange={(e) => {
-                            setAddress(e.target.value);
-                            setHasChanges(true);
-                          }}
+                          {...register('address')}
                           placeholder="Rue de la Commune 12, 1000 Lausanne"
                           className="h-11"
                         />
@@ -401,14 +477,14 @@ export function SettingsPage() {
                     </div>
 
                     <div className="flex justify-end gap-3 pt-4 border-t">
-                      <Button variant="outline" disabled={!hasChanges}>
+                      <Button variant="outline" onClick={() => reset(profile)} disabled={!isDirty && !avatarFile}>
                         {language === 'fr' && 'Annuler'}
                         {language === 'de' && 'Abbrechen'}
                         {language === 'en' && 'Cancel'}
                       </Button>
                       <Button
-                        onClick={handleSaveChanges}
-                        disabled={!hasChanges}
+                        onClick={handleSubmit(handleSaveChanges)}
+                        disabled={!isDirty && !avatarFile}
                         className="gap-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         <Save className="w-4 h-4" />
@@ -455,7 +531,7 @@ export function SettingsPage() {
                         <Input
                           id="email"
                           type="email"
-                          value={email}
+                          value={user?.email || profile.email}
                           readOnly
                           className="h-11 bg-gray-50 cursor-not-allowed"
                         />
@@ -474,7 +550,13 @@ export function SettingsPage() {
                           {language === 'de' && 'Schnittstellensprache'}
                           {language === 'en' && 'Interface Language'}
                         </Label>
-                        <Select value={accountLanguage} onValueChange={setAccountLanguage}>
+                        <Select
+                          value={watch('preferences.language')}
+                          onValueChange={(val) => {
+                            setValue('preferences.language', val as 'fr' | 'de' | 'en');
+                            setLanguage(val as 'fr' | 'de' | 'en');
+                          }}
+                        >
                           <SelectTrigger className="h-11">
                             <SelectValue />
                           </SelectTrigger>
@@ -518,13 +600,13 @@ export function SettingsPage() {
                     </div>
 
                     <div className="flex justify-end gap-3 pt-4 border-t">
-                      <Button variant="outline">
+                      <Button variant="outline" onClick={() => reset(profile)}>
                         {language === 'fr' && 'Annuler'}
                         {language === 'de' && 'Abbrechen'}
                         {language === 'en' && 'Cancel'}
                       </Button>
                       <Button
-                        onClick={handleSaveChanges}
+                        onClick={handleSubmit(handleSaveChanges)}
                         className="gap-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
                       >
                         <Save className="w-4 h-4" />
@@ -761,8 +843,8 @@ export function SettingsPage() {
                       </div>
                       <Switch
                         id="emailNotifications"
-                        checked={emailNotifications}
-                        onCheckedChange={setEmailNotifications}
+                        checked={watch('preferences.emailNotifications')}
+                        onCheckedChange={(checked) => setValue('preferences.emailNotifications', checked, { shouldDirty: true })}
                       />
                     </div>
 
@@ -785,7 +867,13 @@ export function SettingsPage() {
                           </p>
                         </div>
                       </div>
-                      <Select value={appLanguage} onValueChange={setAppLanguage}>
+                      <Select
+                        value={watch('preferences.language')}
+                        onValueChange={(val) => {
+                          setValue('preferences.language', val as 'fr' | 'de' | 'en', { shouldDirty: true });
+                          setLanguage(val as 'fr' | 'de' | 'en');
+                        }}
+                      >
                         <SelectTrigger className="h-11">
                           <SelectValue />
                         </SelectTrigger>
@@ -796,6 +884,75 @@ export function SettingsPage() {
                         </SelectContent>
                       </Select>
                     </div>
+                    <Separator />
+
+                    {/* Favorite Themes */}
+                    <div>
+                      <h4 className="text-gray-900 mb-4 flex items-center gap-2">
+                        <Heart className="w-4 h-4 text-red-500" />
+                        {language === 'fr' && 'Thèmes favoris'}
+                        {language === 'de' && 'Lieblingsthemen'}
+                        {language === 'en' && 'Favorite themes'}
+                      </h4>
+                      <p className="text-sm text-gray-500 mb-4">
+                        {language === 'fr' && 'Sélectionnez les thèmes qui vous intéressent'}
+                        {language === 'de' && 'Wählen Sie die Themen aus, die Sie interessieren'}
+                        {language === 'en' && 'Select the themes that interest you'}
+                      </p>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        {themes.map((theme) => {
+                          const isFavorite = (watch('preferences.favoriteThemes') || []).includes(theme.id);
+                          return (
+                            <button
+                              key={theme.id}
+                              type="button"
+                              onClick={() => {
+                                const current = watch('preferences.favoriteThemes') || [];
+                                const next = current.includes(theme.id)
+                                  ? current.filter(id => id !== theme.id)
+                                  : [...current, theme.id];
+                                setValue('preferences.favoriteThemes', next, { shouldDirty: true });
+                              }}
+                              className={`p-4 rounded-lg border-2 transition-all text-left ${isFavorite
+                                ? 'border-current shadow-sm'
+                                : 'border-gray-200 hover:border-gray-300'
+                                } cursor-pointer hover:shadow-md`}
+                              style={isFavorite ? {
+                                backgroundColor: `${theme.color}15`,
+                                borderColor: theme.color
+                              } : {}}
+                            >
+                              <div className="flex items-center gap-3">
+                                <div
+                                  className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
+                                  style={{ backgroundColor: isFavorite ? `${theme.color}25` : '#f3f4f6' }}
+                                >
+                                  <span className="text-xl">{theme.icon}</span>
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <p className={`font-medium text-sm ${isFavorite ? 'text-gray-900' : 'text-gray-600'}`}>
+                                    {language === 'fr' ? theme.name : language === 'de' ? (theme.nameDE || theme.name) : (theme.nameEN || theme.name)}
+                                  </p>
+                                  <p className="text-xs text-gray-500 mt-0.5">
+                                    {language === 'fr' && theme.descriptionFR}
+                                    {language === 'de' && theme.descriptionDE}
+                                    {language === 'en' && theme.descriptionEN}
+                                  </p>
+                                </div>
+                                {isFavorite && (
+                                  <Heart
+                                    className="w-5 h-5 flex-shrink-0 fill-current"
+                                    style={{ color: theme.color }}
+                                  />
+                                )}
+                              </div>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    <Separator />
 
                     {/* Compact View Toggle */}
                     <div className="flex items-center justify-between p-4 rounded-lg border border-gray-200 hover:border-gray-300 transition-colors">
@@ -830,7 +987,7 @@ export function SettingsPage() {
                         {language === 'en' && 'Reset'}
                       </Button>
                       <Button
-                        onClick={handleSaveChanges}
+                        onClick={handleSubmit(handleSaveChanges)}
                         className="gap-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
                       >
                         <Save className="w-4 h-4" />
@@ -1060,7 +1217,7 @@ export function SettingsPage() {
                         {language === 'en' && 'Reset'}
                       </Button>
                       <Button
-                        onClick={handleSaveChanges}
+                        onClick={handleSubmit(handleSaveChanges)}
                         className="gap-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
                       >
                         <Save className="w-4 h-4" />
@@ -1224,7 +1381,7 @@ export function SettingsPage() {
                         {language === 'en' && 'Reset'}
                       </Button>
                       <Button
-                        onClick={handleSaveChanges}
+                        onClick={handleSubmit(handleSaveChanges)}
                         className="gap-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
                       >
                         <Save className="w-4 h-4" />
@@ -1240,6 +1397,6 @@ export function SettingsPage() {
           </main>
         </div>
       </div>
-    </div>
+    </div >
   );
 }
