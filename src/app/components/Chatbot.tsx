@@ -453,9 +453,9 @@ export function Chatbot() {
 
   // --- Interaction Handlers ---
 
-  const handleSend = async (overrideText?: string) => {
-    const textToSend = overrideText || message;
-    if (!textToSend.trim()) return;
+  const handleSend = async (overrideText?: string | React.MouseEvent | React.KeyboardEvent) => {
+    const textToSend = typeof overrideText === 'string' ? overrideText : message;
+    if (!textToSend || typeof textToSend !== 'string' || !textToSend.trim()) return;
 
     // Stop any ongoing speech when user sends a new message
     stopSpeech();
@@ -694,7 +694,7 @@ export function Chatbot() {
                 className="flex-1 bg-transparent border-none text-gray-800 placeholder-gray-400 text-sm px-6 py-4 focus:ring-0"
               />
               <button
-                onClick={handleSend}
+                onClick={() => handleSend()}
                 disabled={!message.trim()}
                 className="absolute right-2 p-2.5 bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-200 rounded-full text-white transition-all duration-200 transform active:scale-95 flex items-center justify-center shadow-md disabled:shadow-none"
               >
@@ -708,8 +708,9 @@ export function Chatbot() {
               </p>
             </div>
           </div>
-        </div>
-      )}
+        </div >
+      )
+      }
     </>
   );
 }
