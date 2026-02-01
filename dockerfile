@@ -3,6 +3,9 @@ FROM node:18-alpine AS build
 WORKDIR /app
 ARG VITE_API_URL=http://51.210.107.84:9989/api/v1
 ENV VITE_API_URL=$VITE_API_URL
+
+ARG VITE_GEMINI_API_KEY=AIzaSyCZvqAqTVd99KQWOIHfeLdmjsC6LnnC8Z4
+ENV VITE_GEMINI_API_KEY=$VITE_GEMINI_API_KEY
 COPY package*.json ./
 RUN npm install --legacy-peer-deps
 COPY . .
