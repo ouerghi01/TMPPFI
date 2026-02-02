@@ -1235,7 +1235,6 @@ export const signalementApi = {
    * GET /api/signalements/stats
    */
   async getSignalementStats(): Promise<ApiResponse<any>> {
-    await simulateDelay();
 
     return {
       data: await getSignalementStatsApi(),

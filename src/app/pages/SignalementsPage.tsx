@@ -14,8 +14,8 @@ import { StatusBadge } from '../components/StatusBadge';
 
 export function SignalementsPage() {
   const { t, language, tLocal } = useLanguage();
-  const [selectedCategory, setSelectedCategory] = useState<string | null>('all');
-  const [selectedStatus, setSelectedStatus] = useState<string | null>('all');
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [selectedStatus, setSelectedStatus] = useState<string>('all');
   const [activeTab, setActiveTab] = useState<'list' | 'map'>('list');
 
   // Fetch data using React Query hooks
@@ -119,8 +119,15 @@ export function SignalementsPage() {
 
   const filteredSignalements =
     signalements?.filter(s => {
-      const categoryMatch = selectedCategory === 'all' || s.category?.toLowerCase() === selectedCategory?.toLowerCase();
-      const statusMatch = selectedStatus === 'all' || s.status?.toLowerCase() === selectedStatus?.toLowerCase();
+      const categoryMatch = !selectedCategory || selectedCategory === 'all' || s.category?.toLowerCase() === selectedCategory?.toLowerCase();
+      const statusMatch = !selectedStatus || selectedStatus === 'all' || s.status?.toLowerCase() === selectedStatus?.toLowerCase();
+      return categoryMatch && statusMatch;
+    }) ?? [];
+
+  const filteredGeoSignalements =
+    geoSignalements?.filter(s => {
+      const categoryMatch = !selectedCategory || selectedCategory === 'all' || s.category?.toLowerCase() === selectedCategory?.toLowerCase();
+      const statusMatch = !selectedStatus || selectedStatus === 'all' || s.status?.toLowerCase() === selectedStatus?.toLowerCase();
       return categoryMatch && statusMatch;
     }) ?? [];
 
@@ -173,7 +180,7 @@ export function SignalementsPage() {
 
         {/* Filters and Create Button */}
         <div className="flex flex-col sm:flex-row gap-4 mb-6">
-          <Select value={selectedCategory || 'all'} onValueChange={(v) => setSelectedCategory(v === 'all' ? 'all' : v)}>
+          <Select value={selectedCategory} onValueChange={(v) => setSelectedCategory(v)}>
             <SelectTrigger className="w-full sm:w-[200px]">
               <SelectValue placeholder={language === 'fr' ? 'Catégorie' : language === 'de' ? 'Kategorie' : 'Category'} />
             </SelectTrigger>
@@ -190,7 +197,7 @@ export function SignalementsPage() {
             </SelectContent>
           </Select>
 
-          <Select value={selectedStatus || 'all'} onValueChange={(v) => setSelectedStatus(v === 'all' ? null : v)}>
+          <Select value={selectedStatus} onValueChange={(v) => setSelectedStatus(v)}>
             <SelectTrigger className="w-full sm:w-[200px]">
               <SelectValue placeholder={language === 'fr' ? 'Statut' : language === 'de' ? 'Status' : 'Status'} />
             </SelectTrigger>
@@ -262,9 +269,9 @@ export function SignalementsPage() {
 
               {/* Signalements positionnés sur la carte */}
               <div className="relative h-full p-8">
-                {geoSignalements && geoSignalements.length > 0 ? (
+                {filteredGeoSignalements && filteredGeoSignalements.length > 0 ? (
                   <>
-                    {geoSignalements.slice(0, 12).map((signalement, index) => {
+                    {filteredGeoSignalements.slice(0, 12).map((signalement, index) => {
                       // Position pseudo-aléatoire basée sur l'index
                       const positions = [
                         { top: '15%', left: '20%' },
@@ -339,7 +346,7 @@ export function SignalementsPage() {
                 )}
 
                 {/* Légende */}
-                {geoSignalements && geoSignalements.length > 0 && (
+                {filteredGeoSignalements && filteredGeoSignalements.length > 0 && (
                   <div className="absolute bottom-4 left-4 bg-white rounded-lg shadow-lg p-4 border border-gray-200">
                     <h4 className="text-sm font-semibold mb-2">
                       {language === 'fr' ? 'Légende' :
@@ -356,9 +363,9 @@ export function SignalementsPage() {
                         </span>
                       </div>
                       <div className="text-gray-600">
-                        {language === 'fr' ? `${geoSignalements.length} signalements affichés` :
-                          language === 'de' ? `${geoSignalements.length} angezeigte Meldungen` :
-                            `${geoSignalements.length} reports displayed`}
+                        {language === 'fr' ? `${filteredGeoSignalements.length} signalements affichés` :
+                          language === 'de' ? `${filteredGeoSignalements.length} angezeigte Meldungen` :
+                            `${filteredGeoSignalements.length} reports displayed`}
                       </div>
                     </div>
                   </div>
