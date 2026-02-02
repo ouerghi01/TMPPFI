@@ -421,33 +421,70 @@ export function Chatbot() {
 
   // --- Logic: Gemini Call ---
   const callGemini = async (query: string): Promise<string> => {
-    if (!apiKey) {
-      return generateFallbackResponse(query);
-    }
+    if (!apiKey) return generateFallbackResponse(query);
 
     try {
       const genAI = new GoogleGenerativeAI(apiKey);
-      const model = genAI.getGenerativeModel({ model: "gemini-3-flash-preview" });
 
-      const sysPrompt = `You are the CiviAgora assistant. Your goal is to help citizens engage with their local democracy.
-        Use Markdown formatting (bolding, lists) to make answers clear.
-        Be concise and helpful.
-        Language: ${language} (reply in this language).
-        
-        Current System Data:
-        ${buildContext()}
-        
-        Answer based ONLY on the data above if possible. If the user asks general questions about democracy, answer generally.`;
+      const functionDeclarations = [
+        { name: "get_themes", description: "Get the thematic areas available in the city (Environment, Transport, etc.)." },
+        { name: "get_consultations", description: "Retrieve public consultations, including their status, titles, and dates." },
+        { name: "get_petitions", description: "Get citizen petitions and their current signature counts." },
+        { name: "get_votes", description: "Get information about public votes, referendums, and elections." },
+        { name: "get_conferences", description: "Retrieve info on public conferences, topics, and speakers." },
+        { name: "get_assemblies", description: "Retrieve info about citizen assemblies and working groups." },
+        { name: "get_signalements", description: "Get urban reports (signalements) like cleanliness or safety issues and stats." },
+        { name: "get_youth_polls", description: "Retrieve polls and processes specifically focused on youth engagement." },
+        { name: "get_legislative_consultations", description: "Get details about legislative texts and laws under consultation." }
+      ];
 
-      const result = await model.generateContent([sysPrompt, query]);
-      const response = await result.response;
+      const model = genAI.getGenerativeModel({
+        model: "gemini-3-flash-preview",
+        tools: [{ functionDeclarations }],
+        systemInstruction: `You are the CiviAgora assistant. Help citizens engage with their local democracy.
+          Use Markdown. Be concise and friendly. Language: ${language} (REPLY IN THIS LANGUAGE).
+          Use the provided tools to fetch real-time city data if the user query is about consultations, petitions, votes, themes, etc.
+          Data objects contain translations in 'fr', 'de', and 'en' - always prioritize the '${language}' version when presenting information.
+          If tools return no data, inform the user clearly.`
+      });
+
+      const chat = model.startChat();
+      let result = await chat.sendMessage(query);
+      let response = result.response;
+
+      let functionCalls = response.functionCalls();
+
+      // Execute function calls if requested by the LLM
+      while (functionCalls && functionCalls.length > 0) {
+        const toolHandlers: Record<string, () => any> = {
+          get_themes: () => themes,
+          get_consultations: () => consultations,
+          get_petitions: () => petitions,
+          get_votes: () => votes,
+          get_conferences: () => conferences,
+          get_assemblies: () => assemblies,
+          get_signalements: () => signalements,
+          get_youth_polls: () => youthPolls,
+          get_legislative_consultations: () => legislative,
+        };
+
+        const functionResponses = functionCalls.map(call => ({
+          functionResponse: {
+            name: call.name,
+            response: { content: toolHandlers[call.name]?.() || { error: "Data source not found" } }
+          }
+        }));
+
+        const finalResult = await chat.sendMessage(functionResponses);
+        response = finalResult.response;
+        functionCalls = response.functionCalls();
+      }
+
       return response.text();
 
     } catch (error) {
       console.error("Gemini API Error:", error);
-      return language === 'fr'
-        ? "Désolé, je rencontre des problèmes de connexion à mon cerveau IA. Voici une réponse standard :" + generateFallbackResponse(query)
-        : "Sorry, I'm having trouble connecting to my AI brain. Here is a standard response: " + generateFallbackResponse(query);
+      return generateFallbackResponse(query);
     }
   };
 
