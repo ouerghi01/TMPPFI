@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { X, Send, Sparkles, MessageSquare, ArrowUp, Compass, AlertCircle, Volume2, VolumeX, Play, Pause } from 'lucide-react';
+import { X, Send, Sparkles, MessageSquare, ArrowUp, Compass, AlertCircle, Volume2, VolumeX, Play, Pause, User } from 'lucide-react';
 import { useLanguage } from '@/app/contexts/LanguageContext';
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import {
@@ -181,7 +181,7 @@ const MarkdownRenderer = ({ content }: { content: string }) => {
   return <div className="markdown-content">{parseMarkdown(content)}</div>;
 };
 
-const StreamingText = ({ text, speed = 15 }: { text: string; speed?: number }) => {
+const StreamingText = ({ text, speed = 15, onComplete }: { text: string; speed?: number; onComplete?: () => void }) => {
   const [displayedText, setDisplayedText] = useState('');
 
   useEffect(() => {
@@ -196,6 +196,7 @@ const StreamingText = ({ text, speed = 15 }: { text: string; speed?: number }) =
           return text.slice(0, index);
         }
         clearInterval(intervalId);
+        onComplete?.();
         return text;
       });
     }, speed);
@@ -205,6 +206,20 @@ const StreamingText = ({ text, speed = 15 }: { text: string; speed?: number }) =
 
   return <MarkdownRenderer content={displayedText} />;
 };
+
+// --- Custom Animations ---
+const ChatStyles = () => (
+  <style dangerouslySetInnerHTML={{
+    __html: `
+    @keyframes spin-slow {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    .animate-spin-slow {
+      animation: spin-slow 3s linear infinite;
+    }
+  `}} />
+);
 
 // --- Main Chatbot Component ---
 
@@ -216,6 +231,7 @@ export function Chatbot() {
   const [isTyping, setIsTyping] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [currentSpeakingId, setCurrentSpeakingId] = useState<number | null>(null);
+  const [isStreaming, setIsStreaming] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const speechSynthRef = useRef<SpeechSynthesisUtterance | null>(null);
@@ -371,33 +387,7 @@ export function Chatbot() {
     }
   };
 
-  // --- Helper: Build Context for AI ---
-  const buildContext = () => {
-    const contextParts = [];
 
-    if (themes?.length) {
-      contextParts.push(`Themes: ${themes.map(t => tLocal(t.name)).join(', ')}`);
-    }
-    if (consultations?.length) {
-      const active = consultations.filter(c => c.status === 'OPEN').map(c => `${tLocal(c.title)} (ID: ${c.id})`);
-      if (active.length) contextParts.push(`Active Consultations: ${active.join('; ')}`);
-    }
-    if (petitions?.length) {
-      const active = petitions.filter(p => p.status === 'OPEN').map(p => `${tLocal(p.title)} (${p.currentSignatures} signatures)`);
-      if (active.length) contextParts.push(`Active Petitions: ${active.join('; ')}`);
-    }
-    if (votes?.length) {
-      const active = votes.filter(v => v.status === 'OPEN').map(v => tLocal(v.title));
-      if (active.length) contextParts.push(`Active Votes: ${active.join('; ')}`);
-    }
-    if (youthPolls?.length) {
-      const active = youthPolls.filter(y => y.status === 'OPEN').map(y => tLocal(y.title));
-      if (active.length) contextParts.push(`Youth Polls: ${active.join('; ')}`);
-    }
-    contextParts.push(`Total Reports (Signalements): ${signalements?.length || 0}`);
-
-    return contextParts.join('\n');
-  };
 
   // --- Logic: Fallback (Regex) ---
   const generateFallbackResponse = (query: string): string => {
@@ -521,6 +511,7 @@ export function Chatbot() {
       }
 
       setIsTyping(false);
+      setIsStreaming(true);
       const botMsg: Message = {
         id: Date.now() + 1,
         text: replyText,
@@ -557,24 +548,33 @@ export function Chatbot() {
 
   // Generate dynamic suggestions if possible
   const getSuggestions = (): Suggestion[] => {
-    const base: Suggestion[] = [
-      { id: '1', label: { fr: 'Consultations en cours', de: 'Laufende Konsultationen', en: 'Current consultations' }, intent: 'consultation' },
-      { id: '2', label: { fr: 'Voir les pétitions', de: 'Petitionen ansehen', en: 'See petitions' }, intent: 'petition' },
+    return [
+      {
+        id: '1',
+        label: {
+          fr: 'Quelles sont les consultations en cours ?',
+          de: 'Was sind die aktuellen Konsultationen?',
+          en: 'What are the current consultations?'
+        },
+        intent: 'consultation'
+      },
+      {
+        id: '2',
+        label: {
+          fr: 'Comment participer aux votes de la ville ?',
+          de: 'Wie kann ich an den Abstimmungen der Stadt teilnehmen?',
+          en: 'How can I participate in city votes?'
+        },
+        intent: 'vote'
+      },
     ];
-
-    // If we have specific data, add a specific suggestion
-    if (votes && votes.length > 0) {
-      base.push({ id: '3', label: { fr: 'Votes récents', de: 'Letzte Abstimmungen', en: 'Recent votes' }, intent: 'vote' });
-    } else {
-      base.push({ id: '3', label: { fr: 'Espace Jeunesse', de: 'Jugendbereich', en: 'Youth Space' }, intent: 'youth' });
-    }
-    return base;
   };
 
   const suggestions = getSuggestions();
 
   return (
     <>
+      <ChatStyles />
       <button
         onClick={() => setIsOpen(!isOpen)}
         className={`fixed bottom-6 right-6 z-50 flex items-center justify-center transition-all duration-300 shadow-xl 
@@ -635,23 +635,17 @@ export function Chatbot() {
           </div>
 
           {/* Chat Surface */}
-          <div className="flex-1 overflow-y-auto px-6 py-4 bg-white scroll-smooth relative">
+          <div className="flex-1 overflow-y-auto px-6 py-4 bg-white scroll-smooth relative flex flex-col">
 
             {messages.length === 0 && (
-              <div className="h-full flex flex-col items-center justify-center text-center space-y-6 opacity-0 animate-in fade-in duration-700 slide-in-from-bottom-4 fill-mode-forwards delay-100">
-                <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center mb-2 rotate-3 hover:rotate-6 transition-transform duration-500">
-                  <Compass className="w-8 h-8 text-blue-500" />
+              <div className="flex-1 flex flex-col items-center justify-center text-center space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700 min-h-full">
+                <div className="w-16 h-16 bg-indigo-50 rounded-2xl flex items-center justify-center mb-2 animate-bounce">
+                  <Sparkles className="w-8 h-8 text-indigo-500" />
                 </div>
                 <div className="max-w-[280px]">
                   <h2 className="text-xl font-semibold text-gray-900 mb-2">
-                    {language === 'fr' ? 'Bonjour !' : language === 'de' ? 'Hallo!' : 'Hello!'}
+                    {language === 'fr' ? 'Comment puis-je vous aider ?' : language === 'de' ? 'Wie kann ich Ihnen helfen?' : 'How can I help you?'}
                   </h2>
-                  <p className="text-sm text-gray-500 leading-relaxed">
-                    {apiKey
-                      ? (language === 'fr' ? 'Je suis connecté aux données de la ville. Posez-moi une question !' : 'I am connected to city data. Ask me a question!')
-                      : (language === 'fr' ? 'Mode hors-ligne limité. Ajoutez une clé API Gemini pour une expérience complète.' : 'Limited offline mode. Add a Gemini API Key for full experience.')
-                    }
-                  </p>
                 </div>
 
                 <div className="grid grid-cols-1 gap-2 w-full max-w-[260px]">
@@ -675,14 +669,22 @@ export function Chatbot() {
                   key={msg.id}
                   className={`flex flex-col ${msg.isUser ? 'items-end' : 'items-start'} animate-in fade-in slide-in-from-bottom-2 duration-300`}
                 >
-                  <div className="flex items-center gap-2 mb-1 px-1">
-                    <span className="text-[10px] font-bold text-gray-300 uppercase tracking-wider">
-                      {msg.isUser ? 'You' : 'AI'}
-                    </span>
+                  <div className={`flex items-center gap-2 mb-1.5 px-1 ${msg.isUser ? 'flex-row-reverse' : 'flex-row'}`}>
+                    <div className={`w-6 h-6 rounded-full flex items-center justify-center shadow-sm transition-all duration-500
+                      ${msg.isUser ? 'bg-indigo-100' : 'bg-blue-50'}
+                      ${!msg.isUser && (idx === messages.length - 1 && isStreaming) ? 'animate-pulse scale-110 shadow-indigo-200' : 'scale-100'}
+                      animate-in fade-in zoom-in duration-500
+                    `}>
+                      {msg.isUser ? (
+                        <User className="w-3.5 h-3.5 text-indigo-600" />
+                      ) : (
+                        <Sparkles className={`w-3.5 h-3.5 text-blue-500 ${idx === messages.length - 1 && isStreaming ? 'animate-spin-slow' : ''}`} />
+                      )}
+                    </div>
                     {!msg.isUser && (
                       <button
                         onClick={() => togglePlayPause(msg.id, msg.text)}
-                        className="text-gray-300 hover:text-indigo-500 transition-colors p-0.5"
+                        className="text-gray-300 hover:text-indigo-500 transition-colors p-1 rounded-full hover:bg-gray-50 active:scale-90"
                       >
                         {msg.isPlaying ? <Pause className="w-3 h-3" /> : <Play className="w-3 h-3" />}
                       </button>
@@ -697,7 +699,7 @@ export function Chatbot() {
                   >
                     {msg.isUser ? msg.text : (
                       (idx === messages.length - 1 && !isTyping) || (idx === messages.length - 2 && isTyping)
-                        ? <StreamingText text={msg.text} />
+                        ? <StreamingText text={msg.text} onComplete={() => setIsStreaming(false)} />
                         : <MarkdownRenderer content={msg.text} />
                     )}
                   </div>
@@ -706,11 +708,15 @@ export function Chatbot() {
 
               {isTyping && (
                 <div className="flex flex-col items-start animate-in fade-in duration-200">
-                  <span className="text-[10px] font-bold text-gray-300 mb-1 px-1 uppercase tracking-wider">AI</span>
-                  <div className="flex items-center gap-1 h-6 px-1">
-                    <span className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-bounce [animation-delay:-0.3s]"></span>
-                    <span className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-bounce [animation-delay:-0.15s]"></span>
-                    <span className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-bounce"></span>
+                  <div className="flex items-center gap-2 mb-1.5 px-1">
+                    <div className="w-6 h-6 rounded-full bg-blue-50 flex items-center justify-center animate-pulse scale-110 shadow-sm shadow-indigo-100">
+                      <Sparkles className="w-3.5 h-3.5 text-blue-500 animate-spin-slow" />
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1 h-6 px-1 ml-1">
+                    <span className="w-1 h-1 bg-blue-400 rounded-full animate-bounce [animation-delay:-0.3s]"></span>
+                    <span className="w-1 h-1 bg-blue-400 rounded-full animate-bounce [animation-delay:-0.15s]"></span>
+                    <span className="w-1 h-1 bg-blue-400 rounded-full animate-bounce"></span>
                   </div>
                 </div>
               )}
