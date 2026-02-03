@@ -81,7 +81,6 @@ export function UserMenu({ userName, userEmail, onLogout }: UserMenuProps) {
 
         <DropdownMenuSeparator />
 
-        {/* Menu items */}
         <Link to="/profile">
           <DropdownMenuItem className="cursor-pointer">
             <User className="mr-2 h-4 w-4" />
@@ -92,7 +91,7 @@ export function UserMenu({ userName, userEmail, onLogout }: UserMenuProps) {
             </span>
           </DropdownMenuItem>
         </Link>
-
+        {/* 
         <Link to="/settings">
           <DropdownMenuItem className="cursor-pointer">
             <Settings className="mr-2 h-4 w-4" />
@@ -103,6 +102,10 @@ export function UserMenu({ userName, userEmail, onLogout }: UserMenuProps) {
             </span>
           </DropdownMenuItem>
         </Link>
+
+        
+        */}
+
 
         <DropdownMenuSeparator />
 

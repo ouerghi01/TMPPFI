@@ -115,7 +115,7 @@ export function ProfilePage() {
 
   const onSubmit = async (data: UserProfile) => {
     try {
-      let updatedProfile = { ...data, id: user?.userId, birthDate: null };
+      let updatedProfile = { ...data, id: user?.userId, birthDate: null, username: "" };
       const response = await apiClient.post('/users/profile', updatedProfile);
 
       if (avatarFile) {

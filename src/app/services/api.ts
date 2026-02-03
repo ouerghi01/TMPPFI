@@ -266,10 +266,11 @@ export const userApi = {
    * Get user notifications
    * GET /api/users/me/notifications
    */
-  async getNotifications(params?: { unreadOnly?: boolean }): Promise<ApiResponse<NotificationDTO[]>> {
+  async getNotifications(params?: { unreadOnly?: boolean }): Promise<ApiResponse<any[]>> {
     await simulateDelay();
 
-    let notifications = mockNotifications;
+    let data = await apiClient.get<any[]>('/notifications');
+    let notifications = data.data;
     if (params?.unreadOnly) {
       notifications = notifications.filter(n => !n.read);
     }
@@ -285,10 +286,10 @@ export const userApi = {
    * Mark notification as read
    * PATCH /api/users/me/notifications/:id/read
    */
-  async markNotificationAsRead(notificationId: string): Promise<ApiResponse<NotificationDTO>> {
+  async markNotificationAsRead(notificationId: string): Promise<ApiResponse<any>> {
     await simulateDelay();
 
-    const notification = mockNotifications.find(n => n.id === notificationId);
+    const notification = await apiClient.patch<any>(`/notifications/${notificationId}/read`);
     if (!notification) {
       throw new Error('Notification not found');
     }

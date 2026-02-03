@@ -6,6 +6,10 @@ ENV VITE_API_URL=$VITE_API_URL
 
 ARG VITE_GEMINI_API_KEY=AIzaSyDbmiqVnxBf4H06D8dklu4Inmtx1f6YLoo
 ENV VITE_GEMINI_API_KEY=$VITE_GEMINI_API_KEY
+
+ARG VITE_WS_URL=http://51.210.107.84:9989/ws-notifications
+ENV VITE_WS_URL=$VITE_WS_URL
+
 COPY package*.json ./
 RUN npm install --legacy-peer-deps
 COPY . .

@@ -24,7 +24,7 @@ import {
   X
 } from 'lucide-react';
 import { toast } from 'sonner';
-import { getCommentsByConsultation } from '../../api/comments';
+import { getCommentsByConsultation, getCommentReplies } from '../../api/comments';
 import apiClient from '@/client';
 import { useAuth } from '../contexts/AuthContext';
 import { AuthModal } from '../components/AuthModal';
@@ -36,6 +36,8 @@ interface Comment {
   date: string;
   content: string;
   likes: number;
+  replyCount?: number;
+  parentId?: string | null;
 }
 
 
@@ -53,6 +55,8 @@ export function ConsultationDetailPage() {
   const [hasSupported, setHasSupported] = useState(false);
   const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
   const [editingContent, setEditingContent] = useState('');
+  const [replyingToId, setReplyingToId] = useState<string | null>(null);
+  const [replyContent, setReplyContent] = useState('');
   const { user, isLoggedIn } = useAuth();
   const { data: consultation_v1, isLoading, error } = useConsultation(id || '');
   const [consultation, setConsultation] = useState<any | null>(null);
@@ -114,18 +118,8 @@ export function ConsultationDetailPage() {
 
   const handleSubmitComment = () => {
     if (!newComment.trim()) return;
-    /*
-    public class CommentRequestDto {
-        private String content;
-        private CommentModule moduleType;
-        private String moduleId;
-        private Long parentId; // Optionnel pour les réponses
-    }
-    */
-
 
     const comment: any = {
-
       moduleType: "CONSULTATION",
       moduleId: id,
       parentId: null,
@@ -146,14 +140,14 @@ export function ConsultationDetailPage() {
         } else {
           toast.error(
             language === 'fr' ? 'Une erreur est survenue lors de la publication de votre commentaire' :
-              language === 'de' ? 'Ein Fehler ist aufgetreten, Ihr Kommentar konnte nicht veröffentlicht werden' :
+              language === 'de' ? 'Ein Fehler ist aufgetreten, Ihr commentaire konnte pas être publié' :
                 'An error occurred while posting your comment'
           );
         }
       } catch (error) {
         toast.error(
           language === 'fr' ? 'Une erreur est survenue lors de la publication de votre commentaire' :
-            language === 'de' ? 'Ein Fehler ist aufgetreten, Ihr Kommentar konnte nicht veröffentlicht werden' :
+            language === 'de' ? 'Ein Fehler ist aufgetreten, Ihr commentaire konnte pas être publié' :
               'An error occurred while posting your comment'
         );
       }
@@ -372,7 +366,7 @@ export function ConsultationDetailPage() {
                   }
                   rows={3}
                 />
-                <Button onClick={handleSubmitComment} disabled={!newComment.trim()}>
+                <Button onClick={() => handleSubmitComment()} disabled={!newComment.trim()}>
                   <Send className="w-4 h-4 mr-2" />
                   {language === 'fr' && 'Publier'}
                   {language === 'de' && 'Veröffentlichen'}
@@ -382,109 +376,28 @@ export function ConsultationDetailPage() {
 
               {/* Comments List */}
               <div className="space-y-4 pt-4 border-t">
-                {comments.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).map((comment) => (
-                  <div key={comment.id} className="border-b border-gray-100 pb-4 last:border-0">
-                    {editingCommentId === comment.id ? (
-                      // Edit Mode
-                      <div className="space-y-3">
-                        <div className="flex items-start justify-between mb-2">
-                          <div>
-                            <p className="font-medium text-gray-900">{comment.author}</p>
-                            <p className="text-sm text-gray-500">
-                              {new Date(comment.date).toLocaleDateString(language)}
-                            </p>
-                          </div>
-                        </div>
-                        <Textarea
-                          value={editingContent}
-                          onChange={(e) => setEditingContent(e.target.value)}
-                          rows={3}
-                          className="w-full"
-                        />
-                        <div className="flex items-center gap-2">
-                          <Button
-                            size="sm"
-                            onClick={handleSaveEdit}
-                            disabled={!editingContent.trim()}
-                            className="gap-1"
-                          >
-                            <Save className="w-4 h-4" />
-                            {language === 'fr' && 'Enregistrer'}
-                            {language === 'de' && 'Speichern'}
-                            {language === 'en' && 'Save'}
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={handleCancelEdit}
-                            className="gap-1"
-                          >
-                            <X className="w-4 h-4" />
-                            {language === 'fr' && 'Annuler'}
-                            {language === 'de' && 'Abbrechen'}
-                            {language === 'en' && 'Cancel'}
-                          </Button>
-                        </div>
-                      </div>
-                    ) : (
-                      // Display Mode
-                      <>
-                        <div className="flex items-start justify-between mb-2">
-                          <div>
-                            <p className="font-medium text-gray-900">{comment.author}</p>
-                            <p className="text-sm text-gray-500">
-                              {new Date(comment.date).toLocaleDateString(language)}
-                            </p>
-                          </div>
-                          <Button
-                            onClick={() => handleLikeComment(comment.id)}
-                            variant="ghost" size="sm" className="gap-1">
-                            <ThumbsUp className="w-4 h-4" />
-                            {comment.likes}
-                          </Button>
-                        </div>
-                        <p className="text-gray-700 mb-2">{comment.content}</p>
-
-                        {/* Edit and Delete buttons - only for own comments and active debates */}
-                        {comment.userId === user?.userId && isDebateActive && (
-                          <div className="flex items-center gap-2">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="gap-1 text-blue-600 hover:text-blue-700"
-                              onClick={() => handleEditComment(comment.id)}
-                            >
-                              <Edit2 className="w-4 h-4" />
-                              {language === 'fr' && 'Modifier'}
-                              {language === 'de' && 'Bearbeiten'}
-                              {language === 'en' && 'Edit'}
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="gap-1 text-red-600 hover:text-red-700"
-                              onClick={() => handleDeleteComment(comment.id)}
-                            >
-                              <Trash2 className="w-4 h-4" />
-                              {language === 'fr' && 'Supprimer'}
-                              {language === 'de' && 'Löschen'}
-                              {language === 'en' && 'Delete'}
-                            </Button>
-                          </div>
-                        )}
-
-                        {/* Info message if debate is closed */}
-                        {comment.author === 'Vous' && !isDebateActive && (
-                          <p className="text-xs text-gray-500 italic mt-2">
-                            {language === 'fr' && 'La concertation est terminée, vous ne pouvez plus modifier ce commentaire.'}
-                            {language === 'de' && 'Die Konsultation ist beendet, Sie können diesen Kommentar nicht mehr bearbeiten.'}
-                            {language === 'en' && 'The consultation is closed, you can no longer edit this comment.'}
-                          </p>
-                        )}
-                      </>
-                    )}
-                  </div>
-                ))}
+                {comments
+                  .filter(c => !c.parentId)
+                  .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+                  .map((comment) => (
+                    <div key={comment.id} className="border-b border-gray-100 pb-4 last:border-0">
+                      <CommentItem
+                        comment={comment}
+                        user={user}
+                        language={language}
+                        isDebateActive={isDebateActive}
+                        editingCommentId={editingCommentId}
+                        editingContent={editingContent}
+                        setEditingContent={setEditingContent}
+                        handleSaveEdit={handleSaveEdit}
+                        handleCancelEdit={handleCancelEdit}
+                        handleEditComment={handleEditComment}
+                        handleDeleteComment={handleDeleteComment}
+                        handleLikeComment={handleLikeComment}
+                        consultationId={id}
+                      />
+                    </div>
+                  ))}
               </div>
             </CardContent>
           </Card>
@@ -639,6 +552,221 @@ export function ConsultationDetailPage() {
           </Card>
         </div>
       </div>
+    </div>
+  );
+}
+
+function CommentItem({
+  comment,
+  user,
+  language,
+  isDebateActive,
+  editingCommentId,
+  editingContent,
+  setEditingContent,
+  handleSaveEdit,
+  handleCancelEdit,
+  handleEditComment,
+  handleDeleteComment,
+  handleLikeComment,
+  consultationId,
+  isReply = false
+}: any) {
+  const [replies, setReplies] = useState<any[]>([]);
+  const [isLoadingReplies, setIsLoadingReplies] = useState(false);
+  const [showReplies, setShowReplies] = useState(isReply);
+  const [isReplying, setIsReplying] = useState(false);
+  const [replyText, setReplyText] = useState('');
+
+  useEffect(() => {
+    const fetchReplies = async () => {
+      setIsLoadingReplies(true);
+      try {
+        const data = await getCommentReplies(comment.id);
+        setReplies(data);
+      } catch (error) {
+        console.error('Failed to load replies');
+      } finally {
+        setIsLoadingReplies(false);
+      }
+    };
+
+    if (showReplies) {
+      fetchReplies();
+    }
+  }, [comment.id, showReplies]);
+
+  const handleSubmitReply = async () => {
+    if (!replyText.trim()) return;
+
+    const replyData = {
+      moduleType: "CONSULTATION",
+      moduleId: consultationId,
+      parentId: comment.id,
+      content: replyText,
+    };
+
+    try {
+      const response = await apiClient.post(`/comments/${comment.id}/reply`, replyData);
+      if (response.status === 201) {
+        setReplies([response.data, ...replies]);
+        setReplyText('');
+        setIsReplying(false);
+        setShowReplies(true);
+        toast.success(language === 'fr' ? 'Réponse publiée !' : 'Reply posted!');
+      }
+    } catch (error) {
+      toast.error(language === 'fr' ? 'Erreur lors de la réponse' : 'Error posting reply');
+    }
+  };
+
+  return (
+    <div className={isReply ? "ml-8 mt-4 border-l-2 border-gray-100 pl-4" : ""}>
+      {editingCommentId === comment.id ? (
+        <div className="space-y-3">
+          <div className="flex items-start justify-between mb-2">
+            <div>
+              <p className="font-medium text-gray-900">{comment.author}</p>
+              <p className="text-sm text-gray-500">
+                {new Date(comment.date).toLocaleDateString(language)}
+              </p>
+            </div>
+          </div>
+          <Textarea
+            value={editingContent}
+            onChange={(e) => setEditingContent(e.target.value)}
+            rows={2}
+            className="w-full"
+          />
+          <div className="flex items-center gap-2">
+            <Button size="sm" onClick={handleSaveEdit} disabled={!editingContent.trim()}>
+              <Save className="w-4 h-4 mr-1" />
+              {language === 'fr' ? 'Enregistrer' : 'Save'}
+            </Button>
+            <Button variant="outline" size="sm" onClick={handleCancelEdit}>
+              <X className="w-4 h-4 mr-1" />
+              {language === 'fr' ? 'Annuler' : 'Cancel'}
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <>
+          <div className="flex items-start justify-between mb-2">
+            <div>
+              <p className="font-medium text-gray-900">{comment.author}</p>
+              <p className="text-sm text-gray-500">
+                {new Date(comment.date).toLocaleDateString(language)}
+              </p>
+            </div>
+            <Button onClick={() => handleLikeComment(comment.id)} variant="ghost" size="sm" className="gap-1">
+              <ThumbsUp className="w-4 h-4" />
+              {comment.likes}
+            </Button>
+          </div>
+          <p className="text-gray-700 mb-2">{comment.content}</p>
+
+          <div className="flex items-center gap-4">
+            {isDebateActive && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-gray-500 hover:text-blue-600 gap-1 h-8"
+                onClick={() => setIsReplying(!isReplying)}
+              >
+                <MessageSquare className="w-4 h-4" />
+                {language === 'fr' ? 'Répondre' : 'Reply'}
+              </Button>
+            )}
+
+            {comment.userId === user?.userId && isDebateActive && (
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="gap-1 text-blue-600 hover:text-blue-700 h-8"
+                  onClick={() => handleEditComment(comment.id)}
+                >
+                  <Edit2 className="w-4 h-4" />
+                  {language === 'fr' ? 'Modifier' : 'Edit'}
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="gap-1 text-red-600 hover:text-red-700 h-8"
+                  onClick={() => handleDeleteComment(comment.id)}
+                >
+                  <Trash2 className="w-4 h-4" />
+                  {language === 'fr' ? 'Supprimer' : 'Delete'}
+                </Button>
+              </div>
+            )}
+
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-blue-600 hover:bg-blue-50 gap-1 h-8 ml-auto"
+              onClick={() => setShowReplies(!showReplies)}
+            >
+              {showReplies ? (
+                language === 'fr' ? 'Masquer les réponses' : 'Hide replies'
+              ) : (
+                language === 'fr' ? 'Voir les réponses' : 'View replies'
+              )}
+              {(comment.replyCount !== undefined ? comment.replyCount : replies.length) > 0 &&
+                ` (${comment.replyCount !== undefined ? comment.replyCount : replies.length})`}
+            </Button>
+          </div>
+
+          {isReplying && (
+            <div className="mt-4 space-y-3">
+              <Textarea
+                value={replyText}
+                onChange={(e) => setReplyText(e.target.value)}
+                placeholder={language === 'fr' ? 'Votre réponse...' : 'Your reply...'}
+                rows={2}
+              />
+              <div className="flex gap-2">
+                <Button size="sm" onClick={handleSubmitReply} disabled={!replyText.trim()}>
+                  {language === 'fr' ? 'Répondre' : 'Reply'}
+                </Button>
+                <Button variant="ghost" size="sm" onClick={() => setIsReplying(false)}>
+                  {language === 'fr' ? 'Annuler' : 'Cancel'}
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {showReplies && (
+            <div className="space-y-4">
+              {isLoadingReplies && replies.length === 0 ? (
+                <p className="text-xs text-gray-400 mt-2 ml-8">Chargement...</p>
+              ) : (
+                replies
+                  .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+                  .map((reply) => (
+                    <CommentItem
+                      key={reply.id}
+                      comment={reply}
+                      user={user}
+                      language={language}
+                      isDebateActive={isDebateActive}
+                      editingCommentId={editingCommentId}
+                      editingContent={editingContent}
+                      setEditingContent={setEditingContent}
+                      handleSaveEdit={handleSaveEdit}
+                      handleCancelEdit={handleCancelEdit}
+                      handleEditComment={handleEditComment}
+                      handleDeleteComment={handleDeleteComment}
+                      handleLikeComment={handleLikeComment}
+                      consultationId={consultationId}
+                      isReply={true}
+                    />
+                  ))
+              )}
+            </div>
+          )}
+        </>
+      )}
     </div>
   );
 }

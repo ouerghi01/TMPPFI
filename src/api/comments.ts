@@ -18,3 +18,15 @@ export const getCommentsByConsultation = async (
         throw error;
     }
 };
+
+export const getCommentReplies = async (
+    commentId: string
+): Promise<any[]> => {
+    try {
+        const response = await apiClient.get<any[]>(`/comments/${commentId}`);
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching replies:', error);
+        throw error;
+    }
+};

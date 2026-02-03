@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useForm } from 'react-hook-form';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
@@ -43,6 +43,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 type Section = 'profile' | 'account' | 'security' | 'preferences' | 'notifications' | 'administration';
 
 interface UserProfile {
+  id: string | undefined;
   firstName: string;
   lastName: string;
   email: string;
@@ -63,6 +64,7 @@ interface UserProfile {
 const defaultProfile: UserProfile = {
   firstName: '',
   lastName: '',
+  id: '',
   email: '',
   phone: '',
   address: '',
@@ -85,8 +87,9 @@ export function SettingsPage() {
   const [profile, setProfile] = useState<UserProfile>(defaultProfile);
   const [avatarUrl, setAvatarUrl] = useState<string>('');
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const { register, handleSubmit, reset, setValue, watch, formState: { isDirty } } = useForm<UserProfile>({
+  const { register, handleSubmit, reset, setValue, watch, formState: { errors, isDirty } } = useForm<UserProfile>({
     defaultValues: profile
   });
 
@@ -101,8 +104,6 @@ export function SettingsPage() {
     }
   }, [reset]);
 
-  // Sync state variables for static UI elements that aren't yet in the main profile object
-  // (We'll keep these for sections not yet fully dynamic in the backend)
   const [username, setUsername] = useState('jdupont');
   const [timezone, setTimezone] = useState('Europe/Zurich');
   const [currentPassword, setCurrentPassword] = useState('');
@@ -128,10 +129,17 @@ export function SettingsPage() {
   const [maintenanceMode, setMaintenanceMode] = useState(false);
   const [allowRegistrations, setAllowRegistrations] = useState(true);
   const [moderationRequired, setModerationRequired] = useState(true);
-
+  const [email, setEmail] = useState(user?.email || '');
   const handleSaveChanges = async (data: UserProfile) => {
     try {
-      let updatedProfile = { ...data, id: user?.userId, birthDate: null };
+      // Ensure we have the latest email and ID from context if not in form
+      const updatedProfile = {
+        ...data,
+        id: user?.userId || profile.id,
+        email: data.email || user?.email || profile.email || email,
+        username: username,
+        birthDate: null
+      };
 
       // Call same API as ProfilePage
       const response = await apiClient.post('/users/profile', updatedProfile);
@@ -155,9 +163,13 @@ export function SettingsPage() {
           language === 'de' ? '✓ Änderungen erfolgreich gespeichert' :
             '✓ Changes saved successfully'
       );
-      return 0
     } catch (error: any) {
-      toast.error(language === 'fr' ? 'Erreur lors de la sauvegarde' : 'Error saving changes');
+      console.error('Update Error:', error);
+      if (error.response?.status === 401) {
+        toast.error(language === 'fr' ? 'Session expirée' : 'Session expired');
+      } else {
+        toast.error(language === 'fr' ? 'Erreur lors de la sauvegarde' : 'Error saving changes');
+      }
     }
   };
 
@@ -336,28 +348,31 @@ export function SettingsPage() {
                           )}
                         </div>
                         <div className="flex flex-col gap-2">
-                          <label className="cursor-pointer">
-                            <Button variant="outline" className="gap-2 pointer-events-none">
-                              <Camera className="w-4 h-4" />
-                              {language === 'fr' && 'Changer la photo'}
-                              {language === 'de' && 'Foto ändern'}
-                              {language === 'en' && 'Change photo'}
-                            </Button>
-                            <input
-                              type="file"
-                              accept="image/*"
-                              className="hidden"
-                              onChange={(e) => {
-                                const file = e.target.files?.[0];
-                                if (file) {
-                                  setAvatarFile(file);
-                                  const reader = new FileReader();
-                                  reader.onloadend = () => setAvatarUrl(reader.result as string);
-                                  reader.readAsDataURL(file);
-                                }
-                              }}
-                            />
-                          </label>
+                          <Button
+                            variant="outline"
+                            className="gap-2"
+                            onClick={() => fileInputRef.current?.click()}
+                          >
+                            <Camera className="w-4 h-4" />
+                            {language === 'fr' && 'Changer la photo'}
+                            {language === 'de' && 'Foto ändern'}
+                            {language === 'en' && 'Change photo'}
+                          </Button>
+                          <input
+                            ref={fileInputRef}
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) {
+                                setAvatarFile(file);
+                                const reader = new FileReader();
+                                reader.onloadend = () => setAvatarUrl(reader.result as string);
+                                reader.readAsDataURL(file);
+                              }
+                            }}
+                          />
                           <p className="text-xs text-gray-500">
                             {language === 'fr' && 'JPG, PNG ou GIF. Max 2MB.'}
                             {language === 'de' && 'JPG, PNG oder GIF. Max 2MB.'}
@@ -377,10 +392,15 @@ export function SettingsPage() {
                           </Label>
                           <Input
                             id="firstName"
-                            {...register('firstName')}
+                            {...register('firstName', { required: true })}
                             placeholder="Jean"
-                            className="h-11"
+                            className={`h-11 ${errors.firstName ? 'border-red-500' : ''}`}
                           />
+                          {errors.firstName && (
+                            <p className="text-red-500 text-xs mt-1">
+                              {language === 'fr' ? 'Prénom requis' : 'First name required'}
+                            </p>
+                          )}
                         </div>
                         <div className="space-y-2">
                           <Label htmlFor="lastName">
@@ -388,10 +408,15 @@ export function SettingsPage() {
                           </Label>
                           <Input
                             id="lastName"
-                            {...register('lastName')}
+                            {...register('lastName', { required: true })}
                             placeholder="Dupont"
-                            className="h-11"
+                            className={`h-11 ${errors.lastName ? 'border-red-500' : ''}`}
                           />
+                          {errors.lastName && (
+                            <p className="text-red-500 text-xs mt-1">
+                              {language === 'fr' ? 'Nom requis' : 'Last name required'}
+                            </p>
+                          )}
                         </div>
                       </div>
 
@@ -531,9 +556,9 @@ export function SettingsPage() {
                         <Input
                           id="email"
                           type="email"
-                          value={user?.email || profile.email}
-                          readOnly
-                          className="h-11 bg-gray-50 cursor-not-allowed"
+                          {...register('email')}
+                          onChange={(e) => setEmail(e.target.value)}
+                          className="h-11 bg-gray-50 cursor-not-allowed opacity-70"
                         />
                         <p className="text-xs text-gray-500">
                           {language === 'fr' && 'Votre adresse email est vérifiée '}
@@ -1397,6 +1422,6 @@ export function SettingsPage() {
           </main>
         </div>
       </div>
-    </div >
+    </div>
   );
 }

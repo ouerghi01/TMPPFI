@@ -208,7 +208,7 @@ export interface LocationDTO {
 }
 
 export interface UserSummaryDTO {
-  username: ReactNode;
+  username: string;
   id: string;
   firstName: string;
   lastName: string;
@@ -676,7 +676,7 @@ export interface ConferenceRegistrationDTO {
 
 // ==================== Notification DTOs ====================
 
-export type NotificationType = 'consultation' | 'petition' | 'vote' | 'assembly' | 'conference' | 'comment' | 'system';
+export type NotificationType = 'consultation' | 'petition' | 'vote' | 'assembly' | 'conference' | 'comment' | 'system' | 'signalement' | 'youth_space' | 'theme';
 export type NotificationPriority = 'low' | 'normal' | 'high' | 'urgent';
 
 export interface NotificationDTO {
@@ -991,7 +991,7 @@ export interface SignalementDTO {
 }
 
 export interface GeoSignalementDTO {
-  upvotes: ReactNode;
+  upvotes: number;
   description: string | LocalizedString | undefined;
   id: string;
   title: LocalizedString;
@@ -1724,9 +1724,4 @@ export interface PerformModerationActionDTO {
 }
 
 // ==================== Export types ====================
-
-export type {
-  // Re-export all types for easier imports
-  Language,
-  ThemeColor,
-};
+// Types are already exported inline above. Redundant exports removed to avoid conflicts.
