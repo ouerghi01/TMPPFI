@@ -22,7 +22,7 @@ import {
   type VoteDTO,
   type AssemblyDTO,
   type ConferenceDTO,
-  type SpeakerDTO,
+  type ConferenceSpeakerDTO,
   type NotificationDTO,
   type ActivityDTO,
   type DashboardStatsDTO,
@@ -1041,10 +1041,10 @@ export const conferenceApi = {
    * Get conference by ID or slug
    * GET /api/conferences/:idOrSlug
    */
-  async getConference(idOrSlug: string): Promise<ApiResponse<ConferenceDTO>> {
+  async getConference(idOrSlug: string): Promise<ApiResponse<any>> {
     await simulateDelay();
 
-    const conference = mockConferences.find(
+    const conference = (await getConferencesApi()).find(
       c => c.id === idOrSlug || c.slug === idOrSlug
     );
 
@@ -1063,7 +1063,7 @@ export const conferenceApi = {
    * Get speaker by ID
    * GET /api/speakers/:id
    */
-  async getSpeaker(id: string): Promise<ApiResponse<SpeakerDTO>> {
+  async getSpeaker(id: string): Promise<ApiResponse<ConferenceSpeakerDTO>> {
     await simulateDelay();
 
     const speaker = await getSpeakerById(id);

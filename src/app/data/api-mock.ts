@@ -21,7 +21,7 @@ import type {
   AssemblySummaryDTO,
   ConferenceDTO,
   ConferenceSummaryDTO,
-  SpeakerDTO,
+  ConferenceSpeakerDTO,
   NotificationDTO,
   ActivityDTO,
   DashboardStatsDTO,
@@ -3124,7 +3124,7 @@ export const mockAssemblySummaries: AssemblySummaryDTO[] = mockAssemblies.map(a 
 
 // ==================== Mock Conferences ====================
 
-export const mockSpeakers: SpeakerDTO[] = [
+export const mockSpeakers: ConferenceSpeakerDTO[] = [
   {
     id: 'spk_001',
     firstName: 'Jean',
@@ -3366,7 +3366,7 @@ export const mockConferences: ConferenceDTO[] = [
         website: 'https://www.auvergnerhonealpes.fr',
       },
     ],
-    organizer: {
+    organization: {
       id: 'org_001',
       name: {
         fr: 'Ville de Lyon',

@@ -90,9 +90,9 @@ export type {
   SessionType,
   ConferenceDTO,
   ConferenceSummaryDTO,
-  SpeakerDTO,
-  SessionDTO,
-  SponsorDTO,
+  ConferenceSpeakerDTO,
+  ConferenceSessionDTO,
+  ConferenceSponsorDTO,
   ConferenceAgendaDTO,
   ConferenceRegistrationDTO,
 

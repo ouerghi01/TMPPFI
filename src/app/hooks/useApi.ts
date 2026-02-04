@@ -20,7 +20,7 @@ import type {
   VoteDTO,
   AssemblyDTO,
   ConferenceDTO,
-  SpeakerDTO,
+  ConferenceSpeakerDTO,
   NotificationDTO,
   ActivityDTO,
   DashboardStatsDTO,

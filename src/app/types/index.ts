@@ -584,19 +584,14 @@ export interface ConferenceDTO {
   onlineLink?: string;
   capacity: number;
   registeredCount: number;
-  speakers: SpeakerDTO[];
-  sessions: SessionDTO[];
-  sponsors: SponsorDTO[];
-  organizer: OrganizerDTO;
+  speakers: ConferenceConferenceSpeakerDTO[];
+  sessions: ConferenceConferenceSessionDTO[];
+  sponsors: ConferenceConferenceSponsorDTO[];
+  organization: OrganizerDTO;
   registrationDeadline: string;
-  registrationFee?: number;
   tags: string[];
   images: string[];
-  documents: DocumentDTO[];
-  agenda: ConferenceAgendaDTO[];
   hasRegistered?: boolean;
-  createdAt: string;
-  updatedAt: string;
 }
 
 export interface ConferenceSummaryDTO {
@@ -611,7 +606,7 @@ export interface ConferenceSummaryDTO {
   registeredCount: number;
 }
 
-export interface SpeakerDTO {
+export interface ConferenceConferenceSpeakerDTO {
   name: any;
   id: string;
   title: LocalizedString;
@@ -627,7 +622,7 @@ export interface SpeakerDTO {
   sessions: string[];
 }
 
-export interface SessionDTO {
+export interface ConferenceConferenceSessionDTO {
   id: string;
   conferenceId: string;
   title: LocalizedString;
@@ -638,7 +633,7 @@ export interface SessionDTO {
   endTime: string;
   duration: number;
   room?: string;
-  speakers: SpeakerDTO[];
+  speakers: ConferenceConferenceSpeakerDTO[];
   capacity?: number;
   registeredCount?: number;
   isRecorded: boolean;
@@ -647,7 +642,7 @@ export interface SessionDTO {
   tags: string[];
 }
 
-export interface SponsorDTO {
+export interface ConferenceConferenceSponsorDTO {
   id: string;
   name: string;
   logo: string;
@@ -658,7 +653,7 @@ export interface SponsorDTO {
 
 export interface ConferenceAgendaDTO {
   date: string;
-  sessions: SessionDTO[];
+  sessions: ConferenceConferenceSessionDTO[];
 }
 
 export interface ConferenceRegistrationDTO {

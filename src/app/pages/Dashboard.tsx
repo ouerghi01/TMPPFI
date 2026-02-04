@@ -810,7 +810,7 @@ export function Dashboard() {
               {language === "en" && "Upcoming Conferences"}
             </h2>
             <Link
-              to="/conferences"
+              to="#"
               className="text-blue-600 hover:text-blue-700 flex items-center gap-2"
             >
               {language === "fr" && "Voir toutes"}
@@ -824,7 +824,7 @@ export function Dashboard() {
               const date = new Date(conference.startDate);
 
               return (
-                <Link key={conference.id} to={`/conferences/${conference.id}`}>
+                <Link key={conference.id} to={`#`}>
                   <Card className="h-full hover:shadow-lg transition-shadow">
                     <CardContent className="p-6">
                       <div className="flex items-center gap-2 mb-4">

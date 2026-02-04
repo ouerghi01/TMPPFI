@@ -24,7 +24,7 @@ const translations: Translations = {
   'nav.resources': { fr: 'Ressources', de: 'Ressourcen', en: 'Resources' },
   'nav.help': { fr: 'Aide', de: 'Hilfe', en: 'Help' },
   'nav.profile': { fr: 'Mon Profil', de: 'Mein Profil', en: 'My Profile' },
-  
+
   // Footer
   'footer.platform': { fr: 'Plateforme', de: 'Plattform', en: 'Platform' },
   'footer.resources': { fr: 'Ressources', de: 'Ressourcen', en: 'Resources' },
@@ -50,7 +50,7 @@ const translations: Translations = {
   'footer.support247': { fr: 'Support 24/7', de: 'Support 24/7', en: '24/7 Support' },
   'footer.backOffice': { fr: 'Back-office', de: 'Back-Office', en: 'Back-office' },
   'footer.saasBackOffice': { fr: 'Back-office SaaS', de: 'SaaS Back-Office', en: 'SaaS Back-office' },
-  
+
   // Common
   'common.filter': { fr: 'Filtrer', de: 'Filtern', en: 'Filter' },
   'common.search': { fr: 'Rechercher', de: 'Suchen', en: 'Search' },
@@ -65,7 +65,7 @@ const translations: Translations = {
   'common.save': { fr: 'Enregistrer', de: 'Speichern', en: 'Save' },
   'common.cancel': { fr: 'Annuler', de: 'Abbrechen', en: 'Cancel' },
   'common.edit': { fr: 'Modifier', de: 'Bearbeiten', en: 'Edit' },
-  
+
   // Profile
   'profile.title': { fr: 'Mon Profil', de: 'Mein Profil', en: 'My Profile' },
   'profile.personalInfo': { fr: 'Informations personnelles', de: 'Persönliche Informationen', en: 'Personal information' },
@@ -88,7 +88,7 @@ const translations: Translations = {
   'profile.updated': { fr: 'Profil mis à jour avec succès', de: 'Profil erfolgreich aktualisiert', en: 'Profile updated successfully' },
   'profile.activeCitizen': { fr: 'Citoyen actif', de: 'Aktiver Bürger', en: 'Active citizen' },
   'profile.participations': { fr: 'participations', de: 'Teilnahmen', en: 'participations' },
-  
+
   // Themes
   'theme.environment': { fr: 'Environnement & climat', de: 'Umwelt & Klima', en: 'Environment & climate' },
   'theme.urban': { fr: 'Urbanisme & logement', de: 'Städtebau & Wohnen', en: 'Urban planning & housing' },
@@ -98,26 +98,34 @@ const translations: Translations = {
   'theme.culture': { fr: 'Culture', de: 'Kultur', en: 'Culture' },
   'theme.governance': { fr: 'Gouvernance locale', de: 'Lokale Governance', en: 'Local governance' },
   'theme.economy': { fr: 'Économie & emploi', de: 'Wirtschaft & Beschäftigung', en: 'Economy & employment' },
-  
+
   // Dashboard
   'dashboard.welcome': { fr: 'Bienvenue sur la plateforme', de: 'Willkommen auf der Plattform', en: 'Welcome to the platform' },
   'dashboard.myParticipations': { fr: 'Mes participations', de: 'Meine Teilnahmen', en: 'My participations' },
   'dashboard.activeProcesses': { fr: 'Processus en cours', de: 'Laufende Prozesse', en: 'Active processes' },
-  
+
   // Status
   'status.open': { fr: 'Ouvert', de: 'Offen', en: 'Open' },
   'status.closed': { fr: 'Fermé', de: 'Geschlossen', en: 'Closed' },
   'status.pending': { fr: 'En attente', de: 'Ausstehend', en: 'Pending' },
   'status.accepted': { fr: 'Accepté', de: 'Akzeptiert', en: 'Accepted' },
   'status.rejected': { fr: 'Rejeté', de: 'Abgelehnt', en: 'Rejected' },
+  'status.registrationOpen': { fr: 'Inscriptions ouvertes', de: 'Anmeldung offen', en: 'Registration open' },
+  'status.registrationClosed': { fr: 'Inscriptions closes', de: 'Anmeldung geschlossen', en: 'Registration closed' },
+  'status.archived': { fr: 'Archivé', de: 'Archiviert', en: 'Archived' },
+  'status.inReview': { fr: 'En cours de révision', de: 'In Prüfung', en: 'In review' },
+  'status.inactive': { fr: 'Inactif', de: 'Inaktiv', en: 'Inactive' },
+  'status.cancelled': { fr: 'Annulé', de: 'Abgebrochen', en: 'Cancelled' },
+  'status.resultsPublished': { fr: 'Résultats publiés', de: 'Ergebnisse veröffentlicht', en: 'Results published' },
+  'status.draft': { fr: 'Brouillon', de: 'Entwurf', en: 'Draft' },
   'status.inProgress': { fr: 'En cours', de: 'In Bearbeitung', en: 'In progress' },
   'status.completed': { fr: 'Terminé', de: 'Abgeschlossen', en: 'Completed' },
-  
+
   // Resources Pages
   'resources.title': { fr: 'Ressources', de: 'Ressourcen', en: 'Resources' },
   'resources.subtitle': { fr: 'Tout ce dont vous avez besoin pour participer activement', de: 'Alles, was Sie für eine aktive Teilnahme benötigen', en: 'Everything you need to participate actively' },
   'resources.overview': { fr: 'Vue d\'ensemble des ressources', de: 'Ressourcenübersicht', en: 'Resources overview' },
-  
+
   // How it works
   'howItWorks.title': { fr: 'Comment ça marche', de: 'Wie es funktioniert', en: 'How it works' },
   'howItWorks.subtitle': { fr: 'Découvrez comment participer à la démocratie locale', de: 'Erfahren Sie, wie Sie an der lokalen Demokratie teilnehmen können', en: 'Discover how to participate in local democracy' },
@@ -129,7 +137,7 @@ const translations: Translations = {
   'howItWorks.step3Desc': { fr: 'Exprimez vos idées, votez, signez des pétitions et contribuez aux débats', de: 'Äußern Sie Ihre Ideen, stimmen Sie ab, unterzeichnen Sie Petitionen und tragen Sie zu Debatten bei', en: 'Express your ideas, vote, sign petitions and contribute to debates' },
   'howItWorks.step4Title': { fr: 'Suivez l\'impact', de: 'Folgen Sie der Wirkung', en: 'Track the impact' },
   'howItWorks.step4Desc': { fr: 'Recevez des notifications et consultez les résultats des processus participatifs', de: 'Erhalten Sie Benachrichtigungen und sehen Sie die Ergebnisse der partizipativen Prozesse', en: 'Receive notifications and view the results of participatory processes' },
-  
+
   // FAQ
   'faq.title': { fr: 'Questions fréquentes', de: 'Häufig gestellte Fragen', en: 'Frequently Asked Questions' },
   'faq.subtitle': { fr: 'Trouvez des réponses à vos questions', de: 'Finden Sie Antworten auf Ihre Fragen', en: 'Find answers to your questions' },
@@ -137,7 +145,7 @@ const translations: Translations = {
   'faq.participation': { fr: 'Participation', de: 'Teilnahme', en: 'Participation' },
   'faq.technical': { fr: 'Questions techniques', de: 'Technische Fragen', en: 'Technical questions' },
   'faq.security': { fr: 'Sécurité & confidentialité', de: 'Sicherheit & Datenschutz', en: 'Security & privacy' },
-  
+
   // Guides
   'guides.title': { fr: 'Guides pratiques', de: 'Praktische Leitfäden', en: 'Practical guides' },
   'guides.subtitle': { fr: 'Apprenez à utiliser la plateforme efficacement', de: 'Lernen Sie, die Plattform effektiv zu nutzen', en: 'Learn how to use the platform effectively' },
@@ -145,7 +153,7 @@ const translations: Translations = {
   'guides.consultations': { fr: 'Guide des concertations', de: 'Konsultationsleitfaden', en: 'Consultations guide' },
   'guides.petitions': { fr: 'Guide des pétitions', de: 'Petitionsleitfaden', en: 'Petitions guide' },
   'guides.voting': { fr: 'Guide du vote', de: 'Abstimmungsleitfaden', en: 'Voting guide' },
-  
+
   // Support
   'support.title': { fr: 'Support & assistance', de: 'Support & Unterstützung', en: 'Support & assistance' },
   'support.subtitle': { fr: 'Nous sommes là pour vous aider', de: 'Wir sind für Sie da', en: 'We are here to help you' },
@@ -156,7 +164,7 @@ const translations: Translations = {
   'support.ticketSystem': { fr: 'Système de tickets', de: 'Ticketsystem', en: 'Ticket system' },
   'support.openTicket': { fr: 'Ouvrir un ticket', de: 'Ticket öffnen', en: 'Open a ticket' },
   'support.viewTickets': { fr: 'Voir mes tickets', de: 'Meine Tickets anzeigen', en: 'View my tickets' },
-  
+
   // Legal Notice
   'legal.title': { fr: 'Mentions légales', de: 'Impressum', en: 'Legal Notice' },
   'legal.subtitle': { fr: 'Informations légales et éditoriales', de: 'Rechtliche und redaktionelle Informationen', en: 'Legal and editorial information' },
@@ -166,7 +174,7 @@ const translations: Translations = {
   'legal.directorship': { fr: 'Direction de la publication', de: 'Redaktionsleitung', en: 'Editorial direction' },
   'legal.intellectual': { fr: 'Propriété intellectuelle', de: 'Geistiges Eigentum', en: 'Intellectual property' },
   'legal.licenses': { fr: 'Licences et crédits', de: 'Lizenzen und Credits', en: 'Licenses and credits' },
-  
+
   // Privacy Policy
   'privacy.title': { fr: 'Politique de confidentialité', de: 'Datenschutzerklärung', en: 'Privacy Policy' },
   'privacy.subtitle': { fr: 'Protection de vos données personnelles', de: 'Schutz Ihrer personenbezogenen Daten', en: 'Protection of your personal data' },
@@ -177,7 +185,7 @@ const translations: Translations = {
   'privacy.rights': { fr: 'Vos droits', de: 'Ihre Rechte', en: 'Your rights' },
   'privacy.security': { fr: 'Sécurité', de: 'Sicherheit', en: 'Security' },
   'privacy.contact': { fr: 'Contact DPO', de: 'Kontakt DSB', en: 'DPO Contact' },
-  
+
   // Terms of Service
   'terms.title': { fr: 'Conditions d\'utilisation', de: 'Nutzungsbedingungen', en: 'Terms of Service' },
   'terms.subtitle': { fr: 'Règles d\'utilisation de la plateforme', de: 'Nutzungsregeln der Plattform', en: 'Platform usage rules' },
@@ -188,7 +196,7 @@ const translations: Translations = {
   'terms.prohibitedUse': { fr: 'Usages interdits', de: 'Verbotene Nutzung', en: 'Prohibited use' },
   'terms.liability': { fr: 'Responsabilité', de: 'Haftung', en: 'Liability' },
   'terms.modification': { fr: 'Modification des conditions', de: 'Änderung der Bedingungen', en: 'Modification of terms' },
-  
+
   // Accessibility
   'accessibility.title': { fr: 'Accessibilité', de: 'Zugänglichkeit', en: 'Accessibility' },
   'accessibility.subtitle': { fr: 'Notre engagement pour une plateforme accessible à tous', de: 'Unser Engagement für eine für alle zugängliche Plattform', en: 'Our commitment to an accessible platform for all' },
@@ -199,7 +207,7 @@ const translations: Translations = {
   'accessibility.screenReader': { fr: 'Compatibilité lecteurs d\'écran', de: 'Bildschirmleser-Kompatibilität', en: 'Screen reader compatibility' },
   'accessibility.contrast': { fr: 'Contraste et lisibilité', de: 'Kontrast und Lesbarkeit', en: 'Contrast and readability' },
   'accessibility.feedback': { fr: 'Signaler un problème', de: 'Problem melden', en: 'Report an issue' },
-  
+
   // Cookies
   'cookies.title': { fr: 'Politique des cookies', de: 'Cookie-Richtlinie', en: 'Cookie Policy' },
   'cookies.subtitle': { fr: 'Comment nous utilisons les cookies', de: 'Wie wir Cookies verwenden', en: 'How we use cookies' },
@@ -210,7 +218,7 @@ const translations: Translations = {
   'cookies.analytics': { fr: 'Cookies analytiques', de: 'Analyse-Cookies', en: 'Analytics cookies' },
   'cookies.preferences': { fr: 'Gestion des préférences', de: 'Einstellungsverwaltung', en: 'Preferences management' },
   'cookies.manage': { fr: 'Gérer les cookies', de: 'Cookies verwalten', en: 'Manage cookies' },
-  
+
   // Newsletter
   'newsletter.title': { fr: 'Newsletter', de: 'Newsletter', en: 'Newsletter' },
   'newsletter.subtitle': { fr: 'Restez informé de l\'actualité démocratique', de: 'Bleiben Sie über demokratische Neuigkeiten informiert', en: 'Stay informed about democratic news' },
@@ -222,7 +230,7 @@ const translations: Translations = {
   'newsletter.preferences': { fr: 'Préférences d\'abonnement', de: 'Abonnementeinstellungen', en: 'Subscription preferences' },
   'newsletter.privacy': { fr: 'Confidentialité des données', de: 'Datenschutz', en: 'Data privacy' },
   'newsletter.success': { fr: 'Abonnement confirmé !', de: 'Abonnement bestätigt!', en: 'Subscription confirmed!' },
-  
+
   // AI Assistant
   'ai.openAssistant': { fr: 'Ouvrir l\'assistant', de: 'Assistent öffnen', en: 'Open assistant' },
   'ai.closeAssistant': { fr: 'Fermer l\'assistant', de: 'Assistent schließen', en: 'Close assistant' },

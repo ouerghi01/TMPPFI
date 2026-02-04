@@ -182,7 +182,7 @@ export function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) {
           url: `/conferences/${c.id}`,
           icon: <Presentation className="w-4 h-4" />,
           metadata: {
-            date: c.date,
+            date: c.startDate,
             status: c.status
           }
         });

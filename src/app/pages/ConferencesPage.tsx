@@ -17,7 +17,7 @@ import { useConferences } from '../hooks/useApi';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { ErrorMessage } from '../components/ErrorMessage';
 import type { ConferenceDTO } from '../types';
-import { Calendar, MapPin, Users, Mic, UserPlus, Clock, Award, Briefcase, GraduationCap, Mail, Linkedin, Twitter, Globe, FileText, TrendingUp } from 'lucide-react';
+import { Calendar, MapPin, Users, Mic, UserPlus, Clock, Award, Briefcase, GraduationCap, Mail, Linkedin, Twitter, Globe, FileText, TrendingUp, Info } from 'lucide-react';
 import { toast } from 'sonner';
 import { Badge } from '../components/ui/badge';
 import { UserMinus } from 'lucide-react';
@@ -495,7 +495,7 @@ export function ConferencesPage() {
                         </div>
                         <div className="flex flex-wrap gap-2">
                           {conference.speakers.filter((s: any) => s).slice(0, 3).map((speaker: any, idx: number) => {
-                            // Speaker is a SpeakerDTO object with firstName, lastName, and id
+                            // Speaker is a ConferenceSpeakerDTO object with firstName, lastName, and id
                             const speakerName = `${speaker.name}`;
                             // Use the actual speaker ID from the DTO
                             const speakerId = speaker.id;
@@ -543,6 +543,16 @@ export function ConferencesPage() {
 
                   {/* Button aligned at bottom */}
                   <div className="mt-4 pt-4 border-t border-gray-100 space-y-2">
+                    <Button
+                      variant="ghost"
+                      className="w-full gap-2 text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50"
+                      onClick={() => navigate(`/conferences/${conference.id}`)}
+                    >
+                      <Info className="w-4 h-4" />
+                      {language === 'fr' && 'Voir les détails'}
+                      {language === 'de' && 'Details anzeigen'}
+                      {language === 'en' && 'View details'}
+                    </Button>
                     {!isRegistered ? (
                       availableSpots > 0 ? (
                         <Button

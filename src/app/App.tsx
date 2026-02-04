@@ -33,6 +33,7 @@ import { VotesPage } from './pages/VotesPage';
 import { VoteDetailPage } from './pages/VoteDetailPage';
 import { AssembliesPage } from './pages/AssembliesPage';
 import { ConferencesPage } from './pages/ConferencesPage';
+import { ConferenceDetailPage } from './pages/ConferenceDetailPage';
 import { SpeakerDetailPage } from './pages/SpeakerDetailPage';
 import { ConsultationsPage } from './pages/ConsultationsPage';
 import { ConsultationDetailPage } from './pages/ConsultationDetailPage';
@@ -173,6 +174,14 @@ export default function App() {
                   <div className="min-h-screen bg-gray-50">
                     <Header />
                     <main><ConferencesPage /></main>
+                    <Footer />
+                    <Toaster />
+                  </div>
+                } />
+                <Route path="/conferences/:id" element={
+                  <div className="min-h-screen bg-gray-50">
+                    <Header />
+                    <main><ConferenceDetailPage /></main>
                     <Footer />
                     <Toaster />
                   </div>
