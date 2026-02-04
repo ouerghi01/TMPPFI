@@ -57,6 +57,7 @@ import { NewsletterPage } from './pages/NewsletterPage';
 import { RegisterPage } from './pages/RegisterPage';
 import { LoginPage } from './pages/LoginPage';
 import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
+import ResetPassword from './pages/ResetPassword';
 import YouthSpacePage from './pages/YouthSpacePage';
 import YouthPollDetailPage from './pages/YouthPollDetailPage';
 import IVRAccessPage from './pages/IVRAccessPage';
@@ -361,6 +362,12 @@ export default function App() {
                 <Route path="/forgot-password" element={
                   <div className="min-h-screen">
                     <ForgotPasswordPage />
+                    <Toaster />
+                  </div>
+                } />
+                <Route path="/reset-password" element={
+                  <div className="min-h-screen">
+                    <ResetPassword />
                     <Toaster />
                   </div>
                 } />

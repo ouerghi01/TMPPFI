@@ -2,14 +2,14 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
 import { motion } from 'motion/react';
-import { 
-  Users, 
-  Mail, 
-  Phone, 
-  MapPin, 
-  Facebook, 
-  Twitter, 
-  Linkedin, 
+import {
+  Users,
+  Mail,
+  Phone,
+  MapPin,
+  Facebook,
+  Twitter,
+  Linkedin,
   Instagram,
   Heart,
   Shield,
@@ -81,7 +81,7 @@ export function Footer() {
       {/* Centered Container with max-width */}
       <div className="w-full flex justify-center">
         <div className="w-full max-w-[1400px] px-6 lg:px-8 py-12">
-          <motion.div 
+          <motion.div
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12"
             variants={containerVariants}
             initial="hidden"
@@ -94,7 +94,7 @@ export function Footer() {
                 <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
                   <Users className="w-5 h-5 text-white" />
                 </div>
-                <motion.h3 
+                <motion.h3
                   className="font-bold text-xl bg-gradient-to-r from-blue-400 via-purple-400 to-blue-400 bg-clip-text text-transparent bg-[length:200%_auto]"
                   animate={{
                     backgroundPosition: ["0% center", "200% center", "0% center"],
@@ -119,9 +119,8 @@ export function Footer() {
                   </a>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Phone className="w-4 h-4 text-blue-400" />
-                  <a 
-                    href="tel:+41000000000" 
+                  <a
+                    href="tel:+41000000000"
                     className="hover:text-blue-300 transition-colors flex items-center gap-2"
                   >
                     <Phone className="w-4 h-4 text-blue-400" />
@@ -141,8 +140,8 @@ export function Footer() {
               <ul className="space-y-2">
                 {footerLinks.platform.map((link) => (
                   <li key={link.path}>
-                    <Link 
-                      to={link.path} 
+                    <Link
+                      to={link.path}
                       className="text-sm hover:text-blue-400 transition-colors flex items-center gap-1 group"
                     >
                       <span className="w-0 h-0.5 bg-blue-400 group-hover:w-2 transition-all duration-300"></span>
@@ -159,8 +158,8 @@ export function Footer() {
               <ul className="space-y-2">
                 {footerLinks.resources.map((link) => (
                   <li key={link.label}>
-                    <Link 
-                      to={link.path} 
+                    <Link
+                      to={link.path}
                       className="text-sm hover:text-blue-400 transition-colors flex items-center gap-1 group"
                     >
                       <span className="w-0 h-0.5 bg-blue-400 group-hover:w-2 transition-all duration-300"></span>
@@ -177,8 +176,8 @@ export function Footer() {
               <ul className="space-y-2 mb-6">
                 {footerLinks.legal.map((link) => (
                   <li key={link.label}>
-                    <Link 
-                      to={link.path} 
+                    <Link
+                      to={link.path}
                       className="text-sm hover:text-blue-400 transition-colors flex items-center gap-1 group"
                     >
                       <span className="w-0 h-0.5 bg-blue-400 group-hover:w-2 transition-all duration-300"></span>
@@ -193,8 +192,8 @@ export function Footer() {
                 <h5 className="font-semibold text-white text-sm mb-2">{t('footer.newsletter')}</h5>
                 <Link to="/newsletter">
                   <div className="flex gap-2">
-                    <input 
-                      type="email" 
+                    <input
+                      type="email"
                       placeholder={t('footer.emailPlaceholder')}
                       className="flex-1 px-3 py-2 text-sm bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:border-blue-500 text-white placeholder-gray-500"
                     />
@@ -215,7 +214,7 @@ export function Footer() {
           <div className="border-t border-gray-800 pt-8">
             <div className="flex flex-col md:flex-row justify-between items-center gap-4">
               {/* Social Links */}
-              <motion.div 
+              <motion.div
                 className="flex items-center gap-4"
                 initial={{ opacity: 0, x: -20 }}
                 whileInView={{ opacity: 1, x: 0 }}
@@ -240,7 +239,7 @@ export function Footer() {
               </motion.div>
 
               {/* Copyright */}
-              <motion.div 
+              <motion.div
                 className="text-sm text-gray-400 text-center md:text-right"
                 initial={{ opacity: 0, x: 20 }}
                 whileInView={{ opacity: 1, x: 0 }}
@@ -248,8 +247,8 @@ export function Footer() {
                 transition={{ delay: 0.3 }}
               >
                 <p className="flex items-center justify-center md:justify-end gap-1">
-                  © 2025 CiviAgora • {t('footer.madeWith')} 
-                  <Heart className="w-4 h-4 text-red-500 inline animate-pulse" /> 
+                  © 2026 CiviAgora • {t('footer.madeWith')}
+                  <Heart className="w-4 h-4 text-red-500 inline animate-pulse" />
                   {t('footer.forCitizens')}
                 </p>
                 <p className="text-xs mt-1">{t('footer.rightsReserved')}</p>
@@ -257,7 +256,7 @@ export function Footer() {
             </div>
 
             {/* Trust Badges */}
-            <motion.div 
+            <motion.div
               className="mt-6 pt-6 border-t border-gray-800 flex flex-wrap justify-center gap-6 text-xs text-gray-500"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -276,14 +275,14 @@ export function Footer() {
                 <CircleHelp className="w-4 h-4 text-purple-500" />
                 <span>{t('footer.support247')}</span>
               </div>
-              <Link 
+              <Link
                 to="/admin"
                 className="flex items-center gap-1 hover:text-gray-300 transition-colors group"
               >
                 <Settings className="w-4 h-4 text-amber-500 group-hover:rotate-90 transition-transform duration-300" />
                 <span>{t('footer.backOffice')}</span>
               </Link>
-              <Link 
+              <Link
                 to="/saas"
                 className="flex items-center gap-1 hover:text-gray-300 transition-colors group"
               >

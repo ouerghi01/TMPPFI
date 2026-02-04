@@ -15,6 +15,7 @@ import {
   AlertCircle
 } from 'lucide-react';
 import { toast } from 'sonner';
+import apiClient from '@/client';
 
 export function ForgotPasswordPage() {
   const { language } = useLanguage();
@@ -43,16 +44,21 @@ export function ForgotPasswordPage() {
 
     setIsLoading(true);
 
-    // Simuler l'envoi d'un email de réinitialisation
-    setTimeout(() => {
-      setIsLoading(false);
+    const response = await apiClient.post('/auth/forgot-password', {
+      email,
+    });
+
+    if (response.status === 200) {
       setIsSubmitted(true);
       toast.success(
         language === 'fr' ? 'Email envoyé avec succès' :
-        language === 'de' ? 'E-Mail erfolgreich gesendet' :
-        'Email sent successfully'
+          language === 'de' ? 'E-Mail erfolgreich gesendet' :
+            'Email sent successfully'
       );
-    }, 1500);
+    } else {
+      setError(response.data.message);
+    }
+
   };
 
   const getTitle = () => {
@@ -122,8 +128,8 @@ export function ForgotPasswordPage() {
                       type="email"
                       placeholder={
                         language === 'fr' ? 'nom@exemple.com' :
-                        language === 'de' ? 'name@beispiel.com' :
-                        'name@example.com'
+                          language === 'de' ? 'name@beispiel.com' :
+                            'name@example.com'
                       }
                       value={email}
                       onChange={(e) => {
@@ -153,8 +159,8 @@ export function ForgotPasswordPage() {
                 </Alert>
 
                 {/* Submit Button */}
-                <Button 
-                  type="submit" 
+                <Button
+                  type="submit"
                   className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
                   disabled={isLoading}
                 >
@@ -177,8 +183,8 @@ export function ForgotPasswordPage() {
 
                 {/* Back to Login */}
                 <div className="text-center">
-                  <Link 
-                    to="/login" 
+                  <Link
+                    to="/login"
                     className="text-sm text-blue-600 hover:text-blue-700 inline-flex items-center gap-1"
                   >
                     <ArrowLeft className="w-4 h-4" />
@@ -235,7 +241,7 @@ export function ForgotPasswordPage() {
 
                 {/* Action Buttons */}
                 <div className="space-y-2">
-                  <Button 
+                  <Button
                     onClick={() => {
                       setIsSubmitted(false);
                       setEmail('');
@@ -247,7 +253,7 @@ export function ForgotPasswordPage() {
                     {language === 'de' && 'E-Mail erneut senden'}
                     {language === 'en' && 'Resend email'}
                   </Button>
-                  
+
                   <Link to="/login" className="block">
                     <Button variant="ghost" className="w-full">
                       <ArrowLeft className="w-4 h-4 mr-2" />
